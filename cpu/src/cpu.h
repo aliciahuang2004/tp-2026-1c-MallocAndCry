@@ -10,7 +10,6 @@ typedef struct {
     t_log* logger;
     t_config* config;
     char* log_level;
-    int puerto_escucha;
     char* ip_kernel_scheduler;
     char* puerto_kernel_scheduler;
     char* ip_kernel_memory;

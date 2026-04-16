@@ -9,14 +9,12 @@ t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     cpu->config = iniciar_config(cpu->logger, path_config);
     cpu->log_level = config_get_string_value(cpu->config, "LOG_LEVEL");
     cpu->logger->detail = obtener_log_level(cpu->log_level);
-    
+
     cpu->ip_kernel_scheduler = config_get_string_value(cpu->config, "IP_KERNEL_SCHEDULER");
     cpu->puerto_kernel_scheduler = config_get_string_value(cpu->config, "PUERTO_KERNEL_SCHEDULER");
 
     cpu->ip_kernel_memory = config_get_string_value(cpu->config, "IP_KERNEL_MEMORY");
     cpu->puerto_kernel_memory = config_get_string_value(cpu->config, "PUERTO_KERNEL_MEMORY");
-    
-    cpu->puerto_escucha = config_get_int_value(cpu->config, "PUERTO_ESCUCHA");
 
     cpu->sockets_memory_sticks = list_create();
 
