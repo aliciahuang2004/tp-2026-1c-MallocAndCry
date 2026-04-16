@@ -1,4 +1,4 @@
-#include "conexion.h"
+#include "../include/conexion.h"
 #include <commons/log.h>	// Para t_log
 #include <commons/config.h> // Para t_config
 #include <netdb.h>			// Para getaddrinfo, struct addrinfo
