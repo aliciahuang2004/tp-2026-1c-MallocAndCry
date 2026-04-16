@@ -4,7 +4,7 @@
 #include "conexion.h"
 #include "paquete.h"
 #include "sueltos.h"
-#include <commons/string.h>
+#include "protocolo.h"
 
 
 #endif 
