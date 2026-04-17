@@ -30,3 +30,5 @@ void verificarKernelMemory(t_kernel_memory* kernelMemory);
 void* atender_conexion(void* arg);
 
 #endif /* KERNEL_MEMORY_H*/
+
+

@@ -29,7 +29,7 @@ int conectar_kernel_memory(t_cpu* cpu) {
         
     
         t_buffer* buffer = crear_buffer();
-        t_paquete* paquete = crear_paquete(CPU_KERNEL_MEMORY_HANDSHAKE, buffer); 
+        t_paquete* paquete = crear_paquete(CPU_HANDSHAKE, buffer); 
         
         agregar_a_paquete(paquete, &id_cpu_int, sizeof(int));
         
@@ -52,7 +52,7 @@ int conectar_kernel_scheduler(t_cpu* cpu) {
         int id_cpu_int = atoi(cpu->id);
         
         t_buffer* buffer = crear_buffer();
-        t_paquete* paquete = crear_paquete(CPU_KERNEL_SCHEDULER_HANDSHAKE, buffer); 
+        t_paquete* paquete = crear_paquete(CPU_HANDSHAKE, buffer); 
         
         agregar_a_paquete(paquete, &id_cpu_int, sizeof(int));
         
