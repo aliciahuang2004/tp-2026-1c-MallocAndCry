@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (conectar_memory_stick(cpu, cpu->ip_memory_stick_inicial, cpu->puerto_memory_stick_inicial) == -1) {
-        log_warning(cpu->logger, "No se pudo conectar al Memory Stick inicial (puede que no esté levantado).");
+        log_warning(cpu->logger, "Error en la conexion con memory stick.");
     }
 
     log_info(cpu->logger, "## CPU %s inicializada y conectada exitosamente", cpu->id);

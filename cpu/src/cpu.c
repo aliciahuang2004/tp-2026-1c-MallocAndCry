@@ -16,7 +16,7 @@ t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     cpu->ip_kernel_memory = config_get_string_value(cpu->config, "IP_KERNEL_MEMORY");
     cpu->puerto_kernel_memory = config_get_string_value(cpu->config, "PUERTO_KERNEL_MEMORY");
 
-    // --- AGREGAR ESTO ---
+
     if (config_has_property(cpu->config, "IP_MEMORY_STICK") && config_has_property(cpu->config, "PUERTO_MEMORY_STICK")) {
         cpu->ip_memory_stick_inicial = config_get_string_value(cpu->config, "IP_MEMORY_STICK");
         cpu->puerto_memory_stick_inicial = config_get_string_value(cpu->config, "PUERTO_MEMORY_STICK");
@@ -24,7 +24,7 @@ t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
         cpu->ip_memory_stick_inicial = NULL;
         cpu->puerto_memory_stick_inicial = NULL;
     }
-    // --------------------
+
 
     cpu->sockets_memory_sticks = list_create();
 
@@ -81,7 +81,7 @@ int conectar_kernel_scheduler(t_cpu* cpu) {
 }
 
 int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto) {
-    if (ip == NULL || puerto == NULL) return -1; // No hay stick configurado
+    if (ip == NULL || puerto == NULL) return -1; // cuando no hay stick configurado
 
     int socket_ms = crear_conexion(cpu->logger, ip, puerto);
     
