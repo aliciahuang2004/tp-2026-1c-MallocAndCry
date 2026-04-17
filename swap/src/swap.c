@@ -82,10 +82,11 @@ void enviar_tamanio_bloque(t_swap* sp){
 
     int resultado = enviar_paquete(paquete, sp->socket_kernel_memory, sp->logger);
 
-    if(resultado
+    if (resultado == 0) {
         log_info(sp->logger, "Tamaño de bloque y total enviados correctamente a Kernel Memory");
-    else
+    } else {
         log_error(sp->logger, "Error al enviar tamaño de bloque y total a Kernel Memory");
-    
+    }
+
     eliminar_paquete(paquete);
 }
