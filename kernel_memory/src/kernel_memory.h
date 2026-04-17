@@ -28,7 +28,7 @@ typedef struct {
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 void* atender_conexion(void* arg);
-
+int recibir_operacion(int socket_cliente);
 #endif /* KERNEL_MEMORY_H*/
 
 

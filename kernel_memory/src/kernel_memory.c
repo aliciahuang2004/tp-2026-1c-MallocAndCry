@@ -2,6 +2,7 @@
 
 #include "kernel_memory.h"
 #include <unistd.h>
+#include <stdio.h>
 
 int main(int argc, char* argv[]) {
 
@@ -55,33 +56,41 @@ void* atender_conexion(void* arg) {
     log_info(logger, "Nuevo hilo atendiendo conexión en socket %d", socket_cliente);
 
     // Bucle principal de atención: mientras el cliente esté conectado
-    while (1) {
+    //while (1) {
 
-        t_list* paquete = recibir_paquete(socket_cliente);
+        /*t_list* paquete = recibir_paquete(socket_cliente);
         if (!paquete) {
             log_error(logger, "Error al recibir paquete en socket %d. Cerrando conexión.", socket_cliente);
             break; // salimos del bucle en caso de fallar
-        }
+        }*/
 
-        int codigo_operacion = *(int*) list_get(paquete, 0);
-
+        //int codigo_operacion = *(int*) list_get(paquete, 0);
+        int codigo_operacion = recibir_operacion(socket_cliente);
+        /*printf("CODIGO DE OPERACION: %d",codigo_operacion);
+        printf("Presiona Enter para continuar...\n");
+        while (getchar() != '\n');
+        */
         switch (codigo_operacion) {
             case CPU_HANDSHAKE:
-                log_debug(logger, "[Socket %d] Operación CPU recibida", socket_cliente);
+                log_info(logger, "[Socket %d] Operación CPU recibida", socket_cliente);
+                log_info(logger, "CONEXION CON CPU: codigo-> %d", codigo_operacion);
                 // CODIGO CPU
                 break;
 
             case MEMORY_STICK_HANDSHAKE:
-                log_debug(logger, "[Socket %d] Operación MMEMORY STICK recibida", socket_cliente);
+                log_info(logger, "[Socket %d] Operación MEMORY STICK recibida", socket_cliente);
+                log_info(logger, "CONEXION CON MEMORY STICK: codigo-> %d", codigo_operacion);
                 // CODIGO MEMORY STICK
                 break;
 
             case KERNEL_SCHEDULER_HANDSHAKE:
-                log_debug(logger, "[Socket %d] Operación KERNEL SCHEDULER recibida", socket_cliente);
+                log_info(logger, "[Socket %d] Operación KERNEL SCHEDULER recibida", socket_cliente);
+                log_info(logger, "CONEXION CON KERNEL SCHEDULER: codigo-> %d", codigo_operacion);
                  // CODIGO KERNEL SCHEDULER
 
             case SWAP_HANDSHAKE: // ejemplo: operación enviada por el SWAP
-                log_debug(logger, "[Socket %d] Operación SWAP recibida", socket_cliente);
+                log_info(logger, "[Socket %d] Operación SWAP recibida", socket_cliente);
+                log_info(logger, "CONEXION CON SWAP: codigo-> %d", codigo_operacion);
                 // CODIGO SWAP
                 break;
 
@@ -91,8 +100,8 @@ void* atender_conexion(void* arg) {
         }
 
         // Liberar memoria del paquete
-        list_destroy_and_destroy_elements(paquete, free);
-    }
+        //list_destroy_and_destroy_elements(paquete, free);
+    //}
 
     // Cerrar el socket por un error o cliente se desconecta
     close(socket_cliente);
@@ -141,3 +150,14 @@ void verificarKernelMemory(t_kernel_memory* kernelMemory){
     log_debug(kernelMemory->logger, "SCRIPTS_BASEPATH; %s", kernelMemory -> scripts_basePath);
 }
 
+int recibir_operacion(int socket_cliente)
+{
+	int cod_op;
+	if (recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+		return cod_op;
+	else
+	{
+		close(socket_cliente);
+		return -1;
+	}
+}

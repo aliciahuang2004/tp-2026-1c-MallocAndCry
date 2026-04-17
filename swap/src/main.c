@@ -1,7 +1,11 @@
 #include "swap.h"
 
 int main(int argc, char* argv[]) {
-    printf(" inicia");
+
+    if(argc !=2 ){
+       printf("Uso: ./bin/swap [Archivo Config]");
+       return 1;
+    }
 
    t_swap* swap = inicializar_swap(argc,argv);
    
