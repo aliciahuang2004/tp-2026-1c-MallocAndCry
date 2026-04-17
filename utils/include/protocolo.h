@@ -13,7 +13,11 @@ typedef enum{
     MEMORY_STICK_HANDSHAKE,
     CPU_HANDSHAKE,
     
-    IO_HANDSHAKE
+    IO_HANDSHAKE,
+    
+    //handshakes para conexiones:ms-km,ms-cpu
+    MS_HANDSHAKE,
+    KERNEL_MEMORY_HANDSHAKE
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
