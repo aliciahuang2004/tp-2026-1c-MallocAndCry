@@ -1,4 +1,4 @@
-#include <utils/hello.h>
+#include "io.h"
 
 int main(int argc, char* argv[]) {
 
@@ -23,6 +23,6 @@ int main(int argc, char* argv[]) {
     enviar_handshake(io);
 
     liberar_io(io);
-    saludar("io");
+    // saludar("io");
     return 0;
 }
