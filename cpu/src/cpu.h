@@ -25,6 +25,7 @@ typedef struct {
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu);
 int conectar_kernel_memory(t_cpu* cpu);
 int conectar_kernel_scheduler(t_cpu* cpu);
+int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto);
 void liberar_cpu(t_cpu* cpu);
 
-#endif 
+#endif
