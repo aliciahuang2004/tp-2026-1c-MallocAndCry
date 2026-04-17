@@ -38,8 +38,7 @@ void liberar_swap(t_swap* sp){
 
     if(sp->logger) log_destroy(sp->logger);
     if(sp->config) config_destroy(sp->config);
-    if(sp->swap_file_path) free(sp->swap_file_path);
-    if(sp->ip_kernel_memory) free(sp->ip_kernel_memory);
+
     if(sp->log_level) free(sp->log_level);
     free(sp);
 }
