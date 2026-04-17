@@ -36,7 +36,6 @@ void liberar_io(t_io* io){
     if(io->logger) log_destroy(io->logger);
     if(io->config) config_destroy(io->config);
     if(io->tipo_IO) free(io->tipo_IO);
-    if(io->ip_kernel_scheduler) free(io->ip_kernel_scheduler);
     if(io->log_level) free(io->log_level);
     free(io);
 }
@@ -63,6 +62,6 @@ void enviar_handshake(t_io* io){
     
     enviar_paquete(paquete, io->socket_kernel_scheduler, io->logger);
     eliminar_paquete(paquete);
-    log_debug(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
+    log_info(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
 }
 

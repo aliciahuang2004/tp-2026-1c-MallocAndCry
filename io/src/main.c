@@ -22,6 +22,12 @@ int main(int argc, char* argv[]) {
 
     enviar_handshake(io);
 
+    /*Para el check 2 modificarlo*/
+    log_info(io->logger, "Modulo IO conectado. Presione ENTER para desconectar y cerrar.");
+    char* pausa = readline("");
+    free(pausa);
+    //////
+
     liberar_io(io);
     // saludar("io");
     return 0;
