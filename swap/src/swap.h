@@ -16,13 +16,12 @@ typedef struct {
 
 t_swap* inicializar_swap(int argc, char* argv[] );
 
-void verificar_swap(t_swap* sp)
+void verificar_swap(t_swap* sp);
 
-void liberar_swap(t_swap* sp)
+void liberar_swap(t_swap* sp);
 
-int conectar_a_kernel_memory(t_swap* sp)
+int conectar_a_kernel_memory(t_swap* sp);
 
-void enviar_handshake(t_swap* sp)
- t_swap;
+void enviar_handshake(t_swap* sp);
 
 #endif /* SWAP_H*/

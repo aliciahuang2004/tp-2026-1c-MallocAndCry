@@ -4,14 +4,14 @@ t_io* inicializar_io(char* archivo_config, char* tipo_io) {
 
     t_io* io= malloc(sizeof(t_io));
 
-    t_log* logger_temp= iniciar_logger("swap.log", "[IO_INIT]", true, LOG_LEVEL_INFO);
+    t_log* logger_temp= iniciar_logger("io.log", "[IO_INIT]", true, LOG_LEVEL_INFO);
 
     io-> config= iniciar_config(logger_temp, archivo_config);
 
     io-> log_level= strdup(config_get_string_value(io->config, "LOG_LEVEL"));
     t_log_level nivel = obtener_log_level(io->log_level);
 
-    io-> logger= iniciar_logger("swap.log", "[IO]", true, nivel);
+    io-> logger= iniciar_logger("io.log", "[IO]", true, nivel);
 
     log_destroy(logger_temp);
 
