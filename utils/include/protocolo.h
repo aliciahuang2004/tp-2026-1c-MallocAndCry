@@ -9,7 +9,8 @@ typedef enum{
     SWAP_HANDSHAKE, // para el handshake inicial entre swap y kernel memory
     SWAP_REQUEST, // para enviar el tamaño de bloque y total a memoria
     CPU_KERNEL_MEMORY_HANDSHAKE,    
-    CPU_KERNEL_SCHEDULER_HANDSHAKE
+    CPU_KERNEL_SCHEDULER_HANDSHAKE,
+    IO_HANDSHAKE
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
