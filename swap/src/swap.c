@@ -30,7 +30,7 @@ void verificar_swap(t_swap* sp){
     log_debug(sp->logger, "Tamaño del swap: %d bytes", sp->swap_file_size);
     log_debug(sp->logger, "Tamaño del bloque: %d bytes", sp->block_size);
     log_debug(sp->logger, "IP del Kernel Memory: %s", sp->ip_kernel_memory);
-    log_debug(sp->logger, "Puerto del Kernel Memory: %s", sp->puerto_kernel_memory);
+    log_debug(sp->logger, "Puerto del Kernel Memory: %d", sp->puerto_kernel_memory);
 }
 
 void liberar_swap(t_swap* sp){

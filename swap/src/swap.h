@@ -12,6 +12,8 @@ typedef struct {
     char* ip_kernel_memory;
     int puerto_kernel_memory;
     int socket_kernel_memory;
+    int swap_file_size;
+    int block_size;
 }t_swap;
 
 t_swap* inicializar_swap(int argc, char* argv[] );
@@ -23,5 +25,7 @@ void liberar_swap(t_swap* sp);
 int conectar_a_kernel_memory(t_swap* sp);
 
 void enviar_handshake(t_swap* sp);
+
+void enviar_tamanio_bloque(t_swap* sp);
 
 #endif /* SWAP_H*/
