@@ -1,11 +1,13 @@
 #ifndef KERNEL_MEMORY_H
 #define KERNEL_MEMORY_H
 
+#define _GNU_SOURCE
 
 #include "../../utils/include/utils.h"
 #include <commons/config.h>
 #include <string.h>
-
+#include <unistd.h>
+#include <stdio.h>
 
 typedef struct {
     t_log* logger;
@@ -29,6 +31,6 @@ t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 void* atender_conexion(void* arg);
 int recibir_operacion(int socket_cliente);
-#endif /* KERNEL_MEMORY_H*/
+void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd);
 
-
+#endif /* KERNEL_MEMORY_H */
