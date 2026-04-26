@@ -29,13 +29,23 @@ typedef struct {
     t_kernel_memory* km;
 } t_hacerConnect;
 
+typedef struct {
+    int id;
+    int pc;
+    char estado;
+    int seginicio;
+    int seglimite;
+    //VEO SI ES NECESARIO AGREGAR MAS DATOS
+} Contexto;
+
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 void* atender_conexion(void* arg);
 int recibir_operacion(int socket_cliente);
 void inicializar_proceso_memoria(int pid, char* path_relativo, t_kernel_memory* km);
 char* obtener_instruccion(int pid, int pc, t_kernel_memory* km);
-
+void enviar_operacion(int socket_cliente, op_code codigo);
+int crear_CTX(int pid);
 #endif /* KERNEL_MEMORY_H*/
 
 

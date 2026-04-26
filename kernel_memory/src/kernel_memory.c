@@ -4,12 +4,16 @@
 #include <unistd.h>
 #include <stdio.h>
 
+t_list *lista_contextos;//********LISTA GLOBAL DE CONTEXTOS
+
 int main(int argc, char* argv[]) {
 
     if (argc != 2 ){
         printf("Uso: ./bin/kernel_memory [Archivo Config]\n");
         return EXIT_FAILURE;
     }
+
+    lista_contextos = list_create();
 
     //INICIA LOGGER TEMPORAL, CONFIG Y LOGGER
     t_kernel_memory* kernel_memory = iniciar_kernelMemory(argv[1]);
@@ -105,6 +109,15 @@ void* atender_conexion(void* arg) {
 
                 // Según el PDF, acá también deberías inicializar los registros en 0
                 // inicializar_contexto_ejecucion(pid_nuevo, km); 
+
+                int resultado = crear_CTX(pid_nuevo);//************AGREGA CONTEXTO EN LA LISTA
+                debug_lista_contextos(lista_contextos);
+                
+                if (resultado == 0) {
+                    enviar_operacion(socket_cliente, INIT_PROC_OK);
+                } else {
+                    enviar_operacion(socket_cliente, INIT_PROC_ERROR);
+                }
 
                 break;
             }
@@ -267,4 +280,33 @@ char* obtener_instruccion(int pid, int pc, t_kernel_memory* km) {
     }
 
     return instruccion_encontrada;
+}
+
+
+int crear_CTX(int pid)
+{
+    Contexto* ctx = malloc(sizeof(Contexto));
+    if (ctx == NULL) return -1;
+
+    ctx->id = pid;
+    ctx->pc = 0;
+    ctx->seginicio = 0;
+    ctx->seglimite = 0;
+    ctx->estado = 0;
+    list_add(lista_contextos, ctx);
+    return 0;
+}
+
+void enviar_operacion(int socket_cliente, op_code codigo) {
+    send(socket_cliente, &codigo, sizeof(op_code), 0);
+}
+
+void debug_lista_contextos(t_list* lista) {//**************SOLO PARA VER SI LOS NODOS SE CARGARON CORRECTAMENTE
+    printf("\033[1;33m=== LISTA CONTEXTOS (size: %d) ===\033[0m\n", list_size(lista_contextos));
+    for (int i = 0; i < list_size(lista_contextos); i++) {
+        Contexto* ctx = (Contexto*)list_get(lista_contextos, i);
+        printf("\033[1;33mNodo %d → PID: %d | PC: %d | Seg Inicial: %d |Seg Final: %d | Estado: %d\033[0m\n",
+               i, ctx->id, ctx->pc, ctx->seginicio,ctx->seglimite, ctx->estado);
+    }
+    printf("\033[1;33m================================\033[0m\n");
 }

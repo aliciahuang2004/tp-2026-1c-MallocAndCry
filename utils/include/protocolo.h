@@ -21,7 +21,9 @@ typedef enum{
     CREACION_DE_PROCESO,
     PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
     RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
-    ERROR_INSTRUCCION
+    ERROR_INSTRUCCION,
+    INIT_PROC_OK,
+    INIT_PROC_ERROR
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

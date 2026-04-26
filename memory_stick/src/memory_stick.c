@@ -70,7 +70,7 @@ void destruir_memory_stick(t_memory_stick* ms){
 }
 
 void enviar_handshake(t_memory_stick* ms){
-  t_paquete* paquete = crear_paquete(MS_HANDSHAKE, crear_buffer());
+  t_paquete* paquete = crear_paquete(MEMORY_STICK_HANDSHAKE, crear_buffer());
 enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
 eliminar_paquete(paquete);
 log_debug(ms->logger,"**HANDSHAKE KERNEL MEMORY");
