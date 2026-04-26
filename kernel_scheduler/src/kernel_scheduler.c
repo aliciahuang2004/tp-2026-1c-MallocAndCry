@@ -1,6 +1,5 @@
 #include "kernel_scheduler.h"
 
-
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     t_kernel_scheduler* kernel_scheduler = malloc(sizeof(t_kernel_scheduler));
 
@@ -52,17 +51,17 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    free(kernel_scheduler);
 
 }
-int conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler){
-  
+
+void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler){
 
   kernel_scheduler->socket_kernel_memory = crear_conexion(kernel_scheduler->logger,kernel_scheduler->ip_kernel_memory,kernel_scheduler->puerto_kernel_memory);
   
   if(kernel_scheduler->socket_kernel_memory != -1){
-    log_info(kernel_scheduler->logger,COLOR_VERDE "## Conexiòn al Kernel Memory exitosa. IP:%s, Puerto: %s\033[0m",kernel_scheduler->ip_kernel_memory,kernel_scheduler->puerto_kernel_memory);
+    log_info(kernel_scheduler->logger,COLOR_VERDE "## Conexión al Kernel Memory exitosa. IP:%s, Puerto: %s\033[0m",kernel_scheduler->ip_kernel_memory,kernel_scheduler->puerto_kernel_memory);
 
   }else{
     log_error(kernel_scheduler->logger,"Error al conectar con kernel memory");  
-    return -1;  
+    EXIT_FAILURE;  
   }
   
 }

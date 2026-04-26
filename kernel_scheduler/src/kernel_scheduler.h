@@ -5,7 +5,26 @@
 #include "../../utils/include/conexion.h"
 #include "../../utils/include/protocolo.h"
 #include "../../utils/include/utils.h"
+#include <commons/collections/queue.h>
+#include <pthread.h>
+#include <semaphore.h>
 #define COLOR_VERDE "\033[32m"
+
+typedef enum{
+    NEW,
+    READY,
+    READY_SUSP,
+    EXEC,
+    BLOCK,
+    BLOCK_SUSP,
+    EXIT
+} t_estado;
+typedef struct{
+    int pid;
+    int prioridad;
+    t_estado estado;
+    char* path;
+} t_pcb;
 
 typedef struct {
     t_log* logger;
@@ -32,5 +51,11 @@ void esperar_conexiones(t_kernel_scheduler* kernel_scheduler);
 void atender_cliente_scheduler(void* arg);
 int recibir_operacion(int socket_cliente);
 //funciones de cliente
-int conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
+void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
+
+void iniciarPlanificadorLargoPlazo();
+t_pcb* crear_PCB(char* path, int prioridad);
+void crearProceso(char* path, int prioridad);
+void pasarProcesoAReady();
+
 #endif /* KERNEL_SCHEDULER_H*/
