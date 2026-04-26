@@ -91,6 +91,24 @@ void* atender_conexion(void* arg) {
                 // CODIGO SWAP
                 break;
 
+            case CREACION_DE_PROCESO: // Asegurate de que este en protocolo.h
+            {
+                // 1. Extraemos los datos que mandó el Scheduler en el orden acordado
+                // Índice 1: PID (int)
+                // Índice 2: Path (string)
+                int pid_nuevo = *(int*) list_get(paquete, 1);
+                char* path_relativo = (char*) list_get(paquete, 2);
+
+                log_info(logger, "## Creación de Proceso - PID: %d", pid_nuevo); 
+
+                inicializar_proceso_memoria(pid_nuevo, path_relativo, km);
+
+                // Según el PDF, acá también deberías inicializar los registros en 0
+                // inicializar_contexto_ejecucion(pid_nuevo, km); 
+
+                break;
+            }
+
             case PETICION_INSTRUCCION: 
             {
                 int pid_recibido = *(int*) list_get(paquete, 1);
@@ -245,7 +263,7 @@ char* obtener_instruccion(int pid, int pc, t_kernel_memory* km) {
     if (instruccion_encontrada != NULL) {
         log_info(km->logger, "## Obtener instrucción - PID: %d - Instrucción: %s", pid, instruccion_encontrada);
     } else {
-        log_warning(km->logger, "No se encontro la instruccion para el PC %d (Fin de archivo?)", pc);
+        log_warning(km->logger, "No se encontro la instruccion para el PC %d ", pc);
     }
 
     return instruccion_encontrada;
