@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
 
     iniciarPlanificadorLargoPlazo();
-    crearProceso(argv[2],0);
+    crearProceso(kernel_scheduler, argv[2],0);
 
     esperar_conexiones(kernel_scheduler);
     destruir_kernel_scheduler(kernel_scheduler);

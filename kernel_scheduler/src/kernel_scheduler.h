@@ -55,7 +55,7 @@ void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 
 void iniciarPlanificadorLargoPlazo();
 t_pcb* crear_PCB(char* path, int prioridad);
-void crearProceso(char* path, int prioridad);
+void crearProceso(t_kernel_scheduler* ks, char* path, int prioridad);
 void pasarProcesoAReady();
-
+void enviarPathKM(char* path, t_kernel_scheduler* ks);
 #endif /* KERNEL_SCHEDULER_H*/

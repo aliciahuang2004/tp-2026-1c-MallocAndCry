@@ -30,8 +30,10 @@ t_pcb* crear_PCB(char* path, int prioridad){
     return pcbCreado;
 }
 
-void crearProceso(char* path, int prioridad){
+void crearProceso(t_kernel_scheduler* ks ,char* path, int prioridad){
     t_pcb* pcbNuevo = crear_PCB(path, prioridad);
+    
+    enviarPathKM(path,ks);
     //AGREGAR A COLA NEW, es realmente necesario?
     pthread_mutex_lock(&mutex_NEW);
     queue_push(colaNEW, pcbNuevo);
@@ -57,4 +59,16 @@ void pasarProcesoAReady(){
         pthread_mutex_unlock(&mutex_NEW);
     }
 
+}
+
+void enviarPathKM(char* path, t_kernel_scheduler* ks){
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
+    agregar_a_paquete(paquete, path, sizeof(strlen(path) + 1));
+    int resultado = enviar_paquete(paquete, ks->socket_kernel_memory, ks->logger);
+
+    if (resultado != 0) {
+        log_error(ks->logger, "Error al enviar el Path a Kernel Memory");
+        EXIT_FAILURE;
+    }
 }
