@@ -1,13 +1,15 @@
 #ifndef KERNEL_MEMORY_H
 #define KERNEL_MEMORY_H
 
+#define _GNU_SOURCE
 
 #include "../../utils/include/utils.h"
 #include <commons/config.h>
 #include <commons/collections/dictionary.h>
 #include <commons/string.h>
 #include <string.h>
-
+#include <unistd.h>
+#include <stdio.h>
 
 typedef struct {
     t_log* logger;
@@ -48,4 +50,6 @@ void enviar_operacion(int socket_cliente, op_code codigo);
 int crear_CTX(int pid);
 #endif /* KERNEL_MEMORY_H*/
 
+void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd);
 
+#endif /* KERNEL_MEMORY_H */

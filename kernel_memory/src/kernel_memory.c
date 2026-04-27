@@ -1,39 +1,58 @@
-#define _GNU_SOURCE
 
 #include "kernel_memory.h"
-#include <unistd.h>
-#include <stdio.h>
 
 t_list *lista_contextos;//********LISTA GLOBAL DE CONTEXTOS
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 2 ){
-        printf("Uso: ./bin/kernel_memory [Archivo Config]\n");
-        return EXIT_FAILURE;
-    }
+t_kernel_memory* iniciar_kernelMemory(char* argv){
+
+    t_kernel_memory* kernelMemory = malloc(sizeof(t_kernel_memory));
+
+    t_log* logger_temp= iniciar_logger("kernelMemory.log", "[KERNEL_MEMORY_INIT]", true, LOG_LEVEL_INFO);
+
+    kernelMemory -> config = iniciar_config(logger_temp, argv);
+
+    kernelMemory -> log_level = strdup(config_get_string_value(kernelMemory -> config, "LOG_LEVEL"));
+    t_log_level nivel = obtener_log_level(kernelMemory->log_level);
 
     lista_contextos = list_create();
 
     //INICIA LOGGER TEMPORAL, CONFIG Y LOGGER
     t_kernel_memory* kernel_memory = iniciar_kernelMemory(argv[1]);
 
-    //VERIFICA LOS DATOS CARGADOS
-    verificarKernelMemory(kernel_memory);
+    kernelMemory -> puerto_escucha = config_get_string_value(kernelMemory->config, "PUERTO_ESCUCHA");
+    kernelMemory -> allocation_strategy = config_get_string_value(kernelMemory->config, "ALLOCATION_STRATEGY");
+    kernelMemory -> scripts_basePath = config_get_string_value(kernelMemory->config, "SCRIPTS_BASEPATH");
+    kernelMemory -> segment_max_size = config_get_int_value(kernelMemory->config, "SEGMENT_MAX_SIZE");
+    kernelMemory -> instruction_delay = config_get_int_value(kernelMemory->config, "INSTRUCTION_DELAY");
+    kernelMemory -> compaction_delay = config_get_int_value(kernelMemory->config, "COMPACTION_DELAY");
     
-    //INICIA SERVIDOR
-    int kernel_memory_fd = iniciar_servidor(kernel_memory->puerto_escucha);
-    log_debug(kernel_memory->logger, "Servidor listo para recibir una conexion - FD: %i / puerto: %s" , kernel_memory_fd, kernel_memory->puerto_escucha);
+    log_debug(kernelMemory->logger, "Kernel Memory inicializado correctamentew");
+    
+    return kernelMemory;
+    
+}
 
+void verificarKernelMemory(t_kernel_memory* kernelMemory){
+    log_debug(kernelMemory->logger, "Kernel Memory cargado con los siguientes datos");
+    log_debug(kernelMemory->logger, "SEGMENT_MAX_SIZE; %d", kernelMemory -> segment_max_size);
+    log_debug(kernelMemory->logger, "ALLOCATION_STRATEGY; %s", kernelMemory -> allocation_strategy);
+    log_debug(kernelMemory->logger, "INSTRUCTION_DELAY; %d", kernelMemory -> instruction_delay);
+    log_debug(kernelMemory->logger, "COMPACTION_DELAY; %d", kernelMemory -> compaction_delay);
+    log_debug(kernelMemory->logger, "SCRIPTS_BASEPATH; %s", kernelMemory -> scripts_basePath);
+}
+
+void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
 
         pthread_t thread;
 
         int fd_conexion_kernel_memory = esperar_cliente(kernel_memory_fd);
-        log_debug(kernel_memory->logger, "Esperando que se conecte un cliente");
+        log_debug(kernelMemory->logger, "Esperando que se conecte un cliente");
 
         t_hacerConnect* datosConexion = malloc(sizeof(t_hacerConnect));
-        datosConexion->logger = kernel_memory->logger;
+        datosConexion->logger = kernelMemory->logger;
 
         datosConexion->socket_conexion = fd_conexion_kernel_memory;
         datosConexion->km = kernel_memory;
@@ -43,13 +62,11 @@ int main(int argc, char* argv[]) {
                         atender_conexion, // va a llamar a atender conexion pasando parametros
                         datosConexion); // de este struct
         if (err != 0){
-            log_debug(kernel_memory->logger, "Hubo un problema al crear el hilo");
+            log_debug(kernelMemory->logger, "Hubo un problema al crear el hilo");
         }
         pthread_detach(thread);
         
     }
-
-    return 0;
 }
 
 void* atender_conexion(void* arg) {
