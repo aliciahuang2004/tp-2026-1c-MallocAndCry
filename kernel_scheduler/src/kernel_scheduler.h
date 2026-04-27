@@ -74,11 +74,15 @@ void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 
 void iniciarPlanificadorLargoPlazo();
 t_pcb* crear_PCB(char* path, int prioridad);
-void crearProceso(char* path, int prioridad);
+void crearProceso(t_kernel_scheduler* ks, char* path, int prioridad);
 void pasarProcesoAReady();
+<<<<<<< HEAD
 
 // funciones de IO
 void enviar_peticion_io(int socket_io, t_solicitud_io* solicitud, t_log* logger);
 void* esperar_finalizacion_io(void* args);
 
+=======
+void enviarPathKM(char* path, t_kernel_scheduler* ks);
+>>>>>>> 5fc5ab513c863f44aec05ecfa12c7ba48bd56fac
 #endif /* KERNEL_SCHEDULER_H*/

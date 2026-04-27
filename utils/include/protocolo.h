@@ -24,10 +24,16 @@ typedef enum{
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
     KERNEL_MEMORY_HANDSHAKE,
-    
+
     // Operaciones de IO
     IO_REQUEST,  // Solicitud de operación de IO de KS a IO
-    IO_OK        // Confirmación de finalización de IO al KS
+    IO_OK,       // Confirmación de finalización de IO al KS
+
+    CREACION_DE_PROCESO,
+    PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
+    RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
+    ERROR_INSTRUCCION
+
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
