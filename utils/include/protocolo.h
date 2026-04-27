@@ -21,10 +21,14 @@ typedef enum{
 
     PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
     REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
-    CONTEXT_RESPONSE // KM -> CPU: acá tenes el contexto 
-    // //en kernel memory el conexto
+    CONTEXT_RESPONSE, // KM -> CPU: acá tenes el contexto 
 
-
+    CREACION_DE_PROCESO,
+    PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
+    RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
+    ERROR_INSTRUCCION,
+    INIT_PROC_OK,
+    INIT_PROC_ERROR
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
