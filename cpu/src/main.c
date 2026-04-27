@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
 
     log_info(cpu->logger, "## CPU %s inicializada y conectada exitosamente", cpu->id);
 
+    esperar_proceso(cpu);
+
     liberar_cpu(cpu);
     
     return 0;
