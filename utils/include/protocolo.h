@@ -17,7 +17,14 @@ typedef enum{
     
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
-    KERNEL_MEMORY_HANDSHAKE
+    KERNEL_MEMORY_HANDSHAKE,
+
+    PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
+    REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
+    CONTEXT_RESPONSE // KM -> CPU: acá tenes el contexto 
+    // //en kernel memory el conexto
+
+
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
