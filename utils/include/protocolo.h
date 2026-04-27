@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <commons/string.h>
 
+typedef enum {
+    OP_SLEEP,
+    OP_STDIN,
+    OP_STDOUT
+} t_io_operation;
+
 typedef enum{
 
     SWAP_HANDSHAKE, // para el handshake inicial entre swap y kernel memory
@@ -17,7 +23,11 @@ typedef enum{
     
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
-    KERNEL_MEMORY_HANDSHAKE
+    KERNEL_MEMORY_HANDSHAKE,
+    
+    // Operaciones de IO
+    IO_REQUEST,  // Solicitud de operación de IO de KS a IO
+    IO_OK        // Confirmación de finalización de IO al KS
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
