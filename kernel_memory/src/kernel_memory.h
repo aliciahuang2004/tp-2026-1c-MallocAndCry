@@ -48,8 +48,6 @@ void inicializar_proceso_memoria(int pid, char* path_relativo, t_kernel_memory* 
 char* obtener_instruccion(int pid, int pc, t_kernel_memory* km);
 void enviar_operacion(int socket_cliente, op_code codigo);
 int crear_CTX(int pid);
-#endif /* KERNEL_MEMORY_H*/
-
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd);
 
 #endif /* KERNEL_MEMORY_H */
