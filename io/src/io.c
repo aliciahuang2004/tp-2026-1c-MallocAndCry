@@ -1,4 +1,7 @@
 #include "io.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
 t_io* inicializar_io(char* archivo_config, char* tipo_io) {
 
@@ -48,7 +51,7 @@ int conectar_a_kernel_scheduler(t_io* io){
     free(puerto_str);
 
     if(io->socket_kernel_scheduler != -1){
-        log_info(io->logger, "Conexión exitosa a Kernel Scheduler en %s:%d", io->ip_kernel_scheduler, io->puerto_kernel_scheduler);
+        log_info(io->logger, "## Conectado a Kernel Scheduler");
         return 0;
     } else {
         log_error(io->logger, "Error al conectar a Kernel Scheduler en %s:%d", io->ip_kernel_scheduler, io->puerto_kernel_scheduler);
@@ -64,4 +67,5 @@ void enviar_handshake(t_io* io){
     eliminar_paquete(paquete);
     log_info(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
 }
+
 

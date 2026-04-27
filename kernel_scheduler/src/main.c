@@ -13,6 +13,10 @@ int main(int argc, char* argv[]) {
     // Conexión con Kernel Memory 
     conectar_con_kernel_memory(kernel_scheduler);
 
+
+    iniciarPlanificadorLargoPlazo();
+    crearProceso(kernel_scheduler, argv[2],0);
+
     esperar_conexiones(kernel_scheduler);
     destruir_kernel_scheduler(kernel_scheduler);
     return 0;
