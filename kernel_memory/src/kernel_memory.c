@@ -1,47 +1,9 @@
 
 #include "kernel_memory.h"
 
-t_list *lista_contextos;//********LISTA GLOBAL DE CONTEXTOS
+t_list *lista_contextos;
+pthread_mutex_t mutex_lista_contextos = PTHREAD_MUTEX_INITIALIZER;
 
-int main(int argc, char* argv[]) {
-
-t_kernel_memory* iniciar_kernelMemory(char* argv){
-
-    t_kernel_memory* kernelMemory = malloc(sizeof(t_kernel_memory));
-
-    t_log* logger_temp= iniciar_logger("kernelMemory.log", "[KERNEL_MEMORY_INIT]", true, LOG_LEVEL_INFO);
-
-    kernelMemory -> config = iniciar_config(logger_temp, argv);
-
-    kernelMemory -> log_level = strdup(config_get_string_value(kernelMemory -> config, "LOG_LEVEL"));
-    t_log_level nivel = obtener_log_level(kernelMemory->log_level);
-
-    lista_contextos = list_create();
-
-    //INICIA LOGGER TEMPORAL, CONFIG Y LOGGER
-    t_kernel_memory* kernel_memory = iniciar_kernelMemory(argv[1]);
-
-    kernelMemory -> puerto_escucha = config_get_string_value(kernelMemory->config, "PUERTO_ESCUCHA");
-    kernelMemory -> allocation_strategy = config_get_string_value(kernelMemory->config, "ALLOCATION_STRATEGY");
-    kernelMemory -> scripts_basePath = config_get_string_value(kernelMemory->config, "SCRIPTS_BASEPATH");
-    kernelMemory -> segment_max_size = config_get_int_value(kernelMemory->config, "SEGMENT_MAX_SIZE");
-    kernelMemory -> instruction_delay = config_get_int_value(kernelMemory->config, "INSTRUCTION_DELAY");
-    kernelMemory -> compaction_delay = config_get_int_value(kernelMemory->config, "COMPACTION_DELAY");
-    
-    log_debug(kernelMemory->logger, "Kernel Memory inicializado correctamentew");
-    
-    return kernelMemory;
-    
-}
-
-void verificarKernelMemory(t_kernel_memory* kernelMemory){
-    log_debug(kernelMemory->logger, "Kernel Memory cargado con los siguientes datos");
-    log_debug(kernelMemory->logger, "SEGMENT_MAX_SIZE; %d", kernelMemory -> segment_max_size);
-    log_debug(kernelMemory->logger, "ALLOCATION_STRATEGY; %s", kernelMemory -> allocation_strategy);
-    log_debug(kernelMemory->logger, "INSTRUCTION_DELAY; %d", kernelMemory -> instruction_delay);
-    log_debug(kernelMemory->logger, "COMPACTION_DELAY; %d", kernelMemory -> compaction_delay);
-    log_debug(kernelMemory->logger, "SCRIPTS_BASEPATH; %s", kernelMemory -> scripts_basePath);
-}
 
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
@@ -55,7 +17,7 @@ void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
         datosConexion->logger = kernelMemory->logger;
 
         datosConexion->socket_conexion = fd_conexion_kernel_memory;
-        datosConexion->km = kernel_memory;
+        datosConexion->km = kernelMemory;
 
         int err= pthread_create(&thread,
                         NULL,
@@ -310,7 +272,9 @@ int crear_CTX(int pid)
     ctx->seginicio = 0;
     ctx->seglimite = 0;
     ctx->estado = 0;
+    pthread_mutex_lock(&mutex_lista_contextos);
     list_add(lista_contextos, ctx);
+    pthread_mutex_unlock(&mutex_lista_contextos);
     return 0;
 }
 
@@ -319,6 +283,7 @@ void enviar_operacion(int socket_cliente, op_code codigo) {
 }
 
 void debug_lista_contextos(t_list* lista) {//**************SOLO PARA VER SI LOS NODOS SE CARGARON CORRECTAMENTE
+    pthread_mutex_lock(&mutex_lista_contextos);
     printf("\033[1;33m=== LISTA CONTEXTOS (size: %d) ===\033[0m\n", list_size(lista_contextos));
     for (int i = 0; i < list_size(lista_contextos); i++) {
         Contexto* ctx = (Contexto*)list_get(lista_contextos, i);
@@ -326,4 +291,5 @@ void debug_lista_contextos(t_list* lista) {//**************SOLO PARA VER SI LOS 
                i, ctx->id, ctx->pc, ctx->seginicio,ctx->seglimite, ctx->estado);
     }
     printf("\033[1;33m================================\033[0m\n");
+    pthread_mutex_unlock(&mutex_lista_contextos);
 }

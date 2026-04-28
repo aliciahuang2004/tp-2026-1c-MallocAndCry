@@ -49,5 +49,9 @@ char* obtener_instruccion(int pid, int pc, t_kernel_memory* km);
 void enviar_operacion(int socket_cliente, op_code codigo);
 int crear_CTX(int pid);
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd);
+void debug_lista_contextos(t_list* lista);
+
+extern t_list *lista_contextos;
+extern pthread_mutex_t mutex_lista_contextos;
 
 #endif /* KERNEL_MEMORY_H */
