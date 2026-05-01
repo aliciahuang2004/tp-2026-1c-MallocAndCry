@@ -15,6 +15,7 @@ typedef struct {
     t_log* logger;
     t_config* config;
     char* log_level;
+    
     int segment_max_size;
     char* allocation_strategy;
     int instruction_delay;
@@ -40,6 +41,13 @@ typedef struct {
     //VEO SI ES NECESARIO AGREGAR MAS DATOS
 } Contexto;
 
+typedef struct 
+{
+    int id;
+    int tamano;
+    int socket;
+}t_ms_info;
+
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 void* atender_conexion(void* arg);
@@ -53,5 +61,6 @@ void debug_lista_contextos(t_list* lista);
 
 extern t_list *lista_contextos;
 extern pthread_mutex_t mutex_lista_contextos;
+extern t_list* lista_ms;
 
 #endif /* KERNEL_MEMORY_H */

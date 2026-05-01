@@ -132,25 +132,28 @@ void esperar_proceso(t_cpu* cpu) {
         int cod_op = *(int*)list_get(paquete, 0); //el cod_op siempre va a estar en la posicion 0, devuelve un puntero void*, por eso el casteo a int* y luego se desreferencia para obtener el valor
 
         if(cod_op ==PROCESO_A_PROCESAR){
-            int pid_a_ejecutar = *(int*)list_get(paquete, 1);
-            log_info(cpu->logger, "CPU recibió proceso a procesar con PID: %d", pid_a_ejecutar);
-            
-            // aca pido contexto a KERNEL MEMORY
-            t_contexto* contexto_actual = solicitar_contexto(cpu, pid_a_ejecutar);
-            if (contexto_actual!=NULL) {
-                log_info(cpu->logger,"Contexto recibido para PID %d", contexto_actual->pid);
+                int pid_a_ejecutar = *(int*)list_get(paquete, 1);
+                log_info(cpu->logger, "CPU recibió proceso a procesar con PID: %d", pid_a_ejecutar);
+                
+                // aca pido contexto a KERNEL MEMORY
+                t_contexto* contexto_actual = solicitar_contexto(cpu, pid_a_ejecutar);
 
-                //inicia el ciclo de instruccion
-                ciclo_de_instruccion(cpu,contexto_actual);
-                free(contexto_actual);
+                if (contexto_actual!=NULL) {
+                    log_info(cpu->logger,"Contexto recibido para PID %d", contexto_actual->pid);
 
-        } else {
-            log_warning(cpu->logger, "Código de operación desconocido: %d", cod_op);
+                    //inicia el ciclo de instruccion
+                    ciclo_de_instruccion(cpu,contexto_actual);
+                    free(contexto_actual);
+
+                } else {
+                    log_warning(cpu->logger, "Código de operación desconocido: %d", cod_op);
+                }
+            list_destroy_and_destroy_elements(paquete, free);
+
         }
-        list_destroy_and_destroy_elements(paquete, free);
-
     }
 }
+
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
     
@@ -202,4 +205,4 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
     }
-}
+} 

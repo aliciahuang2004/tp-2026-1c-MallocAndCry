@@ -1,21 +1,31 @@
 #include "memory_stick.h"
 
-t_memory_stick* iniciar_memory_stick(){
+t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     t_memory_stick* ms = malloc(sizeof(t_memory_stick));
 
+   char log_name[50];
+   snprintf(log_name, sizeof(log_name),"ms_%d.log",id);
+
     //abajo cargo los campos del struct t_memory_stick
-   ms ->logger = iniciar_logger("memory_stick.log","MEMORY_STICK",1,LOG_LEVEL_INFO);
-   ms ->config = iniciar_config(ms->logger,"memory_stick.config");
- // ms ->config = iniciar_config(ms->logger,argv[1]); ACA EL
- // ARCHIVO CONFIG NO ESTA HARDCODEADO,PUEDE SERVIR SI USAMOS
- // DISTINTOS ARCHIVOS CONFIG,PREGUNTAR
-   ms ->log_level = config_get_string_value(ms->config,"LOG_LEVEL");
+    ms ->logger = iniciar_logger(log_name,"MEMORY_STICK",1,LOG_LEVEL_INFO);
+    ms ->config = iniciar_config(ms->logger,ms_config);
+    ms ->log_level = config_get_string_value(ms->config,"LOG_LEVEL");
     
-   //abajo lleno los campos que vienen del archivo de configuracion memory_stick.config
-   
-   ms ->puerto_escucha = config_get_string_value(ms->config,"PUERTO_ESCUCHA");
-   ms ->ip_kernel_memory = config_get_string_value(ms->config,"IP_KERNEL_MEMORY");
-   ms ->puerto_kernel_memory = config_get_string_value(ms->config,"PUERTO_KERNEL_MEMORY");
+    ms->logger->detail = obtener_log_level(ms->log_level);
+    ms->id = id;
+    ms->tamano = tamano_ms;
+
+    ms->memoria = malloc(ms->tamano);
+    if(ms->memoria == NULL){
+      log_error(ms->logger,"Error al reservar %d bytes de memoria",ms->tamano);
+      return NULL;
+    }
+    memset(ms->memoria,0,ms->tamano);
+
+    //abajo lleno los campos que vienen del archivo de configuracion memory_stick.config
+    ms ->puerto_escucha = config_get_string_value(ms->config,"PUERTO_ESCUCHA");
+    ms ->ip_kernel_memory = config_get_string_value(ms->config,"IP_KERNEL_MEMORY");
+    ms ->puerto_kernel_memory = config_get_string_value(ms->config,"PUERTO_KERNEL_MEMORY");
 
    //loggeo que todo se cargò correctamente
    log_debug(ms->logger, "El mòdulo Memory Stick se inicializò correctamente");
@@ -25,10 +35,12 @@ t_memory_stick* iniciar_memory_stick(){
 
 
 void verificar_memory_stick(t_memory_stick* ms) {
+    log_debug(ms->logger, "ID: %d", ms->id);
+    log_debug(ms->logger, "Tamaño: %d bytes", ms->tamano);
+    log_debug(ms->logger, "Log Level: %s", ms->log_level);
     log_debug(ms->logger, "Puerto de escucha: %s", ms->puerto_escucha);
     log_debug(ms->logger, "IP Kernel Memory: %s", ms->ip_kernel_memory);
     log_debug(ms->logger, "Puerto Kernel Memory: %s", ms->puerto_kernel_memory);
-    log_debug(ms->logger, "Log Level: %s", ms->log_level);
 }
 
 int conectar_al_kernelmem(t_memory_stick* ms){
@@ -70,10 +82,13 @@ void destruir_memory_stick(t_memory_stick* ms){
 }
 
 void enviar_handshake(t_memory_stick* ms){
+
   t_paquete* paquete = crear_paquete(MEMORY_STICK_HANDSHAKE, crear_buffer());
-enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
-eliminar_paquete(paquete);
-log_debug(ms->logger,"**HANDSHAKE KERNEL MEMORY");
+  agregar_a_paquete(paquete,&ms->id, sizeof(int));
+  agregar_a_paquete(paquete,&ms->tamano,  sizeof(int));
+  enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
+  eliminar_paquete(paquete);
+  log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);
 }
 
 void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){

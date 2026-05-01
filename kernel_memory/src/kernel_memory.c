@@ -4,6 +4,8 @@
 t_list *lista_contextos;
 pthread_mutex_t mutex_lista_contextos = PTHREAD_MUTEX_INITIALIZER;
 
+t_list* lista_ms;
+pthread_mutex_t mutex_lista_ms = PTHREAD_MUTEX_INITIALIZER;
 
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
@@ -60,7 +62,21 @@ void* atender_conexion(void* arg) {
                 break;
 
             case MEMORY_STICK_HANDSHAKE:
-                log_info(logger, "[Socket %d] Operación MEMORY STICK recibida", socket_cliente);
+                int ms_id = *(int*)list_get(paquete,1);
+                int ms_tamano = *(int*)list_get(paquete,2);
+
+                log_info(logger, "[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes", socket_cliente,ms_id,ms_tamano);
+                //AGREGA EN LA LISTA DE MSs
+                t_ms_info* ms_info = malloc(sizeof(t_ms_info));
+                ms_info->id = ms_id;
+                ms_info->tamano = ms_tamano;
+                ms_info->socket = socket_cliente;
+
+                pthread_mutex_lock(&mutex_lista_ms);
+                list_add(lista_ms,ms_info);
+                pthread_mutex_unlock(&mutex_lista_ms);
+
+                log_info(logger,"Memory sticks conectados: %d",list_size(lista_ms));
                 // CODIGO MEMORY STICK
                 break;
 
