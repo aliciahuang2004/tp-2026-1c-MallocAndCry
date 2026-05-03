@@ -36,8 +36,17 @@ typedef enum{
     PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
     RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
     ERROR_INSTRUCCION,
-    INIT_PROC_OK,
-    INIT_PROC_ERROR
+    CREACION_DE_PROCESO_OK,
+    CREACION_DE_PROCESO_ERROR,
+    CONTEXT_ERROR,           //KM responde esto cuando no encuentra el CTX solicitado
+    NUEVO_MEMORY_STICK,
+    ESCRITURA_DE_DATOS,              //KS envía una serie de bytes y dir logica a KM para que MS lo escriba en sus segmentos
+    LECTURA_DE_DATOS,
+    FINALIZAR_PROCESO,
+    SUSPENSION_DE_PROCESO,
+    DESUSPENSION_DE_PROCESO,
+    ELIMINACION_DE_SEGMENTO,
+    CREACION_DE_SEGMENTO
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

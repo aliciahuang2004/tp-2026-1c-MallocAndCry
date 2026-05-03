@@ -83,4 +83,5 @@ void* esperar_finalizacion_io(void* args);
 
 void enviarPathKM(char* path, t_kernel_scheduler* ks);
 
+void enviarPathYPidKM(int pid, char* path, t_kernel_scheduler* ks);
 #endif /* KERNEL_SCHEDULER_H*/

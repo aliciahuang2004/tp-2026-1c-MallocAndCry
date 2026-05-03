@@ -161,6 +161,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
