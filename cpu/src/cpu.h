@@ -22,7 +22,6 @@ typedef struct {
     
 } t_cpu;
 
-
 //estructura de registros
 typedef struct {
     uint32_t PC; //4 bytes
@@ -45,6 +44,7 @@ typedef struct {// consultar
     t_registros registros;
 } t_contexto;
 
+
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu);
 int conectar_kernel_memory(t_cpu* cpu);
 int conectar_kernel_scheduler(t_cpu* cpu);
@@ -54,5 +54,7 @@ void liberar_cpu(t_cpu* cpu);
 void esperar_proceso(t_cpu* cpu);
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid);
 void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto);
+
+char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto);
 
 #endif
