@@ -17,12 +17,12 @@ int main(int argc, char* argv[]) {
         verificar_memory_stick(ms);
 
         //conectarse como cliente a kernel_memory
-                if(conectar_al_kernelmem(ms) == -1){
-            destruir_memory_stick(ms);
-            return EXIT_FAILURE;
+        if(conectar_al_kernelmem(ms) == -1){
+        destruir_memory_stick(ms);
+        return EXIT_FAILURE;
         }
-
-        enviar_handshake(ms);        //paquete(socket_kernel_mem);
+        //***MS ENVIA HANDSHAKE,ID,TAMAÑO A KM
+        enviar_handshake(ms);     
 
         //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
        

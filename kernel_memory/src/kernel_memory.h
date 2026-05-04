@@ -23,6 +23,7 @@ typedef struct {
     char* scripts_basePath;
     char* puerto_escucha;
     t_dictionary* paths_por_pid;
+    int socket_kernel_scheduler; //***PREGUNTAR SI QUEDA ACÁ O DEBERÍA MOVERLO A UN NUEVO STRUCT?
 } t_kernel_memory;
 
 typedef struct {
@@ -33,12 +34,18 @@ typedef struct {
 } t_hacerConnect;
 
 typedef struct {
-    int id;
-    int pc;
-    char estado;
-    int seginicio;
-    int seglimite;
-    //VEO SI ES NECESARIO AGREGAR MAS DATOS
+    int pid;
+    uint32_t PC; //4 bytes
+    uint8_t AX; //1 byte
+    uint8_t BX;
+    uint8_t CX;
+    uint8_t DX;
+    uint32_t EAX;
+    uint32_t EBX;
+    uint32_t ECX;
+    uint32_t EDX;
+    uint32_t SI;
+    uint32_t DI;
 } Contexto;
 
 typedef struct 

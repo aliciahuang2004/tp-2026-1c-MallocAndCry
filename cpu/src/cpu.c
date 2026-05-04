@@ -161,6 +161,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
@@ -178,8 +179,18 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         contexto_recibido = malloc(sizeof(t_contexto));
         //TODO aca deberia recibir tmb los registros, consultar qué datos mas deberia recibir para el contexto
         contexto_recibido->pid= pid; //el pid lo tengo
-        memset(&contexto_recibido->registros, 0, sizeof(t_registros)); //inicializo registros en 0 para probar
-        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
+        contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 1); 
+        contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 2);
+        contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 3);
+        contexto_recibido->registros.CX = *(uint8_t*)list_get(respuesta, 4);
+        contexto_recibido->registros.DX = *(uint8_t*)list_get(respuesta, 5);
+        contexto_recibido->registros.EAX = *(uint32_t*)list_get(respuesta, 6);
+        contexto_recibido->registros.EBX = *(uint32_t*)list_get(respuesta, 7);
+        contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 8);
+        contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 9);
+        contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 10);
+        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 11);
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%s", contexto_recibido->pid, contexto_recibido->registros);
     } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
@@ -206,3 +217,41 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
     }
 } 
+
+char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
+    
+    log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+
+    t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
+    agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
+    agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); // es necesario pasarle lo registros?
+
+    enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
+    eliminar_paquete(paquete);
+
+    //espero respuesta
+    t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
+    if (!respuesta) {
+        log_error(cpu->logger, "Error al recibir instrucción de Kernel Memory para PID %d", contexto->pid);
+        return NULL;
+    }
+
+    int cod_op = *(int*)list_get(respuesta, 0);
+    char* instruccion_leida = NULL;
+
+    if(cod_op == RESPUESTA_INSTRUCCION){ //todavia no tengo este tipo operacion
+        char* str_recibido = (char*)list_get(respuesta, 1); // asumo que el string viene en la posicion 1 del paquete
+        instruccion_leida = strdup(str_recibido); // duplico el string para devolverlo, luego se debe liberar
+    }
+    else {
+        log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
+    }
+
+    list_destroy_and_destroy_elements(respuesta, free);
+
+    // deberia sumar un 1 al PC pero lo deberia hacer en la otra funcion
+
+
+   
+    return instruccion_leida;
+}
