@@ -3,6 +3,7 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/protocolo.h"
+#include <unistd.h>
 #include <commons/config.h>
 #include <pthread.h>
 

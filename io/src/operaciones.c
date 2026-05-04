@@ -24,7 +24,7 @@ void ejecutar_stdin(int pid, uint32_t datos_size, int socket_ks, t_log* logger) 
         // Si la entrada es menor, copiar y rellenar con '\0'
             memcpy(buffer_respuesta, input, input_len);
             // El resto ya está en '\0' por calloc
-            log_info(logger, "Entrada completada con null terminators (%zu + %u bytes de padding)", input_len, datos_size - input_len);
+            log_info(logger, "Entrada completada con null terminators (%zu + %lu bytes de padding)", input_len, datos_size - input_len);
                 }
             }
 
@@ -34,22 +34,25 @@ void ejecutar_stdin(int pid, uint32_t datos_size, int socket_ks, t_log* logger) 
 
 void ejecutar_stdout(int pid, uint32_t datos_size, void* datos, int socket_ks, t_log* logger) {
     // Imprimir por pantalla y en el archivo de Log 
-    log_info(logger, "Ejecutando STDOUT: imprimiendo %u bytes para PID %d", datos_size, pid);
     if (datos != NULL && datos_size > 0) {
+        // Crear string terminado en null para el log
+        char* datos_str = malloc(datos_size + 1);
+        memcpy(datos_str, datos, datos_size);
+        datos_str[datos_size] = '\0';
+        
+        // Log con formato solicitado
+        log_info(logger, "## PID: %d - %s", pid, datos_str);
+        
         // Imprimir en pantalla
         printf("[IO STDOUT PID %d] ", pid);
         fwrite(datos, 1, datos_size, stdout);
         printf("\n");
         fflush(stdout);
-
-        // Registrar en log
-        char* datos_str = malloc(datos_size + 1);
-        memcpy(datos_str, datos, datos_size);
-        datos_str[datos_size] = '\0';
+        
         free(datos_str);
     } else {
         log_warning(logger, "STDOUT: No hay datos para imprimir");
-        }
+    }
     enviar_confirmacion_ks(socket_ks, pid, NULL, 0, logger);
 }
 

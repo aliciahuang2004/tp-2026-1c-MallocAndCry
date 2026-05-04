@@ -1,4 +1,5 @@
 #include "kernel_scheduler.h"
+#include <unistd.h>
 
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     t_kernel_scheduler* kernel_scheduler = malloc(sizeof(t_kernel_scheduler));
@@ -79,33 +80,94 @@ void esperar_conexiones(t_kernel_scheduler* scheduler) {
             datos->logger = scheduler->logger;
 
             // Creamos un hilo por cada nueva conexión
-            pthread_create(&hilo_atencion, NULL, (void*)atender_cliente_scheduler, datos);
+            pthread_create(&hilo_atencion, NULL, atender_cliente_scheduler, datos);
             pthread_detach(hilo_atencion);
         }
     }
 }
-void atender_cliente_scheduler(void* arg) {
+void* atender_cliente_scheduler(void* arg) {
     t_atencion_cliente* datos = (t_atencion_cliente*) arg;
-    
-    // Identificación del cliente mediante el primer paquete
-    int cod_op = recibir_operacion(datos->socket_cliente);
+    int socket_cliente = datos->socket_cliente;
+    t_log* logger = datos->logger;
+    while (1) {
+        // Recibir el paquete completo
+        t_list* paquete = recibir_paquete(datos->socket_cliente);
+        if (paquete == NULL) {
+            log_error(logger, "El cliente en socket %d se desconectó", socket_cliente);
+            break;
+        }
 
-    switch (cod_op) {
-        case CPU_HANDSHAKE:
-            log_info(datos->logger, "Nueva CPU conectada en socket %d", datos->socket_cliente);
-            // Lógica para gestionar ciclos de instrucción de la CPU
+        // Obtener el código de operación
+        int* cod_op_ptr = (int*) list_get(paquete, 0);
+        if (cod_op_ptr == NULL) {
+            log_error(logger, "Error al obtener código de operación del paquete");
+            list_destroy_and_destroy_elements(paquete, free);
             break;
-        case IO_HANDSHAKE:
-            log_info(datos->logger, "Nuevo módulo de I/O conectado en socket %d", datos->socket_cliente);
-            // Lógica para peticiones de dispositivos de entrada/salida
-            break;
-        default:
-            log_warning(datos->logger, "Operación desconocida de cliente en socket %d", datos->socket_cliente);
-            break;
+        }
+        int cod_op = *cod_op_ptr;
+
+        switch (cod_op) {
+            case CPU_HANDSHAKE:
+                log_info(datos->logger, "Nueva CPU conectada en socket %d", datos->socket_cliente);
+                // Lógica para gestionar ciclos de instrucción de la CPU
+                break;
+            case IO_HANDSHAKE:
+                log_debug(datos->logger, "Nuevo módulo de I/O conectado en socket %d", datos->socket_cliente);
+                // Lógica para peticiones de dispositivos de entrada/salida
+                
+                // ========== PRUEBAS DE IO
+                /*
+                int pid = 123;
+                // Ejemplo para enviar una petición de IO de prueba para STDIN
+                t_io_operation tipo_op = OP_STDIN;
+                uint32_t datos_size = 10;
+                //Ejemplo para prueba ,definimos los datos de la petición (ejemplo: SLEEP de 2.5 segundos)
+                t_io_operation tipo_op = OP_SLEEP; (Para prueba de SLEEP) 
+                uint32_t tiempo_ms = 2500; (Para prueba de SLEEP)
+                
+                // Ejemplo para enviar una petición de IO de prueba para STDOUT
+                t_io_operation tipo_op = OP_STDOUT;
+                char* datos_stdout = "Hola Mundo desde STDOUT";
+                uint32_t datos_size = strlen(datos_stdout) + 1;
+                
+                // Creamos el paquete con el código IO_REQUEST
+                t_paquete* paquete_request = crear_paquete(IO_REQUEST, crear_buffer());
+            
+                // Agregamos los campos respetando el orden del receptor 
+                agregar_a_paquete(paquete_request, &pid, sizeof(int));
+                agregar_a_paquete(paquete_request, &tipo_op, sizeof(t_io_operation));
+                agregar_a_paquete(paquete_request, &datos_size, sizeof(uint32_t));
+                agregar_a_paquete(paquete_request, datos_stdout, datos_size);
+
+                // Enviamos y liberamos
+                enviar_paquete(paquete_request, datos->socket_cliente, datos->logger);
+                eliminar_paquete(paquete_request);
+                */
+                // ==================================================================================
+                break;
+            case IO_OK: // RESPUESTA DE IO
+                // El paquete ya fue recibido y deserializado en "paquete"
+                if (list_size(paquete) > 1) {
+                    int pid_io = *(int*) list_get(paquete, 1);
+                    log_debug(datos->logger, "IO_OK recibido para PID %d en socket %d", pid_io, datos->socket_cliente);
+                } else {
+                    log_warning(datos->logger, "IO_OK recibido sin PID en socket %d", datos->socket_cliente);
+                }
+                // Aca iria la lógica de desbloqueo del proceso y envío al planificador
+                break;
+                   
+            default:
+                log_warning(datos->logger, "Operación desconocida de cliente en socket %d", datos->socket_cliente);
+                break;
+        }
+
+        // Liberar el paquete recibido
+        list_destroy_and_destroy_elements(paquete, free);
+
+    // Aca el hilo puede continuar en un bucle según la necesidad del protocolo
     }
-
-    // Aquí el hilo puede continuar en un bucle según la necesidad del protocolo
     free(datos);
+    return NULL;
 }
 int recibir_operacion(int socket_cliente)
 {
@@ -114,7 +176,7 @@ int recibir_operacion(int socket_cliente)
 		return cod_op;
 	else
 	{
-		pclose(socket_cliente);
+		close(socket_cliente);
 		return -1;
 	}
 }

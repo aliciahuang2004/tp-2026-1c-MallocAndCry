@@ -30,8 +30,7 @@ void recibir_y_ejecutar_tarea(t_io* io, t_io_operation tipo_modulo) {
     int cod_op = *cod_op_ptr;
 
     if (cod_op != IO_REQUEST) {
-        log_warning(io->logger, "Código de operación inesperado: esperado IO_REQUEST (%d), recibido %d", 
-                    IO_REQUEST, cod_op);
+        log_warning(io->logger, "Código de operación inesperado: esperado IO_REQUEST (%d), recibido %d", IO_REQUEST, cod_op);
         list_destroy_and_destroy_elements(paquete, free);
         return;
     }
@@ -109,7 +108,11 @@ void enviar_confirmacion_ks(int socket_ks, int pid, void* datos_respuesta, uint3
 
     // Enviar paquete
     int resultado = enviar_paquete(paquete, socket_ks, logger);
-
+    if (resultado == 0) {
+        log_info(logger, "Enviando confirmación IO_OK para PID %d al socket %d", pid, socket_ks);
+    } else {
+        log_error(logger, "Error al enviar IO_OK para PID %d al socket %d", pid, socket_ks);
+    }
     // Liberar estructura
     eliminar_paquete(paquete);
 }

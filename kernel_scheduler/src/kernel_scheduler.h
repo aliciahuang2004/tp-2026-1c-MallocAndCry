@@ -67,7 +67,7 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler);
 
 // funciones de servidor
 void esperar_conexiones(t_kernel_scheduler* kernel_scheduler);
-void atender_cliente_scheduler(void* arg);
+void* atender_cliente_scheduler(void* arg);
 int recibir_operacion(int socket_cliente);
 //funciones de cliente
 void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
