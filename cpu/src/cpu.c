@@ -190,7 +190,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 9);
         contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 10);
         contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 11);
-        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%s", contexto_recibido->pid, contexto_recibido->registros);
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
