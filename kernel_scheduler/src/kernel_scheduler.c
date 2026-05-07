@@ -16,6 +16,7 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->puerto_escucha = config_get_string_value(kernel_scheduler->config, "PUERTO_ESCUCHA");
     kernel_scheduler->ip_kernel_memory = config_get_string_value(kernel_scheduler->config, "IP_KERNEL_MEMORY");
     kernel_scheduler->puerto_kernel_memory = config_get_string_value(kernel_scheduler->config, "PUERTO_KERNEL_MEMORY");
+     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
     log_debug(kernel_scheduler->logger, "El kernel scheduler se inicializo correctamente");
     
     return kernel_scheduler;
@@ -96,7 +97,6 @@ void* atender_cliente_scheduler(void* arg) {
             log_error(logger, "El cliente en socket %d se desconectó", socket_cliente);
             break;
         }
-
         // Obtener el código de operación
         int* cod_op_ptr = (int*) list_get(paquete, 0);
         if (cod_op_ptr == NULL) {
@@ -108,8 +108,19 @@ void* atender_cliente_scheduler(void* arg) {
 
         switch (cod_op) {
             case CPU_HANDSHAKE:
-                log_info(datos->logger, "Nueva CPU conectada en socket %d", datos->socket_cliente);
-                // Lógica para gestionar ciclos de instrucción de la CPU
+                int* id_cpu_ptr = (int*) list_get(paquete, 1);
+                 if (id_cpu_ptr != NULL) {
+                    t_cpu_conectada* nuevaCPU = malloc(sizeof(t_cpu_conectada));
+                    nuevaCPU -> socket_cliente = datos -> socket_cliente;
+                    nuevaCPU -> id_cpu = *id_cpu_ptr;
+                    nuevaCPU -> id_cpu = true;
+                    log_info(logger, "Nueva CPU (id: %d) conectada en socket %d", nuevaCPU -> id_cpu, datos->socket_cliente);
+                    pthread_mutex_lock(&mutex_CPU);
+                    queue_push(colaCPUs, nuevaCPU);
+                    pthread_mutex_unlock(&mutex_CPU);
+                } else {
+                    log_error(logger, "No se pudo obtener id de la cpu con la que se estaba iniciando la conexion");
+                }
                 break;
             case IO_HANDSHAKE:
                 log_debug(datos->logger, "Nuevo módulo de I/O conectado en socket %d", datos->socket_cliente);

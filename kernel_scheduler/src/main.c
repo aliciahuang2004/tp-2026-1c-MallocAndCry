@@ -14,7 +14,9 @@ int main(int argc, char* argv[]) {
     conectar_con_kernel_memory(kernel_scheduler);
 
 
-    iniciarPlanificadorLargoPlazo();
+    iniciarPlanificadorLargoPlazo(kernel_scheduler);
+    iniciarPlanificadorLCortoPlazo(kernel_scheduler);
+    iniciarCPU();
     crearProceso(kernel_scheduler, argv[2],0);
 
     esperar_conexiones(kernel_scheduler);
