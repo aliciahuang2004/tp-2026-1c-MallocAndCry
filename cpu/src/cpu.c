@@ -190,7 +190,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 9);
         contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 10);
         contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 11);
-        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%s", contexto_recibido->pid, contexto_recibido->registros);
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
@@ -208,11 +208,20 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         //FETCH
         log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
 
+        char* cadena_leida = fetch_instruccion(cpu, contexto);
+        
         //DECODE
-
+        t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
+        
+        log_debug(cpu->logger, "Decodificado con éxito: %s", instruccion_actual.nombre_operacion);
+        
         //EXECUTE
 
         //CHECK INTERRUPT 
+        free(cadena_leida);
+        if(instruccion_actual.nombre_operacion) free(instruccion_actual.nombre_operacion);
+        if(instruccion_actual.argumento_operando_destino) free(instruccion_actual.argumento_operando_destino);
+        if(instruccion_actual.argumento_operando_origen) free(instruccion_actual.argumento_operando_origen);
 
         ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
     }
@@ -254,4 +263,57 @@ char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
 
    
     return instruccion_leida;
+}
+
+t_instruccion_decodificada decodificar_instruccion(t_cpu* cpu, char* cadena_instruccion_texto) {
+    t_instruccion_decodificada instruccion_formateada;
+    
+    instruccion_formateada.identificador_operacion = INST_DESCONOCIDA;
+    instruccion_formateada.nombre_operacion = NULL;
+    instruccion_formateada.argumento_operando_destino = NULL;
+    instruccion_formateada.argumento_operando_origen = NULL;
+
+    if (!cadena_instruccion_texto) {
+        log_error(cpu->logger, "Error: Se recibió una cadena de instrucción nula.");
+        return instruccion_formateada;
+    }
+
+    char** tokens_de_la_linea = string_split(cadena_instruccion_texto, " ");
+    
+    if (tokens_de_la_linea[0] != NULL) {
+        instruccion_formateada.nombre_operacion = strdup(tokens_de_la_linea[0]);
+        
+        if (strcmp(tokens_de_la_linea[0], "NOOP") == 0) instruccion_formateada.identificador_operacion = INST_NOOP;
+        else if (strcmp(tokens_de_la_linea[0], "SET") == 0) instruccion_formateada.identificador_operacion = INST_SET;
+        else if (strcmp(tokens_de_la_linea[0], "MOV_IN") == 0) instruccion_formateada.identificador_operacion = INST_MOV_IN;
+        else if (strcmp(tokens_de_la_linea[0], "MOV_OUT") == 0) instruccion_formateada.identificador_operacion = INST_MOV_OUT;
+        else if (strcmp(tokens_de_la_linea[0], "SUM") == 0) instruccion_formateada.identificador_operacion = INST_SUM;
+        else if (strcmp(tokens_de_la_linea[0], "SUB") == 0) instruccion_formateada.identificador_operacion = INST_SUB;
+        else if (strcmp(tokens_de_la_linea[0], "JNZ") == 0) instruccion_formateada.identificador_operacion = INST_JNZ;
+        else if (strcmp(tokens_de_la_linea[0], "COPY_MEM") == 0) instruccion_formateada.identificador_operacion = INST_COPY_MEM;
+        else if (strcmp(tokens_de_la_linea[0], "MUTEX_CREATE") == 0) instruccion_formateada.identificador_operacion = INST_MUTEX_CREATE;
+        else if (strcmp(tokens_de_la_linea[0], "MUTEX_LOCK") == 0) instruccion_formateada.identificador_operacion = INST_MUTEX_LOCK;
+        else if (strcmp(tokens_de_la_linea[0], "MUTEX_UNLOCK") == 0) instruccion_formateada.identificador_operacion = INST_MUTEX_UNLOCK;
+        else if (strcmp(tokens_de_la_linea[0], "MEM_ALLOC") == 0) instruccion_formateada.identificador_operacion = INST_MEM_ALLOC;
+        else if (strcmp(tokens_de_la_linea[0], "MEM_FREE") == 0) instruccion_formateada.identificador_operacion = INST_MEM_FREE;
+        else if (strcmp(tokens_de_la_linea[0], "SLEEP") == 0) instruccion_formateada.identificador_operacion = INST_SLEEP;
+        else if (strcmp(tokens_de_la_linea[0], "STDOUT") == 0) instruccion_formateada.identificador_operacion = INST_STDOUT;
+        else if (strcmp(tokens_de_la_linea[0], "STDIN") == 0) instruccion_formateada.identificador_operacion = INST_STDIN;
+        else if (strcmp(tokens_de_la_linea[0], "INIT_PROC") == 0) instruccion_formateada.identificador_operacion = INST_INIT_PROC;
+        else if (strcmp(tokens_de_la_linea[0], "EXIT") == 0) instruccion_formateada.identificador_operacion = INST_EXIT;
+
+        if (tokens_de_la_linea[1] != NULL) {
+            instruccion_formateada.argumento_operando_destino = strdup(tokens_de_la_linea[1]);
+            
+            if (tokens_de_la_linea[2] != NULL) {
+                instruccion_formateada.argumento_operando_origen = strdup(tokens_de_la_linea[2]);
+            }
+        }
+    } else {
+        log_error(cpu->logger, "Error: La etapa Decode no pudo identificar la operación.");
+    }
+
+    string_array_destroy(tokens_de_la_linea);
+
+    return instruccion_formateada;
 }
