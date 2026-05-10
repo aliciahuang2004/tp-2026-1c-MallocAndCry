@@ -52,6 +52,7 @@ typedef struct {
     char* puerto_kernel_memory;
     int socket_kernel_memory;
     int socket_io;  // Socket para comunicarse con IO
+    char* planification_algorithm;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -59,6 +60,12 @@ typedef struct {
     int socket_cliente;
     t_log* logger;
 }t_atencion_cliente;
+
+typedef struct {
+    int socket_cliente;
+    int id_cpu;
+    bool libre;
+}t_cpu_conectada;
 
 // funciones de inicializacion
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
@@ -72,16 +79,46 @@ int recibir_operacion(int socket_cliente);
 //funciones de cliente
 void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 
-void iniciarPlanificadorLargoPlazo();
-t_pcb* crear_PCB(char* path, int prioridad);
-void crearProceso(t_kernel_scheduler* ks, char* path, int prioridad);
-void pasarProcesoAReady();
-
 // funciones de IO
 void enviar_peticion_io(int socket_io, t_solicitud_io* solicitud, t_log* logger);
 void* esperar_finalizacion_io(void* args);
 
-void enviarPathKM(char* path, t_kernel_scheduler* ks);
-
+//SYSCALL
+//Crear proceso
+t_pcb* crear_PCB(char* path, int prioridad);
+void crearProceso(t_kernel_scheduler* ks, char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path, t_kernel_scheduler* ks);
+
+//Planificador
+
+extern int pidParaAsignar;
+
+extern t_queue* colaNEW;
+extern t_queue* colaREADY;
+extern t_queue* colaEXEC;
+extern t_queue* colaCPUs;
+
+extern pthread_mutex_t mutex_NEW;
+extern pthread_mutex_t mutex_READY;
+extern pthread_mutex_t mutex_BLOCK;
+extern pthread_mutex_t mutex_EXEC;
+extern pthread_mutex_t  mutex_CPU;
+
+extern sem_t sem_procesosReady;
+extern sem_t sem_procesosExec;
+
+extern char* planificador;
+extern int cpu_socket;
+
+extern t_kernel_scheduler* kernel;
+
+void iniciarPlanificadorLargoPlazo(t_kernel_scheduler* kernel);
+void iniciarPlanificadorLCortoPlazo(t_kernel_scheduler* kernel);
+void iniciarCPU();
+void pasarProcesoNewAReady();
+void pasarProcesoReadyAExec();
+void enviarPIDAcpu(int pid, t_kernel_scheduler* ks);
+t_cpu_conectada* elegirCPU();
+bool hayCpuLibre();
+
 #endif /* KERNEL_SCHEDULER_H*/
