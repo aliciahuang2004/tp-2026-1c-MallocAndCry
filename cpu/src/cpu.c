@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "instrucciones.h"
 
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     t_cpu* cpu = malloc(sizeof(t_cpu));
