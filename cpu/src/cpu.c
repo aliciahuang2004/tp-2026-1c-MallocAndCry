@@ -210,12 +210,16 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
 
         char* cadena_leida = fetch_instruccion(cpu, contexto);
+
+        //sumo uno al PC
+        if(cadena_leida != NULL){
+            contexto ->registros.PC +=1;
+        }
         
         //DECODE
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
         
-        log_debug(cpu->logger, "Decodificado con éxito: %s", instruccion_actual.nombre_operacion);
-        
+        log_info(cpu->logger, "## PID: %d - Ejecutando: %s", contexto->pid, cadena_leida);
         //EXECUTE
 
         //CHECK INTERRUPT 

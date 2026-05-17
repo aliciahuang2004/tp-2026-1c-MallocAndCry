@@ -15,7 +15,7 @@ void ejecutar_SET(t_registros* reg, char* registro_destino, uint32_t valor) {
 
 // SUM
 void ejecutar_SUM(t_registros* reg, char* registro_destino, char* registro_origen) {
-
+}
 
 // SUB
 void ejecutar_SUB(t_registros* reg, char* registro_destino, char* registro_origen) {
