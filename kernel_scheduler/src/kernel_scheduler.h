@@ -120,5 +120,5 @@ void pasarProcesoReadyAExec();
 void enviarPIDAcpu(int pid, t_kernel_scheduler* ks);
 t_cpu_conectada* elegirCPU();
 bool hayCpuLibre();
-
+void* loop_corto_plazo(void* args);
 #endif /* KERNEL_SCHEDULER_H*/

@@ -66,16 +66,16 @@ void pasarProcesoNewAReady(){
 
 void pasarProcesoReadyAExec(){
 
-    t_pcb* pcb;
+    t_pcb* pcb = NULL;
 
     pthread_mutex_lock(&mutex_READY);
     if (!queue_is_empty(colaREADY)){
         
-        if (planificador == "FIFO"){
+        if (strcmp(planificador, "FIFO") == 0){
             pcb = queue_pop(colaREADY);
             pthread_mutex_unlock(&mutex_READY);
 
-        }else if (planificador == "RR"){
+        }else if (strcmp(planificador, "RR") == 0){
             //TO DO
             // ELEGIR PCB A SACAR
             // ENVIAR PCB A CPU
@@ -85,18 +85,26 @@ void pasarProcesoReadyAExec(){
     }else{
         pthread_mutex_unlock(&mutex_READY);
     }
-    enviarPIDAcpu(pcb->pid, kernel);
+    
+    if (pcb != NULL) {
+        enviarPIDAcpu(pcb->pid, kernel);
+    }
     // agregar a cola exec
 }
 
 void enviarPIDAcpu(int pid, t_kernel_scheduler* ks){
     
+    t_cpu_conectada* cpu = elegirCPU();
+    
+    if (cpu == NULL) {
+        log_error(ks->logger, "No hay CPUs disponibles para procesar el PID %d", pid);
+        return;
+    }
+    
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(PROCESO_A_PROCESAR, buffer);
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
-
-    t_cpu_conectada* cpu = elegirCPU();
 
     enviar_paquete(paquete, cpu->socket_cliente, ks->logger);
 
@@ -105,8 +113,10 @@ void enviarPIDAcpu(int pid, t_kernel_scheduler* ks){
 
 t_cpu_conectada* elegirCPU(){
 
+    pthread_mutex_lock(&mutex_CPU);
+    
     int cantidad = queue_size(colaCPUs);
-    t_cpu_conectada* cpu_elegida = malloc(sizeof(t_cpu_conectada));
+    t_cpu_conectada* cpu_elegida = NULL;
 
     t_queue* colaAux = queue_create();
 
@@ -124,8 +134,11 @@ t_cpu_conectada* elegirCPU(){
     }
     queue_destroy(colaAux);
 
-    cpu_elegida -> libre = false;
-    queue_push(colaCPUs,cpu_elegida);
+    if (cpu_elegida != NULL) {
+        cpu_elegida->libre = false;
+        queue_push(colaCPUs, cpu_elegida); 
+    }
+    pthread_mutex_unlock(&mutex_CPU);
 
     return cpu_elegida;
 }
@@ -133,4 +146,13 @@ t_cpu_conectada* elegirCPU(){
 bool hayCpuLibre(){
 
     return 1;
+}
+void* loop_corto_plazo(void* args) {
+    log_info(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
+    
+    while(1) {
+        sem_wait(&sem_procesosReady); 
+        pasarProcesoReadyAExec();
+    }
+    return NULL;
 }

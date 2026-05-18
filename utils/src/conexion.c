@@ -57,29 +57,46 @@ int iniciar_servidor(const char* puerto)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	getaddrinfo(NULL, puerto, &hints, &servinfo);
+	int result = getaddrinfo(NULL, puerto, &hints, &servinfo);
+	if (result != 0) {
+		fprintf(stderr, "Error en getaddrinfo para puerto %s: %s\n", puerto, gai_strerror(result));
+		return -1;
+	}
 
 	int socket_servidor = socket(servinfo->ai_family,
-								 servinfo->ai_socktype,
-								 servinfo->ai_protocol);
+						 servinfo->ai_socktype,
+						 servinfo->ai_protocol);
+	if (socket_servidor == -1) {
+		fprintf(stderr, "Error al crear socket servidor: %s\n", strerror(errno));
+		freeaddrinfo(servinfo);
+		return -1;
+	}
 
-	// permite que varios sockets se puedan bindear a un puerto al mismo tiempo,
-	// siempre y cuando pertenezcan al mismo usuario
-	// setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
+	if (bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+		fprintf(stderr, "Error al bindear socket servidor: %s\n", strerror(errno));
+		close(socket_servidor);
+		freeaddrinfo(servinfo);
+		return -1;
+	}
 
-	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
-	listen(socket_servidor, SOMAXCONN);
+	if (listen(socket_servidor, SOMAXCONN) == -1) {
+		fprintf(stderr, "Error en listen del socket servidor: %s\n", strerror(errno));
+		close(socket_servidor);
+		freeaddrinfo(servinfo);
+		return -1;
+	}
 
 	freeaddrinfo(servinfo);
-	// log_trace(logger, "Listo para escuchar a mi cliente");
-
 	return socket_servidor;
 }
 
 int esperar_cliente(int socket_servidor)
 {
-	// Aceptamos un nuevo cliente
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
-
 	return socket_cliente;
+}
+
+void liberar_conexion(int socket_cliente)
+{
+	close(socket_cliente);
 }

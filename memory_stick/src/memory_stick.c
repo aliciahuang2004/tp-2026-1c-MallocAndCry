@@ -1,4 +1,5 @@
 #include "memory_stick.h"
+#include <unistd.h>
 
 t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     t_memory_stick* ms = malloc(sizeof(t_memory_stick));
@@ -92,6 +93,11 @@ void enviar_handshake(t_memory_stick* ms){
 }
 
 void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
+
+    if (servidor_fd < 0) {
+        log_error(ms->logger, "Servidor inválido en rutina_recepcion: %d", servidor_fd);
+        return;
+    }
 
     pthread_t hilo_exec;
     int temp_socket_cpu;
