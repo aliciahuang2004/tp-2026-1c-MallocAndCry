@@ -179,18 +179,18 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     if(cod_op == CONTEXT_RESPONSE) {
         contexto_recibido = malloc(sizeof(t_contexto));
         //TODO aca deberia recibir tmb los registros, consultar qué datos mas deberia recibir para el contexto
-        contexto_recibido->pid= pid; //el pid lo tengo
-        contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 1); 
-        contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 2);
-        contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 3);
-        contexto_recibido->registros.CX = *(uint8_t*)list_get(respuesta, 4);
-        contexto_recibido->registros.DX = *(uint8_t*)list_get(respuesta, 5);
-        contexto_recibido->registros.EAX = *(uint32_t*)list_get(respuesta, 6);
-        contexto_recibido->registros.EBX = *(uint32_t*)list_get(respuesta, 7);
-        contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 8);
-        contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 9);
-        contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 10);
-        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 11);
+        contexto_recibido->pid = *(int*)list_get(respuesta, 1);
+        contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 2); 
+        contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 3);
+        contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 4);
+        contexto_recibido->registros.CX = *(uint8_t*)list_get(respuesta, 5);
+        contexto_recibido->registros.DX = *(uint8_t*)list_get(respuesta, 6);
+        contexto_recibido->registros.EAX = *(uint32_t*)list_get(respuesta, 7);
+        contexto_recibido->registros.EBX = *(uint32_t*)list_get(respuesta, 8);
+        contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 9);
+        contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 10);
+        contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 11);
+        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 12);
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
