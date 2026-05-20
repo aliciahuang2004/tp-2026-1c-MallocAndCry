@@ -5,10 +5,3 @@ JNZ AX 4
 SUM AX BX
 EXIT
 
-
-./bin/kernel_scheduler kernel_scheduler.config hola.txt
-./bin/memory_stick ms1.config 1024 1
-./bin/memory_stick ms2.config 2048 2
-./bin/cpu cpu.config 1
-./bin/kernel_memory kernel_memory.config 
-valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config

@@ -222,13 +222,16 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         log_info(cpu->logger, "## PID: %d - Ejecutando: %s", contexto->pid, cadena_leida);
         //EXECUTE
 
+        
+
+
         //CHECK INTERRUPT 
         free(cadena_leida);
         if(instruccion_actual.nombre_operacion) free(instruccion_actual.nombre_operacion);
         if(instruccion_actual.argumento_operando_destino) free(instruccion_actual.argumento_operando_destino);
         if(instruccion_actual.argumento_operando_origen) free(instruccion_actual.argumento_operando_origen);
 
-        ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
+       ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
     }
 } 
 
