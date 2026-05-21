@@ -86,5 +86,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid);
 void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto);
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto);
-
+bool hay_interrupcion_pendiente(int socket_fd);
+void enviar_contexto_a_memoria(t_cpu* cpu, t_contexto* contexto);
+void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo);
 #endif

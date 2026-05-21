@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "instrucciones.h"
+#include <sys/select.h>
 
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     t_cpu* cpu = malloc(sizeof(t_cpu));
@@ -190,7 +191,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 9);
         contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 10);
         contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 11);
-        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 12);
+        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 1);
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
@@ -226,6 +227,37 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
 
         //CHECK INTERRUPT 
+        if (hay_interrupcion_pendiente(cpu->socket_kernel_scheduler)) {
+            
+            t_list* paquete_interrupcion = recibir_paquete(cpu->socket_kernel_scheduler);
+            
+            if (paquete_interrupcion) {
+                int codigo_interrupcion = *(int*)list_get(paquete_interrupcion, 0);
+
+                log_info(cpu->logger, "## Interrupción recibida");
+
+                enviar_contexto_a_memoria(cpu, contexto);
+
+                if (codigo_interrupcion == PROCESO_DESALOJADO_QUANTUM) {
+                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_QUANTUM);
+                } 
+                else if (codigo_interrupcion == PROCESO_DESALOJADO_PRIORIDAD) {
+                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_PRIORIDAD);
+                }
+                else if (codigo_interrupcion == PROCESO_DESALOJADO_COMPACTACION) {
+                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_COMPACTACION);
+                }
+                else {
+                     log_warning(cpu->logger, "Interrupción desconocida (%d). Se desaloja por precaución.", codigo_interrupcion);
+                     devolver_proceso_interrumpido(cpu, contexto->pid, codigo_interrupcion); 
+                }
+
+                ejecutando = 0; 
+                list_destroy_and_destroy_elements(paquete_interrupcion, free);
+            }
+        }
+
+
         free(cadena_leida);
         if(instruccion_actual.nombre_operacion) free(instruccion_actual.nombre_operacion);
         if(instruccion_actual.argumento_operando_destino) free(instruccion_actual.argumento_operando_destino);
@@ -324,4 +356,58 @@ t_instruccion_decodificada decodificar_instruccion(t_cpu* cpu, char* cadena_inst
     string_array_destroy(tokens_de_la_linea);
 
     return instruccion_formateada;
+}
+
+bool hay_interrupcion_pendiente(int socket_fd) {
+    fd_set read_fds;
+    FD_ZERO(&read_fds);
+    FD_SET(socket_fd, &read_fds);
+
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+
+    int result = select(socket_fd + 1, &read_fds, NULL, NULL, &timeout);
+    return (result > 0 && FD_ISSET(socket_fd, &read_fds));
+}
+
+void enviar_contexto_a_memoria(t_cpu* cpu, t_contexto* contexto) {
+   
+    t_paquete* paquete = crear_paquete(ACTUALIZAR_CONTEXTO, crear_buffer());
+
+    agregar_a_paquete(paquete, &(contexto->pid), sizeof(int));
+    agregar_a_paquete(paquete, &(contexto->registros.PC), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.AX), sizeof(uint8_t));
+    agregar_a_paquete(paquete, &(contexto->registros.BX), sizeof(uint8_t));
+    agregar_a_paquete(paquete, &(contexto->registros.CX), sizeof(uint8_t));
+    agregar_a_paquete(paquete, &(contexto->registros.DX), sizeof(uint8_t));
+    agregar_a_paquete(paquete, &(contexto->registros.EAX), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.EBX), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.ECX), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.EDX), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.SI), sizeof(uint32_t));
+    agregar_a_paquete(paquete, &(contexto->registros.DI), sizeof(uint32_t));
+
+    if (enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger) == -1) {
+        log_error(cpu->logger, "Error al enviar el contexto actualizado a Kernel Memory para PID %d", contexto->pid);
+    } else {
+        log_debug(cpu->logger, "Contexto actualizado enviado a Kernel Memory para PID %d", contexto->pid);
+    }
+
+    eliminar_paquete(paquete);
+}
+
+void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo) {
+
+    t_paquete* paquete = crear_paquete(motivo_desalojo, crear_buffer());
+
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+
+    if (enviar_paquete(paquete, cpu->socket_kernel_scheduler, cpu->logger) == -1) {
+        log_error(cpu->logger, "Error al devolver el proceso %d al Kernel Scheduler", pid);
+    } else {
+        log_info(cpu->logger, "Proceso %d devuelto al Kernel Scheduler (Motivo: %d)", pid, motivo_desalojo);
+    }
+
+    eliminar_paquete(paquete);
 }
