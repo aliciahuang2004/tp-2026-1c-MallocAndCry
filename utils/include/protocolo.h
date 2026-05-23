@@ -35,7 +35,7 @@ typedef enum{
     STDOUT,
     STDIN,
     INIT_PROC,
-    EXIT,
+    EXIT_PROC,
     // Operaciones de IO
     IO_REQUEST,  // Solicitud de operación de IO de KS a IO
     IO_OK,       // Confirmación de finalización de IO al KS
