@@ -94,7 +94,6 @@ void pasarProcesoReadyAExec(){
 
 void ejecutarPorFIFO(){
     t_cpu_conectada* cpuElegida= elegirCPULibre();
-    atender_cpu(cpuElegida->socket_cliente);
     if(cpuElegida != NULL){
         pthread_mutex_lock(&mutex_READY);
         if (!queue_is_empty(colaREADY)){
@@ -113,12 +112,11 @@ void ejecutarPorFIFO(){
             pthread_mutex_unlock(&mutex_READY);
         } 
     }
-    
+    atender_cpu(cpuElegida->socket_cliente);
 }
 
 void ejecutarPorRR(){
     t_cpu_conectada* cpuElegida= elegirCPULibre();
-    atender_cpu(cpuElegida->socket_cliente);
     if(cpuElegida != NULL){
         pthread_mutex_lock(&mutex_READY);
         if (!queue_is_empty(colaREADY)){
@@ -144,6 +142,7 @@ void ejecutarPorRR(){
             pthread_mutex_unlock(&mutex_READY);
         } 
     }
+    atender_cpu(cpuElegida->socket_cliente);
 }
 
 t_cpu_conectada* elegirCPULibre(){
@@ -318,7 +317,7 @@ void atender_cpu(int socket_cpu) {
                 log_info(kernel->logger, "## CPU solicita creación de proceso: %s (prioridad %d)", path, prioridad);
                 crearProceso(path,prioridad);
                 break;
-            case EXIT:
+            case EXIT_PROC:
                 log_info(kernel->logger, "finalizar proceso");
                 break;
             default:

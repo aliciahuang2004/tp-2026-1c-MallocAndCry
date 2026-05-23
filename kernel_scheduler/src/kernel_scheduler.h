@@ -129,4 +129,5 @@ void ejecutarPorRR();
 void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPID(int pid);
+void atender_cpu(int socket_cpu);
 #endif /* KERNEL_SCHEDULER_H*/
