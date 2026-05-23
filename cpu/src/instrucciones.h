@@ -10,10 +10,10 @@ void* obtener_registro(t_registros* reg, char* nombre_registro);
 uint32_t leer_valor_registro(t_registros* registros, char* nombre_registro);
 
 void ejecutar_NOOP(t_cpu* cpu, t_contexto* ctx);
-void ejecutar_SET(t_registros* reg, char* registro_destino, uint32_t valor);
-void ejecutar_SUM(t_registros* reg, char* registro_destino, char* registro_origen);
-void ejecutar_SUB(t_registros* reg, char* registro_destino, char* registro_origen);
-void ejecutar_JNZ(t_registros* reg, char* registro_evaluado, uint32_t nueva_instruccion);
+void ejecutar_SET(t_cpu* cpu,t_registros* reg, char* registro_destino, uint32_t valor);
+void ejecutar_SUM(t_cpu* cpu,t_registros* reg, char* registro_destino, char* registro_origen);
+void ejecutar_SUB(t_cpu* cpu,t_registros* reg, char* registro_destino, char* registro_origen);
+void ejecutar_JNZ(t_cpu* cpu,t_registros* reg, char* registro_evaluado, uint32_t nueva_instruccion);
 
 // instrucciones de memoria(usaran la MMU)
 int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos);

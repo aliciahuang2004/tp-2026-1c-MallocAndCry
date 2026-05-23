@@ -427,21 +427,21 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
             
         case INST_SET: {
             uint32_t valor = (uint32_t)atoi(instruccion.argumento_operando_origen);
-            ejecutar_SET(&(contexto->registros), instruccion.argumento_operando_destino, valor);
+            ejecutar_SET(cpu,&(contexto->registros), instruccion.argumento_operando_destino, valor);
             break;
         }
             
         case INST_SUM:
-            ejecutar_SUM(&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
+            ejecutar_SUM(cpu,&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
             break;
             
         case INST_SUB:
-            ejecutar_SUB(&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
+            ejecutar_SUB(cpu,&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
             break;
 
         case INST_JNZ: {
             uint32_t nueva_instruccion = (uint32_t)atoi(instruccion.argumento_operando_origen);
-            ejecutar_JNZ(&(contexto->registros), instruccion.argumento_operando_destino, nueva_instruccion);
+            ejecutar_JNZ(cpu,&(contexto->registros), instruccion.argumento_operando_destino, nueva_instruccion);
             break;
         }
         

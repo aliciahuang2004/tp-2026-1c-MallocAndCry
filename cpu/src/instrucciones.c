@@ -47,7 +47,7 @@ void ejecutar_NOOP(t_cpu* cpu, t_contexto* ctx) {
 }
 
 // SET
-void ejecutar_SET(t_registros* reg, char* registro_destino, uint32_t valor) {
+void ejecutar_SET(t_cpu* cpu,t_registros* reg, char* registro_destino, uint32_t valor) {
     void* reg_ptr = obtener_registro(reg, registro_destino);
     if (reg_ptr != NULL) {
         if (es_registro_8bits(registro_destino)) {
@@ -60,7 +60,7 @@ void ejecutar_SET(t_registros* reg, char* registro_destino, uint32_t valor) {
 }
 
 // SUM
-void ejecutar_SUM(t_registros* reg, char* registro_destino, char* registro_origen) {
+void ejecutar_SUM(t_cpu* cpu,t_registros* reg, char* registro_destino, char* registro_origen) {
     uint32_t valor_origen = leer_valor_registro(reg, registro_origen);
     void* reg_dest_ptr = obtener_registro(reg, registro_destino);
     
@@ -75,7 +75,7 @@ void ejecutar_SUM(t_registros* reg, char* registro_destino, char* registro_orige
 }
 
 // SUB
-void ejecutar_SUB(t_registros* reg, char* registro_destino, char* registro_origen) {
+void ejecutar_SUB(t_cpu* cpu,t_registros* reg, char* registro_destino, char* registro_origen) {
    uint32_t valor_origen = leer_valor_registro(reg, registro_origen);
     void* reg_dest_ptr = obtener_registro(reg, registro_destino);
     
@@ -90,7 +90,7 @@ void ejecutar_SUB(t_registros* reg, char* registro_destino, char* registro_orige
 }
 
 // JNZ
-void ejecutar_JNZ(t_registros* reg, char* registro_evaluado, uint32_t nueva_instruccion) {
+void ejecutar_JNZ(t_cpu* cpu,t_registros* reg, char* registro_evaluado, uint32_t nueva_instruccion) {
     uint32_t valor = leer_valor_registro(reg, registro_evaluado);
     // Solo actualiza el PC si el registro evaluado es distinto de 0
     if (valor != 0) {
