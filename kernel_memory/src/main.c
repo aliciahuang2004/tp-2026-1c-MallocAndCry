@@ -1,4 +1,5 @@
 #include "kernel_memory.h"
+#include "conexiones.h"
 
 int main(int argc, char* argv[]) {
 
@@ -18,7 +19,7 @@ int main(int argc, char* argv[]) {
     log_debug(kernel_memory->logger, "Servidor listo para recibir una conexion - FD: %i / puerto: %s" , kernel_memory_fd, kernel_memory->puerto_escucha);
 
     lista_ms = list_create();
-    lista_contextos = list_create();
+    tabla_contextos = dictionary_create();
 
     esperarConexiones(kernel_memory,kernel_memory_fd);
 

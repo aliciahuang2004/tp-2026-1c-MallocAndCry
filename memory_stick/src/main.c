@@ -27,11 +27,15 @@ int main(int argc, char* argv[]) {
         //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
        
         int servidor_fd = iniciar_servidor(ms->puerto_escucha);
-        
-        log_info(ms->logger,"Servidor Memory Stick ID:%d listo,esperando peticiones de CPUs..",ms->id);
+        if (servidor_fd == -1) {
+            log_error(ms->logger, "No se pudo iniciar el servidor Memory Stick en puerto %s", ms->puerto_escucha);
+            destruir_memory_stick(ms);
+            return EXIT_FAILURE;
+        }
 
-        rutina_recepcion(ms,servidor_fd); //CREA HILOS PARA ATENDER A CADA CPU
+        log_info(ms->logger,"Servidor Memory Stick ID:%d listo, esperando peticiones de CPUs..", ms->id);
 
+        rutina_recepcion(ms, servidor_fd); //CREA HILOS PARA ATENDER A CADA CPU
 
         destruir_memory_stick(ms);
    

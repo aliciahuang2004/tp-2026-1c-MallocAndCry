@@ -8,14 +8,15 @@ int main(int argc, char* argv[]) {
 
     t_cpu* cpu = iniciar_cpu(argv[1], argv[2]);
 
-    if (conectar_kernel_memory(cpu) == -1) {
-        log_error(cpu->logger, "Error en la conexion con Kernel Memory. Terminando programa."); 
+    // Conectamos primero al Kernel Scheduler y enviamos el handshake inmediato.
+    if (conectar_kernel_scheduler(cpu) == -1) {
+        log_error(cpu->logger, "Error en la conexion con Kernel Scheduler. Terminando programa.");
         liberar_cpu(cpu);
         return -1;
     }
 
-    if (conectar_kernel_scheduler(cpu) == -1) {
-        log_error(cpu->logger, "Error en la conexion con kernel scheduler. Terminando programa.");
+    if (conectar_kernel_memory(cpu) == -1) {
+        log_error(cpu->logger, "Error en la conexion con Kernel Memory. Terminando programa."); 
         liberar_cpu(cpu);
         return -1;
     }
