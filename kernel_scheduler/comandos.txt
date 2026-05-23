@@ -4,3 +4,11 @@
 ./bin/cpu cpu.config 1
 ./bin/kernel_memory kernel_memory.config 
 valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
+
+pkill -f kernel_memory
+pkill -f kernel_scheduler
+pkill -f cpu
+fuser -k 9001/tcp
+fuser -k 9002/tcp
+
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
