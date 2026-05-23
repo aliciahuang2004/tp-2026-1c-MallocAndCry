@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #define COLOR_VERDE "\033[32m"
 
+extern char* pathInicial;
 typedef enum{
     NEW,
     READY,
@@ -53,6 +54,8 @@ typedef struct {
     int socket_kernel_memory;
     int socket_io;  // Socket para comunicarse con IO
     char* planification_algorithm;
+    int rr_quantum;
+    bool procesoInicialCreado;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -65,6 +68,7 @@ typedef struct {
     int socket_cliente;
     int id_cpu;
     bool libre;
+    int pidEjecutando;
 }t_cpu_conectada;
 
 // funciones de inicializacion
@@ -86,8 +90,8 @@ void* esperar_finalizacion_io(void* args);
 //SYSCALL
 //Crear proceso
 t_pcb* crear_PCB(char* path, int prioridad);
-void crearProceso(t_kernel_scheduler* ks, char* path, int prioridad);
-void enviarPathYPidKM(int pid, char* path, t_kernel_scheduler* ks);
+void crearProceso(char* path, int prioridad);
+void enviarPathYPidKM(int pid, char* path);
 
 //Planificador
 
@@ -106,19 +110,23 @@ extern pthread_mutex_t  mutex_CPU;
 
 extern sem_t sem_procesosReady;
 extern sem_t sem_procesosExec;
+extern sem_t sem_hayCPUs;
 
-extern char* planificador;
 extern int cpu_socket;
 
 extern t_kernel_scheduler* kernel;
 
-void iniciarPlanificadorLargoPlazo(t_kernel_scheduler* kernel);
-void iniciarPlanificadorLCortoPlazo(t_kernel_scheduler* kernel);
+void iniciarPlanificadorLargoPlazo();
+void iniciarPlanificadorLCortoPlazo();
 void iniciarCPU();
 void pasarProcesoNewAReady();
 void pasarProcesoReadyAExec();
-void enviarPIDAcpu(int pid, t_kernel_scheduler* ks);
-t_cpu_conectada* elegirCPU();
-bool hayCpuLibre();
+void enviarPIDAcpu(int pid, t_cpu_conectada* cpu);
+t_cpu_conectada* elegirCPULibre();
 void* loop_corto_plazo(void* args);
+void ejecutarPorFIFO();
+void ejecutarPorRR();
+void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
+void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
+t_pcb* buscarPcbporPID(int pid);
 #endif /* KERNEL_SCHEDULER_H*/

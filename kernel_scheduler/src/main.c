@@ -1,5 +1,7 @@
 #include "kernel_scheduler.h"
 
+char* pathInicial;
+
 int main(int argc, char* argv[]) {
     
     if (argc != 3)
@@ -18,6 +20,8 @@ int main(int argc, char* argv[]) {
     iniciarPlanificadorLargoPlazo(kernel_scheduler);
     iniciarPlanificadorLCortoPlazo(kernel_scheduler);
     iniciarCPU();
+
+    pathInicial = argv[2];
     // ====================================================================
     pthread_t hilo_corto_plazo;
     if (pthread_create(&hilo_corto_plazo, NULL, loop_corto_plazo, NULL) != 0) {
