@@ -221,12 +221,18 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
         
         log_info(cpu->logger, "## PID: %d - Ejecutando: %s", contexto->pid, cadena_leida);
+
         //EXECUTE
 
-        
+        execute(cpu, contexto, instruccion_actual);
 
-
-        //CHECK INTERRUPT 
+        //  SI FUE UNA SYSCALL, EL PROCESO SE DESALOJA. CORTAMOS EL CICLO.
+        if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
+            instruccion_actual.identificador_operacion <= INST_EXIT) {
+            ejecutando = 0;
+        }
+        //  SI NO FUE SYSCALL, CHEQUEAMOS SI HAY INTERRUPCIONES PENDIENTES
+        else  //CHECK INTERRUPT 
         if (hay_interrupcion_pendiente(cpu->socket_kernel_scheduler)) {
             
             t_list* paquete_interrupcion = recibir_paquete(cpu->socket_kernel_scheduler);
@@ -263,7 +269,7 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
         if(instruccion_actual.argumento_operando_destino) free(instruccion_actual.argumento_operando_destino);
         if(instruccion_actual.argumento_operando_origen) free(instruccion_actual.argumento_operando_origen);
 
-       ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
+       //ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
     }
 } 
 
