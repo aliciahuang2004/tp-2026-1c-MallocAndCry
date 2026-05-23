@@ -25,6 +25,17 @@ typedef enum{
     MS_HANDSHAKE,
     KERNEL_MEMORY_HANDSHAKE,
 
+    //SYSCALL
+    MUTEX_CREATE,
+    MUTEX_LOCK,
+    MUTEX_UNLOCK,
+    MEM_ALLOC,
+    MEM_FREE,
+    SLEEP,
+    STDOUT,
+    STDIN,
+    INIT_PROC,
+    EXIT,
     // Operaciones de IO
     IO_REQUEST,  // Solicitud de operación de IO de KS a IO
     IO_OK,       // Confirmación de finalización de IO al KS

@@ -17,7 +17,9 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->puerto_escucha = config_get_string_value(kernel_scheduler->config, "PUERTO_ESCUCHA");
     kernel_scheduler->ip_kernel_memory = config_get_string_value(kernel_scheduler->config, "IP_KERNEL_MEMORY");
     kernel_scheduler->puerto_kernel_memory = config_get_string_value(kernel_scheduler->config, "PUERTO_KERNEL_MEMORY");
-     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
+    kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
+    kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
+    kernel_scheduler->procesoInicialCreado = false;
     log_debug(kernel_scheduler->logger, "El kernel scheduler se inicializo correctamente");
     
     return kernel_scheduler;
@@ -126,12 +128,17 @@ void* atender_cliente_scheduler(void* arg) {
                     nuevaCPU->socket_cliente = datos->socket_cliente;
                     nuevaCPU->id_cpu = id_cpu;
                     nuevaCPU->libre = true;
+                    nuevaCPU->pidEjecutando = -1; // no ejecuta ninguno
                     pthread_mutex_lock(&mutex_CPU);
                     queue_push(colaCPUs, nuevaCPU);
                     pthread_mutex_unlock(&mutex_CPU);
 
                     log_info(logger, "CPU registrada con éxito en colaCPUs. Creando proceso inicial...");
-                    crearProceso(kernel, "hola.txt", 0);
+                    if(!kernel->procesoInicialCreado){
+                        crearProceso(pathInicial, 0);
+                        kernel->procesoInicialCreado = true; 
+                    }
+                    sem_post(&sem_hayCPUs);
                 }
         
                 break;
