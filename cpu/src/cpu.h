@@ -44,6 +44,7 @@ typedef struct {// consultar
     int pid;
     t_registros registros;
 } t_contexto;
+
 typedef enum {
     INST_NOOP, 
     INST_SET, 

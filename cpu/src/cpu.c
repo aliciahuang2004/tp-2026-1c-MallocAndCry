@@ -411,3 +411,65 @@ void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo)
 
     eliminar_paquete(paquete);
 }
+
+void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+    
+    switch (instruccion.identificador_operacion) {
+        case INST_NOOP:
+            ejecutar_NOOP(cpu, contexto);
+            break;
+            
+        case INST_SET: {
+            uint32_t valor = (uint32_t)atoi(instruccion.argumento_operando_origen);
+            ejecutar_SET(&(contexto->registros), instruccion.argumento_operando_destino, valor);
+            break;
+        }
+            
+        case INST_SUM:
+            ejecutar_SUM(&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
+            break;
+            
+        case INST_SUB:
+            ejecutar_SUB(&(contexto->registros), instruccion.argumento_operando_destino, instruccion.argumento_operando_origen);
+            break;
+
+        case INST_JNZ: {
+            uint32_t nueva_instruccion = (uint32_t)atoi(instruccion.argumento_operando_origen);
+            ejecutar_JNZ(&(contexto->registros), instruccion.argumento_operando_destino, nueva_instruccion);
+            break;
+        }
+        
+        // instrucciones de memoria
+        case INST_MOV_IN:
+            ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
+            break;
+
+        case INST_MOV_OUT:
+            ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
+            break;
+
+        case INST_COPY_MEM:
+            ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
+            break;
+
+        //syscalls
+        case INST_MUTEX_CREATE:
+        case INST_MUTEX_LOCK:
+        case INST_MUTEX_UNLOCK:
+        case INST_MEM_ALLOC:
+        case INST_MEM_FREE:
+        case INST_SLEEP:
+        case INST_STDOUT:
+        case INST_STDIN:
+        case INST_INIT_PROC:
+        case INST_EXIT:
+            // aca deberia avisarle a kernel que ejecute la syscall
+            ejecutar_SYSCALL(cpu, contexto, instruccion);
+            break;
+
+        case INST_DESCONOCIDA:
+        default:
+            log_debug(cpu->logger, "Instrucción desconocida o no implementada: %s", instruccion.nombre_operacion);
+            break;
+    }
+}
