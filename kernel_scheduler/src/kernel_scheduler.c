@@ -53,6 +53,10 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    if(kernel_scheduler->puerto_kernel_memory){
     free(kernel_scheduler->puerto_kernel_memory);
    }
+   if(kernel_scheduler->planification_algorithm){
+    free(kernel_scheduler->planification_algorithm);
+   }
+   
    free(kernel_scheduler);
 
 }

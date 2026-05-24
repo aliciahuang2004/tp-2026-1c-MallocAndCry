@@ -100,6 +100,13 @@ void* esperar_finalizacion_io(void* args);
 t_pcb* crear_PCB(char* path, int prioridad);
 void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
+void crearMutex(char* nombreMutex);
+void tomarMutex(int pidSolicitaSyscall,char* nombreMutex);
+void liberarMutex(int pidLiberaMutex,char* nombreMutex);
+void hacerSleep(int pid,int tiempo_ms);
+void hacerStdOut(int pidSolicitaSyscall,int direccionALeer, int tamanioLectura);
+void hacerStdIn(int pidSolicitaSyscall,int direccionAEscribir, int tamanioLectura);
+void finalizarProceso();
 
 //Planificador
 
@@ -107,17 +114,23 @@ extern int pidParaAsignar;
 
 extern t_queue* colaNEW;
 extern t_queue* colaREADY;
+extern t_queue* colaREADY_SUSP;
 extern t_queue* colaEXEC;
+extern t_queue* colaBLOCK;
+extern t_queue* colaBLOCK_SUSP;
+extern t_queue* colaEXIT;
 extern t_queue* colaCPUs;
 
 extern pthread_mutex_t mutex_NEW;
 extern pthread_mutex_t mutex_READY;
+extern pthread_mutex_t mutex_READY_SUSP;
 extern pthread_mutex_t mutex_BLOCK;
+extern pthread_mutex_t mutex_BLOCK_SUSP;
 extern pthread_mutex_t mutex_EXEC;
-extern pthread_mutex_t  mutex_CPU;
+extern pthread_mutex_t mutex_EXIT;
+extern pthread_mutex_t mutex_CPU;
 
 extern sem_t sem_procesosReady;
-extern sem_t sem_procesosExec;
 extern sem_t sem_hayCPUs;
 
 extern int cpu_socket;

@@ -4,17 +4,23 @@ int pidParaAsignar = 0;
 
 t_queue* colaNEW;
 t_queue* colaREADY;
+t_queue* colaREADY_SUSP;
 t_queue* colaEXEC;
+t_queue* colaBLOCK;
+t_queue* colaBLOCK_SUSP;
+t_queue* colaEXIT;
 t_queue* colaCPUs;
 
 pthread_mutex_t mutex_NEW;
 pthread_mutex_t mutex_READY;
+pthread_mutex_t mutex_READY_SUSP;
 pthread_mutex_t mutex_BLOCK;
+pthread_mutex_t mutex_BLOCK_SUSP;
 pthread_mutex_t mutex_EXEC;
+pthread_mutex_t mutex_EXIT;
 pthread_mutex_t mutex_CPU;
 
 sem_t sem_procesosReady;
-sem_t sem_procesosExec;
 sem_t sem_hayCPUs;
 
 t_kernel_scheduler* kernel;
@@ -32,10 +38,11 @@ void iniciarPlanificadorLargoPlazo(){
 void iniciarPlanificadorLCortoPlazo(){
     //colaREADY inicia con planificador largo
     colaEXEC = queue_create();
+    colaBLOCK = queue_create();
 
     pthread_mutex_init(&mutex_EXEC, NULL);
+    pthread_mutex_init(&mutex_BLOCK, NULL);
 
-    sem_init(&sem_procesosExec,0,0);
 }
 
 void iniciarCPU(){
@@ -72,7 +79,6 @@ void* loop_corto_plazo(void* args) {
         sem_wait(&sem_hayCPUs);
         sem_wait(&sem_procesosReady);
         pasarProcesoReadyAExec();
-        log_info(kernel->logger,"loop");
     }
     return NULL;
 }
@@ -129,8 +135,8 @@ void ejecutarPorRR(){
             pthread_mutex_unlock(&mutex_EXEC);
             enviarPIDAcpu(pcb->pid,cpuElegida);
             log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcb->pid);
-            log_info(kernel->logger,"INICIA QUANTUM");
             
+            log_info(kernel->logger,"INICIA QUANTUM");
             usleep(kernel->rr_quantum * 1000);
             log_info(kernel->logger,"FINALIZA QUANTUM");
             
@@ -293,15 +299,7 @@ void atender_cpu(int socket_cpu) {
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_CREATE>",pidSolicitaSyscall);
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
-                t_mutex* nuevoMutex = malloc(sizeof(t_mutex));
-                nuevoMutex->nombreMutex = nombreMutex;
-                nuevoMutex->bloqueado = false;
-                nuevoMutex->pidAsignado = -1;
-                pthread_mutex_init(&nuevoMutex->nombreMutex,NULL);
-
-                //AGREGARLO PARA MANEJAR: COLAS? LISTAS?
-
-                log_info(kernel->logger, "## Mutex %s creado correctamente", nuevoMutex->nombreMutex);
+                crearMutex(nombreMutex);
                 */
                 break;
             case MUTEX_LOCK:
@@ -309,19 +307,7 @@ void atender_cpu(int socket_cpu) {
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 
-                //BUSCAR MUTEX SEGUN NOMBRE
-
-                if(!mutex->bloqueado){
-                    mutex->bloqueado = true;
-                    mutex->pidAsignado = pidPideMutex;
-
-                    log_info(kernel->logger,"## (<%d>) Toma el Mutex <%s>",pidSolicitaSyscall,mutex->nombreMutex);
-
-                }else{
-                    
-                    //BLOQUEAR ESTE PROCESO
-
-                }
+                tomarMutex(pidSolicitaSyscall,nombreMutex)
                 */
                 break;
             case MUTEX_UNLOCK: 
@@ -329,17 +315,7 @@ void atender_cpu(int socket_cpu) {
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 
-                //BUSCAR MUTEX SEGUN NOMBRE
-
-                if(mutex->pidAsignado == pidLiberaMutex && mutex->bloqueado ){
-                    nuevoMutex->bloqueado = false;
-                    nuevoMutex->pidAsignado = -1;
-                    log_info(kernel->logger,"## (<%d>) Libera el Mutex <%s>",pidSolicitaSyscall,mutex->nombreMutex);
-                }else{
-                    
-                    //DESBLOQUEAR PROCESO QUE QUIERA ESTE MUTEX
-
-                }
+                liberarMutex(int pidSolicitaSyscall,char* nombreMutex);
                 */
                 break;
             case MEM_ALLOC: 
@@ -355,51 +331,22 @@ void atender_cpu(int socket_cpu) {
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <SLEEP>",pidSolicitaSyscall);
                 //buscar io sleep
                 //int tiempo_ms = *(int*) list_get(paquete, 2);
-                /*
-                t_buffer* buffer = crear_buffer();
-                t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
-
-                agregar_a_paquete(paquete, &pid, sizeof(int));
-                agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
-                agregar_a_paquete(paquete, &tiempo_ms, sizeof(int));
-                enviar_paquete(paquete, socketIO, kernel->logger);
-
-                eliminar_paquete(paquete);
-                */
+                
+                // hacerSleep(pidSolicitaSyscall,tiempo_ms);
                 break;
             case STDOUT:
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDOUT>",pidSolicitaSyscall);
                 //buscar io stdout
                 //int direccionALeer = *(int*) list_get(paquete, 2);
                 //int tamanioLectura = *(int*) list_get(paquete, 3);
-                /*
-                //PEDIR A KM DATOS DE LA DIRECCION RECIBIDA
-
-                // ENVIAR A IO LOS DATOS RECIBIDOS DE KM
-                
-                */
+                // hacerStdOut(pidSolicitaSyscall,direccionALeer,tamanioLectura);
                 break;
             case STDIN:
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDIN>",pidSolicitaSyscall);
                 //buscar io stdin
                 //int direccionAEscribir = *(int*) list_get(paquete, 2);
                 //int tamanioLectura = *(int*) list_get(paquete, 3);
-                /*
-                //PEDIR A IO INGRESO DE DATOS
-                t_buffer* buffer = crear_buffer();
-                t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
-
-                agregar_a_paquete(paquete, &pid, sizeof(int));
-                agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
-                agregar_a_paquete(paquete, &tamanioLectura, sizeof(int));
-                enviar_paquete(paquete, socketIO, kernel->logger);
-
-                eliminar_paquete(paquete);
-
-                //recibirpaquete con los datos
-
-                // ENVIAR A KM LOS DATOS DE IO
-                */
+                // hacerStdIn(pidSolicitaSyscall,direccionAEscribir,tamanioLectura);
                 break;
             case INIT_PROC:
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <INIT_PROC>",pidSolicitaSyscall);
@@ -411,8 +358,7 @@ void atender_cpu(int socket_cpu) {
             case EXIT_PROC:
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <EXIT_PROC>",pidSolicitaSyscall);
                 /*
-                EJECUTAR SYSCALL de finalizar proceso
-                */
+                finalizarProceso(pidSolicitaSyscall)*/
                 break;
             default:
                 log_warning(kernel->logger, "Operación desconocida de CPU");
