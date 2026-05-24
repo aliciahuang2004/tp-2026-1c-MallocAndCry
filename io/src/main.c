@@ -11,7 +11,9 @@ int main(int argc, char* argv[]) {
     char *tipo_io = argv[2];
 
     t_io* io=inicializar_io(archivo_config, tipo_io);
-
+    // Obtener el tipo de operación esperado
+    t_io_operation tipo_modulo = obtener_tipo_operacion(tipo_io);
+    
     verificar_io(io);
 
     if(conectar_a_kernel_scheduler(io) == -1){
@@ -21,14 +23,12 @@ int main(int argc, char* argv[]) {
     }
 
     enviar_handshake(io);
-
-    /*Para el check 2 modificarlo*/
-    log_info(io->logger, "Modulo IO conectado. Presione ENTER para desconectar y cerrar.");
-    char* pausa = readline("");
-    free(pausa);
-    //////
+    log_info(io->logger, "## Conectado a Kernel Scheduler");
+    
+    while(1) {
+        recibir_y_ejecutar_tarea(io, tipo_modulo);
+    }
 
     liberar_io(io);
-    // saludar("io");
     return 0;
 }

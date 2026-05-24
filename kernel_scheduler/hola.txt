@@ -1,1 +1,3 @@
-hola
+INIT_PROC proceso3 2
+NOOP
+EXIT

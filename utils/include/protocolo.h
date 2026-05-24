@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <commons/string.h>
 
+typedef enum {
+    OP_SLEEP,
+    OP_STDIN,
+    OP_STDOUT
+} t_io_operation;
+
 typedef enum{
 
     SWAP_HANDSHAKE, // para el handshake inicial entre swap y kernel memory
@@ -17,7 +23,46 @@ typedef enum{
     
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
-    KERNEL_MEMORY_HANDSHAKE
+    KERNEL_MEMORY_HANDSHAKE,
+
+    //SYSCALL
+    MUTEX_CREATE,
+    MUTEX_LOCK,
+    MUTEX_UNLOCK,
+    MEM_ALLOC,
+    MEM_FREE,
+    SLEEP,
+    STDOUT,
+    STDIN,
+    INIT_PROC,
+    EXIT_PROC,
+    // Operaciones de IO
+    IO_REQUEST,  // Solicitud de operación de IO de KS a IO
+    IO_OK,       // Confirmación de finalización de IO al KS
+    PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
+    REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
+    CONTEXT_RESPONSE, // KM -> CPU: acá tenes el contexto 
+
+    CREACION_DE_PROCESO,
+    PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
+    RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
+    ERROR_INSTRUCCION,
+    CREACION_DE_PROCESO_OK,
+    CREACION_DE_PROCESO_ERROR,
+    CONTEXT_ERROR,           //KM responde esto cuando no encuentra el CTX solicitado
+    NUEVO_MEMORY_STICK,
+    ESCRITURA_DE_DATOS,              //KS envía una serie de bytes y dir logica a KM para que MS lo escriba en sus segmentos
+    LECTURA_DE_DATOS,
+    FINALIZAR_PROCESO,
+    SUSPENSION_DE_PROCESO,
+    DESUSPENSION_DE_PROCESO,
+    ELIMINACION_DE_SEGMENTO,
+    CREACION_DE_SEGMENTO,
+    ACTUALIZAR_CONTEXTO,            
+    PROCESO_DESALOJADO,
+    PROCESO_DESALOJADO_QUANTUM,
+    PROCESO_DESALOJADO_PRIORIDAD,
+    PROCESO_DESALOJADO_COMPACTACION            
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

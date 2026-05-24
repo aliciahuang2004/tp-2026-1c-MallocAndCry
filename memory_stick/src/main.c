@@ -3,33 +3,39 @@
 int main(int argc, char* argv[]) {
     
 
-    if (argc != 3){                     //3 porque 2 son los argumentos:archivo config y tamaño y el 3ero el nombre del modulo
-        printf("Uso: ./bin/memory_stick [Archivo Config] [Tamaño]\n ");
+    if (argc != 4){                  
+        printf("Uso: ./bin/memory_stick [Archivo Config] [Tamaño] [ID]\n ");
         return EXIT_FAILURE;
     }
-        t_memory_stick* ms = iniciar_memory_stick(argc, argv); 
+
+        char* ms_config = argv[1];                 //ms1.config ms2.config etc
+        int tamano = atoi(argv[2]);                //1024 2048 etc
+        int id = atoi(argv[3]); 
+        t_memory_stick* ms = iniciar_memory_stick(ms_config,tamano,id); 
        
         
         verificar_memory_stick(ms);
 
         //conectarse como cliente a kernel_memory
-                if(conectar_al_kernelmem(ms) == -1){
-            destruir_memory_stick(ms);
-            return EXIT_FAILURE;
+        if(conectar_al_kernelmem(ms) == -1){
+        destruir_memory_stick(ms);
+        return EXIT_FAILURE;
         }
-
-        enviar_handshake(ms);        //paquete(socket_kernel_mem);
-
-       // destruir_memory_stick(ms); NO PORQUE DEBE CONTINUAR AHORA COMO SERVIDOR DE CPUS
+        //***MS ENVIA HANDSHAKE,ID,TAMAÑO A KM
+        enviar_handshake(ms);     
 
         //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
        
         int servidor_fd = iniciar_servidor(ms->puerto_escucha);
-        
-        log_info(ms->logger,"Servidor Memory Stick listo,esperando peticiones de cpu");
+        if (servidor_fd == -1) {
+            log_error(ms->logger, "No se pudo iniciar el servidor Memory Stick en puerto %s", ms->puerto_escucha);
+            destruir_memory_stick(ms);
+            return EXIT_FAILURE;
+        }
 
-        rutina_recepcion(ms,servidor_fd); //CREA HILOS PARA ATENDER A CADA CPU
+        log_info(ms->logger,"Servidor Memory Stick ID:%d listo, esperando peticiones de CPUs..", ms->id);
 
+        rutina_recepcion(ms, servidor_fd); //CREA HILOS PARA ATENDER A CADA CPU
 
         destruir_memory_stick(ms);
    

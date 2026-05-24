@@ -1,0 +1,422 @@
+#include "kernel_scheduler.h"
+
+int pidParaAsignar = 0;
+
+t_queue* colaNEW;
+t_queue* colaREADY;
+t_queue* colaEXEC;
+t_queue* colaCPUs;
+
+pthread_mutex_t mutex_NEW;
+pthread_mutex_t mutex_READY;
+pthread_mutex_t mutex_BLOCK;
+pthread_mutex_t mutex_EXEC;
+pthread_mutex_t mutex_CPU;
+
+sem_t sem_procesosReady;
+sem_t sem_procesosExec;
+sem_t sem_hayCPUs;
+
+t_kernel_scheduler* kernel;
+
+void iniciarPlanificadorLargoPlazo(){
+    colaNEW = queue_create();
+    colaREADY = queue_create();
+
+    pthread_mutex_init(&mutex_NEW, NULL);
+    pthread_mutex_init(&mutex_READY, NULL);
+
+    sem_init(&sem_procesosReady,0,0);
+}
+
+void iniciarPlanificadorLCortoPlazo(){
+    //colaREADY inicia con planificador largo
+    colaEXEC = queue_create();
+
+    pthread_mutex_init(&mutex_EXEC, NULL);
+
+    sem_init(&sem_procesosExec,0,0);
+}
+
+void iniciarCPU(){
+    colaCPUs = queue_create();
+
+    pthread_mutex_init(&mutex_CPU,NULL);
+
+    sem_init(&sem_hayCPUs,0,0);
+}
+
+void pasarProcesoNewAReady(){
+    pthread_mutex_lock(&mutex_NEW);
+    if (!queue_is_empty(colaNEW)){
+        t_pcb* pcb = queue_pop(colaNEW);
+        pthread_mutex_unlock(&mutex_NEW);
+
+        pcb->estado = READY;
+        
+        pthread_mutex_lock(&mutex_READY);
+        queue_push(colaREADY, pcb);
+        pthread_mutex_unlock(&mutex_READY);
+
+        log_info(kernel->logger,"## (<%d>) Pasa del estado <NEW> al estado <READY>",pcb->pid);
+        sem_post(&sem_procesosReady);
+    }else{
+        pthread_mutex_unlock(&mutex_NEW);
+    }
+}
+
+void* loop_corto_plazo(void* args) {
+    log_info(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
+    
+    while(1) {
+        sem_wait(&sem_hayCPUs);
+        sem_wait(&sem_procesosReady);
+        pasarProcesoReadyAExec();
+        log_info(kernel->logger,"loop");
+    }
+    return NULL;
+}
+
+void pasarProcesoReadyAExec(){
+    if (strcmp(kernel->planification_algorithm, "FIFO") == 0){
+        log_info(kernel->logger,"EJECUCION POR FIFO");
+        ejecutarPorFIFO();
+    }
+    if (strcmp(kernel->planification_algorithm, "RR") == 0){
+        log_info(kernel->logger,"EJECUCION POR RR");
+        ejecutarPorRR();
+    }
+
+    if(strcmp(kernel->planification_algorithm, "CMN") == 0){
+        //COLAS MULTINIVEL
+        log_info(kernel->logger,"EJECUCION COLAS MULTINIVEL");
+    }
+}
+
+void ejecutarPorFIFO(){
+    t_cpu_conectada* cpuElegida= elegirCPULibre();
+    if(cpuElegida != NULL){
+        pthread_mutex_lock(&mutex_READY);
+        if (!queue_is_empty(colaREADY)){
+            t_pcb* pcb = queue_pop(colaREADY);
+            pthread_mutex_unlock(&mutex_READY);
+
+            pcb->estado = EXEC;
+            
+            pthread_mutex_lock(&mutex_EXEC);
+            queue_push(colaEXEC, pcb);
+            pthread_mutex_unlock(&mutex_EXEC);
+            enviarPIDAcpu(pcb->pid,cpuElegida);
+            log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcb->pid);
+        }else{
+            pthread_mutex_unlock(&mutex_READY);
+        } 
+    }
+}
+
+void ejecutarPorRR(){
+    t_cpu_conectada* cpuElegida= elegirCPULibre();
+    if(cpuElegida != NULL){
+        pthread_mutex_lock(&mutex_READY);
+        if (!queue_is_empty(colaREADY)){
+            t_pcb* pcb = queue_pop(colaREADY);
+            pthread_mutex_unlock(&mutex_READY);
+
+            pcb->estado = EXEC;
+            
+            pthread_mutex_lock(&mutex_EXEC);
+            queue_push(colaEXEC, pcb);
+            pthread_mutex_unlock(&mutex_EXEC);
+            enviarPIDAcpu(pcb->pid,cpuElegida);
+            log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcb->pid);
+            log_info(kernel->logger,"INICIA QUANTUM");
+            
+            usleep(kernel->rr_quantum * 1000);
+            log_info(kernel->logger,"FINALIZA QUANTUM");
+            
+            pedirDesalojoPorFinDeQuantum(pcb->pid, cpuElegida);
+
+        }else{
+            pthread_mutex_unlock(&mutex_READY);
+        } 
+    }
+}
+
+t_cpu_conectada* elegirCPULibre(){
+
+    t_cpu_conectada* cpu_elegida = NULL;
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidad = queue_size(colaCPUs);
+
+    for(int i = 0; i < cantidad; i++){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if (cpu_elegida == NULL && cpu->libre){
+            cpu_elegida = cpu;
+        } else {
+            queue_push(colaAux, cpu);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(colaCPUs, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+
+    if (cpu_elegida != NULL) {
+        cpu_elegida->libre = false;
+        queue_push(colaCPUs, cpu_elegida); 
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+
+    return cpu_elegida;
+}
+
+void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
+    if (cpu == NULL) {
+        log_error(kernel->logger, "No hay CPUs disponibles para procesar el PID %d", pid);
+        return;
+    }
+    
+    cpu->pidEjecutando = pid;
+
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(PROCESO_A_PROCESAR, buffer);
+
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+
+    enviar_paquete(paquete, cpu->socket_cliente, kernel->logger);
+
+    eliminar_paquete(paquete);
+
+}
+
+void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu){
+    if (cpu == NULL) {
+        log_error(kernel->logger, "No hay CPUs disponibles para procesar el PID %d", pid);
+        return;
+    }
+
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO_QUANTUM, buffer);
+
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+
+    enviar_paquete(paquete, cpu->socket_cliente, kernel->logger);
+
+    eliminar_paquete(paquete);
+
+    log_info(kernel->logger,"ENVIE MENSAJE A CPU PARA DESALOJAR");
+            
+
+    t_list* paquete_motivo = recibir_paquete(cpu->socket_cliente);
+
+    if (paquete_motivo == NULL ) {
+        log_error(kernel->logger, "El cliente en socket %d se desconectó o envió un paquete inválido", cpu->socket_cliente);
+        EXIT_SUCCESS;
+    }
+
+    int motivo_desalojo = *(int*)list_get(paquete_motivo, 0);
+
+    log_info(kernel->logger,"recibi paquete CON MOTIVO: %d", motivo_desalojo);
+
+    if(motivo_desalojo == PROCESO_DESALOJADO_QUANTUM){
+        log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",pid);
+        pasarProcesoExecAReady(pid, cpu);
+    } 
+}
+
+void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu){
+    // buscar pid del pcb en cola exec
+    // sacarlo de cola exec
+    // agregarlo a ready
+    t_pcb* pcb = buscarPcbporPID(pid);
+
+    if(pcb != NULL){
+        pcb->estado = READY;
+        pthread_mutex_lock(&mutex_READY);
+        queue_push(colaREADY, pcb);
+        pthread_mutex_unlock(&mutex_READY);
+        log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
+    }
+    //LIBERAR CPU
+    cpu->libre = true;
+    cpu->pidEjecutando = -1;
+
+    sem_post(&sem_procesosReady);
+    
+}
+
+t_pcb* buscarPcbporPID(int pid){
+    t_pcb* pcbEncontrado = NULL;
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_EXEC);
+    int cantidad = queue_size(colaEXEC);
+
+    for(int i = 0; i < cantidad; i++){
+        t_pcb* pcb = queue_pop(colaEXEC);
+        if(pcb->pid == pid && pcbEncontrado == NULL){
+            pcbEncontrado = pcb;
+        }else{
+            queue_push(colaAux,pcb);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(colaEXEC, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+
+    // queue_push(colaEXEC, pcbEncontrado);
+    pthread_mutex_unlock(&mutex_EXEC);
+
+    return pcbEncontrado;
+}
+
+void atender_cpu(int socket_cpu) {
+    while(1) {
+        t_list* paquete = recibir_paquete(socket_cpu);
+        if (!paquete) {
+            log_error(kernel->logger, "Error al recibir pedido de syscall");
+            return NULL;
+        }
+
+        int cod_op = *(int*)list_get(paquete, 0);
+        int pidSolicitaSyscall = *(int*) list_get(paquete, 1);
+
+        //PAQUETE = NOMBRE SYSCALL , PID, DATOS
+        
+        switch(cod_op) {
+            case MUTEX_CREATE:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_CREATE>",pidSolicitaSyscall);
+                /*
+                char* nombreMutex = (char*) list_get(paquete, 2);
+                t_mutex* nuevoMutex = malloc(sizeof(t_mutex));
+                nuevoMutex->nombreMutex = nombreMutex;
+                nuevoMutex->bloqueado = false;
+                nuevoMutex->pidAsignado = -1;
+                pthread_mutex_init(&nuevoMutex->nombreMutex,NULL);
+
+                //AGREGARLO PARA MANEJAR: COLAS? LISTAS?
+
+                log_info(kernel->logger, "## Mutex %s creado correctamente", nuevoMutex->nombreMutex);
+                */
+                break;
+            case MUTEX_LOCK:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_LOCK>",pidSolicitaSyscall);
+                /*
+                char* nombreMutex = (char*) list_get(paquete, 2);
+                
+                //BUSCAR MUTEX SEGUN NOMBRE
+
+                if(!mutex->bloqueado){
+                    mutex->bloqueado = true;
+                    mutex->pidAsignado = pidPideMutex;
+
+                    log_info(kernel->logger,"## (<%d>) Toma el Mutex <%s>",pidSolicitaSyscall,mutex->nombreMutex);
+
+                }else{
+                    
+                    //BLOQUEAR ESTE PROCESO
+
+                }
+                */
+                break;
+            case MUTEX_UNLOCK: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>",pidSolicitaSyscall);
+                /*
+                char* nombreMutex = (char*) list_get(paquete, 2);
+                
+                //BUSCAR MUTEX SEGUN NOMBRE
+
+                if(mutex->pidAsignado == pidLiberaMutex && mutex->bloqueado ){
+                    nuevoMutex->bloqueado = false;
+                    nuevoMutex->pidAsignado = -1;
+                    log_info(kernel->logger,"## (<%d>) Libera el Mutex <%s>",pidSolicitaSyscall,mutex->nombreMutex);
+                }else{
+                    
+                    //DESBLOQUEAR PROCESO QUE QUIERA ESTE MUTEX
+
+                }
+                */
+                break;
+            case MEM_ALLOC: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MEM_ALLOC>",pidSolicitaSyscall);
+                //int idSegmento = *(int*) list_get(paquete, 2);
+                //int tamanio = *(int*) list_get(paquete, 3);
+                break;
+            case MEM_FREE: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MEM_FREE>",pidSolicitaSyscall);
+                //int idSegmento = *(int*) list_get(paquete, 2);
+                break;
+            case SLEEP:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <SLEEP>",pidSolicitaSyscall);
+                //buscar io sleep
+                //int tiempo_ms = *(int*) list_get(paquete, 2);
+                /*
+                t_buffer* buffer = crear_buffer();
+                t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
+
+                agregar_a_paquete(paquete, &pid, sizeof(int));
+                agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
+                agregar_a_paquete(paquete, &tiempo_ms, sizeof(int));
+                enviar_paquete(paquete, socketIO, kernel->logger);
+
+                eliminar_paquete(paquete);
+                */
+                break;
+            case STDOUT:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDOUT>",pidSolicitaSyscall);
+                //buscar io stdout
+                //int direccionALeer = *(int*) list_get(paquete, 2);
+                //int tamanioLectura = *(int*) list_get(paquete, 3);
+                /*
+                //PEDIR A KM DATOS DE LA DIRECCION RECIBIDA
+
+                // ENVIAR A IO LOS DATOS RECIBIDOS DE KM
+                
+                */
+                break;
+            case STDIN:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDIN>",pidSolicitaSyscall);
+                //buscar io stdin
+                //int direccionAEscribir = *(int*) list_get(paquete, 2);
+                //int tamanioLectura = *(int*) list_get(paquete, 3);
+                /*
+                //PEDIR A IO INGRESO DE DATOS
+                t_buffer* buffer = crear_buffer();
+                t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
+
+                agregar_a_paquete(paquete, &pid, sizeof(int));
+                agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
+                agregar_a_paquete(paquete, &tamanioLectura, sizeof(int));
+                enviar_paquete(paquete, socketIO, kernel->logger);
+
+                eliminar_paquete(paquete);
+
+                //recibirpaquete con los datos
+
+                // ENVIAR A KM LOS DATOS DE IO
+                */
+                break;
+            case INIT_PROC:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <INIT_PROC>",pidSolicitaSyscall);
+                char* path = (char*) list_get(paquete, 2);
+                int prioridad = *(int*) list_get(paquete, 3);
+                log_info(kernel->logger, "## CPU solicita creación de proceso: %s (prioridad %d)", path, prioridad);
+                crearProceso(path,prioridad);
+                break;
+            case EXIT_PROC:
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <EXIT_PROC>",pidSolicitaSyscall);
+                /*
+                EJECUTAR SYSCALL de finalizar proceso
+                */
+                break;
+            default:
+                log_warning(kernel->logger, "Operación desconocida de CPU");
+                break;
+        }
+    }
+}
