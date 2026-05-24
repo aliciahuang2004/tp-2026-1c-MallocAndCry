@@ -134,6 +134,11 @@ void* atender_cliente_scheduler(void* arg) {
                     pthread_mutex_unlock(&mutex_CPU);
 
                     log_info(logger, "CPU registrada con éxito en colaCPUs. Creando proceso inicial...");
+                    
+                    pthread_t hilo_cpu;
+                    pthread_create(&hilo_cpu, NULL, (void*) atender_cpu, (void*) nuevaCPU->socket_cliente);
+                    pthread_detach(hilo_cpu);
+
                     if(!kernel->procesoInicialCreado){
                         crearProceso(pathInicial, 0);
                         kernel->procesoInicialCreado = true; 
@@ -144,7 +149,8 @@ void* atender_cliente_scheduler(void* arg) {
                 break;
             case IO_HANDSHAKE:
                 
-                log_debug(datos->logger, "Nuevo módulo de I/O conectado en socket %d", datos->socket_cliente);
+                log_info(datos->logger, "Nuevo módulo de I/O conectado en socket %d", datos->socket_cliente);
+                
                 // Lógica para peticiones de dispositivos de entrada/salida
                 break;
             case IO_OK: // RESPUESTA DE IO

@@ -71,6 +71,14 @@ typedef struct {
     int pidEjecutando;
 }t_cpu_conectada;
 
+typedef struct {
+    char* nombreMutex;            
+    bool bloqueado;
+    int pidAsignado;
+    pthread_mutex_t mutex;
+} t_mutex;
+
+
 // funciones de inicializacion
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
 void verificar_kernel_scheduler(t_kernel_scheduler* kernel_scheduler);
@@ -130,4 +138,5 @@ void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPID(int pid);
 void atender_cpu(int socket_cpu);
+
 #endif /* KERNEL_SCHEDULER_H*/
