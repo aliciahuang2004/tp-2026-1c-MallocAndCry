@@ -1,3 +1,2 @@
-INIT_PROC proceso3 2
-NOOP
+INIT_PROC hola.txt 1
 EXIT

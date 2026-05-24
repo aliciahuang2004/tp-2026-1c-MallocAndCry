@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
     kernel= kernel_scheduler; // Asignar el kernel_scheduler a la variable global para su uso en otros módulos
     conectar_con_kernel_memory(kernel_scheduler);
 
-
     iniciarPlanificadorLargoPlazo(kernel_scheduler);
     iniciarPlanificadorLCortoPlazo(kernel_scheduler);
     iniciarCPU();

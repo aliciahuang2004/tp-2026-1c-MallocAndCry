@@ -291,18 +291,18 @@ void atender_cpu(int socket_cpu) {
 
         int cod_op = *(int*)list_get(paquete, 0);
         int pidSolicitaSyscall = *(int*) list_get(paquete, 1);
-
-        //PAQUETE = NOMBRE SYSCALL , PID, DATOS
+        
+        //PAQUETE = NOMBRE SYSCALL, PID, DATOS
         
         switch(cod_op) {
-            case MUTEX_CREATE:
+            case MUTEX_CREATE: //NO BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_CREATE>",pidSolicitaSyscall);
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 crearMutex(nombreMutex);
                 */
                 break;
-            case MUTEX_LOCK:
+            case MUTEX_LOCK: //POSIBLE BLOQUEADO => PEDIMOS DESALOJO
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_LOCK>",pidSolicitaSyscall);
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
@@ -310,7 +310,7 @@ void atender_cpu(int socket_cpu) {
                 tomarMutex(pidSolicitaSyscall,nombreMutex)
                 */
                 break;
-            case MUTEX_UNLOCK: 
+            case MUTEX_UNLOCK: //NO BLOQUEA, SACAR PROCESO DE BLOCK QUE SOLICITO MUTEX
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>",pidSolicitaSyscall);
                 /*
                 char* nombreMutex = (char*) list_get(paquete, 2);
@@ -318,44 +318,44 @@ void atender_cpu(int socket_cpu) {
                 liberarMutex(int pidSolicitaSyscall,char* nombreMutex);
                 */
                 break;
-            case MEM_ALLOC: 
+            case MEM_ALLOC: //POSIBLE BLOQUEADO => PEDIMOS DESALOJO
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MEM_ALLOC>",pidSolicitaSyscall);
                 //int idSegmento = *(int*) list_get(paquete, 2);
                 //int tamanio = *(int*) list_get(paquete, 3);
                 break;
-            case MEM_FREE: 
+            case MEM_FREE: //NO BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MEM_FREE>",pidSolicitaSyscall);
                 //int idSegmento = *(int*) list_get(paquete, 2);
                 break;
-            case SLEEP:
+            case SLEEP: // BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <SLEEP>",pidSolicitaSyscall);
                 //buscar io sleep
                 //int tiempo_ms = *(int*) list_get(paquete, 2);
                 
                 // hacerSleep(pidSolicitaSyscall,tiempo_ms);
                 break;
-            case STDOUT:
+            case STDOUT: //BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDOUT>",pidSolicitaSyscall);
                 //buscar io stdout
                 //int direccionALeer = *(int*) list_get(paquete, 2);
                 //int tamanioLectura = *(int*) list_get(paquete, 3);
                 // hacerStdOut(pidSolicitaSyscall,direccionALeer,tamanioLectura);
                 break;
-            case STDIN:
+            case STDIN: //BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <STDIN>",pidSolicitaSyscall);
                 //buscar io stdin
                 //int direccionAEscribir = *(int*) list_get(paquete, 2);
                 //int tamanioLectura = *(int*) list_get(paquete, 3);
                 // hacerStdIn(pidSolicitaSyscall,direccionAEscribir,tamanioLectura);
                 break;
-            case INIT_PROC:
+            case INIT_PROC: //NO BLOQUEA
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <INIT_PROC>",pidSolicitaSyscall);
                 char* path = (char*) list_get(paquete, 2);
                 int prioridad = *(int*) list_get(paquete, 3);
                 log_info(kernel->logger, "## CPU solicita creación de proceso: %s (prioridad %d)", path, prioridad);
                 crearProceso(path,prioridad);
                 break;
-            case EXIT_PROC:
+            case EXIT_PROC: //NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <EXIT_PROC>",pidSolicitaSyscall);
                 /*
                 finalizarProceso(pidSolicitaSyscall)*/
