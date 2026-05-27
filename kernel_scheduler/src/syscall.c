@@ -41,44 +41,105 @@ void enviarPathYPidKM(int pid, char* path){
 }
 
 void crearMutex(char* nombreMutex){
+    pthread_mutex_lock(&mutex_diccionario);
+    
+    // Verificar si ya existe para evitar duplicados
+    if(dictionary_has_key(diccionario_mutex, nombreMutex)) {
+        pthread_mutex_unlock(&mutex_diccionario);
+        return;
+    }
+
     t_mutex* nuevoMutex = malloc(sizeof(t_mutex));
-                nuevoMutex->nombreMutex = nombreMutex;
+                nuevoMutex->nombreMutex = strdup(nombreMutex);
                 nuevoMutex->bloqueado = false;
                 nuevoMutex->pidAsignado = -1;
+                nuevoMutex->cola_bloqueados = queue_create();
                 pthread_mutex_init(&nuevoMutex->mutex,NULL);
 
-                //AGREGARLO PARA MANEJAR: COLAS? LISTAS?
+                dictionary_put(diccionario_mutex, nuevoMutex->nombreMutex, nuevoMutex);
+                pthread_mutex_unlock(&mutex_diccionario);
 
                 log_info(kernel->logger, "## Mutex %s creado correctamente", nuevoMutex->nombreMutex);
 }
 
-void tomarMutex(int pidSolicitaSyscall,char* nombreMutex){
-    //BUSCAR MUTEX SEGUN NOMBRE
-    t_mutex* mutex;
+void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
+    pthread_mutex_lock(&mutex_diccionario);
+    t_mutex* mutex = dictionary_get(diccionario_mutex, nombreMutex);
+    
+    if(mutex == NULL) {
+        log_error(kernel->logger, "Error: El proceso %d solicitó un Mutex inexistente: %s", pidSolicitaSyscall, nombreMutex);
+        pthread_mutex_unlock(&mutex_diccionario);
+        return;
+    }
+
     if(!mutex->bloqueado){
         mutex->bloqueado = true;
         mutex->pidAsignado = pidSolicitaSyscall;
-        pthread_mutex_lock(&mutex->mutex);
-        log_info(kernel->logger,"## (<%d>) Toma el Mutex <%s>",pidSolicitaSyscall,mutex->nombreMutex);
+        pthread_mutex_unlock(&mutex_diccionario);
+        
+        log_info(kernel->logger, "## (<%d>) Toma el Mutex <%s>", pidSolicitaSyscall, nombreMutex); 
+        
+    } else {
+        int* pid_ptr = malloc(sizeof(int));
+        *pid_ptr = pidSolicitaSyscall;
+        queue_push(mutex->cola_bloqueados, pid_ptr);
+        pthread_mutex_unlock(&mutex_diccionario);
 
-    }else{
-                    
-        //BLOQUEAR ESTE PROCESO
-        //pasarProcesoReadyABlock();
+        t_pcb* pcb = buscarPcbporPID(pidSolicitaSyscall);
+        if(pcb != NULL){
+            pcb->estado = BLOCK;
+            pthread_mutex_lock(&mutex_BLOCK);
+            queue_push(colaBLOCK, pcb);
+            pthread_mutex_unlock(&mutex_BLOCK);
+            log_info(kernel->logger, "## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>", pcb->pid); 
+        }
 
+        t_cpu_conectada* cpu = buscarCpuPorSocket(socket_cpu);
+        if(cpu != NULL) {
+            cpu->libre = true;
+            cpu->pidEjecutando = -1;
+        }
+        sem_post(&sem_hayCPUs);
     }
 }
 
-void liberarMutex(int pidLiberaMutex,char* nombreMutex){
-    //BUSCAR MUTEX SEGUN NOMBRE
-    t_mutex* mutex;
+void liberarMutex(int pidLiberaMutex, char* nombreMutex){
+    pthread_mutex_lock(&mutex_diccionario);
+    t_mutex* mutex = dictionary_get(diccionario_mutex, nombreMutex);
 
-    if(mutex->pidAsignado == pidLiberaMutex && mutex->bloqueado ){
-        mutex->bloqueado = false;
-        mutex->pidAsignado = -1;
-        pthread_mutex_unlock(&mutex->mutex);
-        log_info(kernel->logger,"## (<%d>) Libera el Mutex <%s>",pidLiberaMutex,mutex->nombreMutex);
-        //DESBLOQUEAR PROCESO QUE QUIERA ESTE MUTEX
+    if(mutex == NULL) {
+        pthread_mutex_unlock(&mutex_diccionario);
+        return;
+    }
+
+    if(mutex->bloqueado && mutex->pidAsignado == pidLiberaMutex){
+        log_info(kernel->logger, "## (<%d>) Libera el Mutex <%s>", pidLiberaMutex, nombreMutex); 
+
+        if(!queue_is_empty(mutex->cola_bloqueados)){
+            int* proximo_pid_ptr = queue_pop(mutex->cola_bloqueados);
+            int proximo_pid = *proximo_pid_ptr;
+            free(proximo_pid_ptr);
+
+            mutex->pidAsignado = proximo_pid;
+            pthread_mutex_unlock(&mutex_diccionario);
+            t_pcb* pcb_desbloqueado = sacardeColaBlockPorPID(proximo_pid);
+            if(pcb_desbloqueado != NULL){
+                pcb_desbloqueado->estado = READY;
+                pthread_mutex_lock(&mutex_READY);
+                queue_push(colaREADY, pcb_desbloqueado);
+                pthread_mutex_unlock(&mutex_READY);
+                
+                log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pcb_desbloqueado->pid); 
+                sem_post(&sem_procesosReady);
+            }
+        } else {
+            // No hay nadie en la cola de espera, el mutex queda libre 
+            mutex->bloqueado = false;
+            mutex->pidAsignado = -1;
+            pthread_mutex_unlock(&mutex_diccionario);
+        }
+    } else {
+        pthread_mutex_unlock(&mutex_diccionario);
     }
 }
 

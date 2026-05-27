@@ -2,6 +2,9 @@
 
 int pidParaAsignar = 0;
 
+t_dictionary* diccionario_mutex;
+pthread_mutex_t mutex_diccionario;
+
 t_queue* colaNEW;
 t_queue* colaREADY;
 t_queue* colaREADY_SUSP;
@@ -43,6 +46,58 @@ void iniciarPlanificadorLCortoPlazo(){
     pthread_mutex_init(&mutex_EXEC, NULL);
     pthread_mutex_init(&mutex_BLOCK, NULL);
 
+    // Inicialización del almacenamiento global de Mutexes
+    diccionario_mutex = dictionary_create();
+    pthread_mutex_init(&mutex_diccionario, NULL);
+}
+
+t_cpu_conectada* buscarCpuPorSocket(int socket_cpu) {
+    t_cpu_conectada* cpuEncontrada = NULL;
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidad = queue_size(colaCPUs);
+
+    for(int i = 0; i < cantidad; i++){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if(cpu->socket_cliente == socket_cpu){
+            cpuEncontrada = cpu;
+        }
+        queue_push(colaAux, cpu);
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(colaCPUs, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_CPU);
+
+    return cpuEncontrada;
+}
+
+t_pcb* sacardeColaBlockPorPID(int pid) {
+    t_pcb* pcbEncontrado = NULL;
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_BLOCK);
+    int cantidad = queue_size(colaBLOCK);
+
+    for(int i = 0; i < cantidad; i++) {
+        t_pcb* pcb = queue_pop(colaBLOCK);
+        if(pcb->pid == pid && pcbEncontrado == NULL) {
+            pcbEncontrado = pcb;
+        } else {
+            queue_push(colaAux, pcb);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)) {
+        queue_push(colaBLOCK, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_BLOCK);
+
+    return pcbEncontrado;
 }
 
 void iniciarCPU(){
@@ -295,28 +350,29 @@ void atender_cpu(int socket_cpu) {
         //PAQUETE = NOMBRE SYSCALL, PID, DATOS
         
         switch(cod_op) {
-            case MUTEX_CREATE: //NO BLOQUEA
-                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_CREATE>",pidSolicitaSyscall);
-                /*
-                char* nombreMutex = (char*) list_get(paquete, 2);
-                crearMutex(nombreMutex);
-                */
+            case MUTEX_CREATE: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_CREATE>", pidSolicitaSyscall);
+                {
+                    char* nombreMutex = (char*) list_get(paquete, 2);
+                    crearMutex(nombreMutex);
+                }
                 break;
-            case MUTEX_LOCK: //POSIBLE BLOQUEADO => PEDIMOS DESALOJO
-                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_LOCK>",pidSolicitaSyscall);
-                /*
-                char* nombreMutex = (char*) list_get(paquete, 2);
                 
-                tomarMutex(pidSolicitaSyscall,nombreMutex)
-                */
+            case MUTEX_LOCK: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_LOCK>", pidSolicitaSyscall);
+                {
+                    char* nombreMutex = (char*) list_get(paquete, 2);
+                    // Pasamos socket_cpu para poder liberar la estructura de la CPU si el proceso se bloquea
+                    tomarMutex(pidSolicitaSyscall, nombreMutex, socket_cpu);
+                }
                 break;
-            case MUTEX_UNLOCK: //NO BLOQUEA, SACAR PROCESO DE BLOCK QUE SOLICITO MUTEX
-                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>",pidSolicitaSyscall);
-                /*
-                char* nombreMutex = (char*) list_get(paquete, 2);
                 
-                liberarMutex(int pidSolicitaSyscall,char* nombreMutex);
-                */
+            case MUTEX_UNLOCK: 
+                log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>", pidSolicitaSyscall);
+                {
+                    char* nombreMutex = (char*) list_get(paquete, 2);
+                    liberarMutex(pidSolicitaSyscall, nombreMutex);
+                }
                 break;
             case MEM_ALLOC: //POSIBLE BLOQUEADO => PEDIMOS DESALOJO
                 log_info(kernel->logger,"## (<%d>) - Solicitó syscall: <MEM_ALLOC>",pidSolicitaSyscall);

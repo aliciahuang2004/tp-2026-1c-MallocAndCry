@@ -8,6 +8,7 @@
 #include <commons/collections/queue.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <commons/collections/dictionary.h>
 #define COLOR_VERDE "\033[32m"
 
 extern char* pathInicial;
@@ -75,6 +76,7 @@ typedef struct {
     char* nombreMutex;            
     bool bloqueado;
     int pidAsignado;
+    t_queue* cola_bloqueados;
     pthread_mutex_t mutex;
 } t_mutex;
 
@@ -101,7 +103,7 @@ t_pcb* crear_PCB(char* path, int prioridad);
 void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
 void crearMutex(char* nombreMutex);
-void tomarMutex(int pidSolicitaSyscall,char* nombreMutex);
+void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu);
 void liberarMutex(int pidLiberaMutex,char* nombreMutex);
 void hacerSleep(int pid,int tiempo_ms);
 void hacerStdOut(int pidSolicitaSyscall,int direccionALeer, int tamanioLectura);
@@ -129,6 +131,8 @@ extern pthread_mutex_t mutex_BLOCK_SUSP;
 extern pthread_mutex_t mutex_EXEC;
 extern pthread_mutex_t mutex_EXIT;
 extern pthread_mutex_t mutex_CPU;
+extern t_dictionary* diccionario_mutex;
+extern pthread_mutex_t mutex_diccionario;
 
 extern sem_t sem_procesosReady;
 extern sem_t sem_hayCPUs;
@@ -151,5 +155,8 @@ void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPID(int pid);
 void atender_cpu(int socket_cpu);
+t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
+t_pcb* sacardeColaBlockPorPID(int pid);
+
 
 #endif /* KERNEL_SCHEDULER_H*/
