@@ -29,9 +29,24 @@ typedef struct{
     char* path;
 } t_pcb;
 
+typedef enum {
+    IO_SLEEP,
+    IO_STDIN,
+    IO_STDOUT
+} t_tipo_io;
+
+// Estructura administrativa que mantendrá el Kernel por cada interfaz física conectada
+typedef struct {
+    char* nombre;               // Nombre único de la interfaz (ej: "GENERICA", "TECLADO")
+    t_tipo_io tipo;             // Tipo (SLEEP, STDIN, STDOUT)
+    int socket_interfaz;        // Socket de red para enviarle las operaciones
+    bool ocupada;               // Si la interfaz está ejecutando una tarea actualmente
+} t_interfaz_conectada;
+
 // Estructura para solicitud de IO
 typedef struct {
     int pid;
+    t_pcb* pcb;
     t_io_operation tipo_operacion;
     uint32_t datos_size;
     void* datos;
@@ -154,9 +169,33 @@ void ejecutarPorRR();
 void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPID(int pid);
-void atender_cpu(int socket_cpu);
+
+//void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
 t_pcb* sacardeColaBlockPorPID(int pid);
 
 
+void* atender_cpu(void* socket_cpu_ptr);
+// IO globals (colas por tipo y lista de interfaces)
+extern t_list* lista_interfaces_io;
+extern t_queue* cola_bloqueados_sleep;
+extern t_queue* cola_bloqueados_stdin;
+extern t_queue* cola_bloqueados_stdout;
+extern pthread_mutex_t mutex_lista_interfaces;
+extern pthread_mutex_t mutex_cola_sleep;
+extern pthread_mutex_t mutex_cola_stdin;
+extern pthread_mutex_t mutex_cola_stdout;
+
+// IO helpers (visibles desde otros módulos)
+t_queue* obtener_cola_bloqueados_por_tipo(t_tipo_io tipo);
+pthread_mutex_t* obtener_mutex_cola_por_tipo(t_tipo_io tipo);
+t_interfaz_conectada* buscar_interfaz_libre_por_tipo(t_tipo_io tipo);
+t_interfaz_conectada* buscar_interfaz_por_socket(int socket_interfaz);
+t_solicitud_io* crear_solicitud_io(int pid, t_pcb* pcb, t_io_operation tipo_operacion, uint32_t datos_size, void* datos);
+void liberar_solicitud_io(t_solicitud_io* solicitud);
+void enviar_operacion_a_io(t_interfaz_conectada* interfaz, t_solicitud_io* solicitud);
+void imprimir_lista_interfaces_io(t_log* logger);
+
+t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
+void liberar_cpu_y_notificar(t_cpu_conectada* cpu);
 #endif /* KERNEL_SCHEDULER_H*/
