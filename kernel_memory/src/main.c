@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
     lista_ms = list_create();
     tabla_contextos = dictionary_create();
-
+    lista_huecos_libres = list_create();
     esperarConexiones(kernel_memory,kernel_memory_fd);
 
     void* atender_conexion(void* arg);

@@ -59,7 +59,7 @@ typedef struct {
 
     uint32_t base;
 
-    uint32_t tamanio;
+    uint32_t tamano;
 
 } t_hueco;
 

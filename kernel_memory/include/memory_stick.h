@@ -5,4 +5,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente);
+
 #endif 

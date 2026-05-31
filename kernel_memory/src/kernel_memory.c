@@ -3,12 +3,12 @@
 
 t_list* lista_ms;
 pthread_mutex_t mutex_lista_ms = PTHREAD_MUTEX_INITIALIZER;
-
+pthread_mutex_t mutex_memoria_total = PTHREAD_MUTEX_INITIALIZER;
 
 t_kernel_memory* iniciar_kernelMemory(char* argv){
 
     t_kernel_memory* kernelMemory = malloc(sizeof(t_kernel_memory));
-
+    memset(kernelMemory, 0, sizeof(t_kernel_memory));
     t_log* logger_temp= iniciar_logger("kernelMemory.log", "[KERNEL_MEMORY_INIT]", true, LOG_LEVEL_INFO);
 
     kernelMemory -> config = iniciar_config(logger_temp, argv);
@@ -62,3 +62,13 @@ void enviar_operacion(int socket_cliente, op_code codigo) {
     send(socket_cliente, &codigo, sizeof(op_code), 0);
 }
 
+uint32_t aumentar_memoria_total(uint32_t tamano) {
+    pthread_mutex_lock(&mutex_memoria_total);
+
+    uint32_t base = memoria_total;
+    memoria_total += tamano;
+
+    pthread_mutex_unlock(&mutex_memoria_total);
+
+    return base;
+}

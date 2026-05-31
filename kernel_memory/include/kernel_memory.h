@@ -37,13 +37,15 @@ typedef struct {
 //GLOBALES
 extern t_dictionary* procesos;
 
-extern t_list* huecos_libres;
+extern t_list* lista_huecos_libres;
 
 extern t_list* lista_ms;
 
 extern t_list* bloques_swap;
 
 extern t_dictionary* tabla_contextos;
+
+extern uint32_t memoria_total;
 
 //MUTEX
 extern pthread_mutex_t mutex_procesos;
@@ -55,6 +57,8 @@ extern pthread_mutex_t mutex_lista_ms;
 extern pthread_mutex_t mutex_swap;
 
 extern pthread_mutex_t mutex_tabla_contextos;
+
+extern pthread_mutex_t mutex_memoria_total;
 
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);

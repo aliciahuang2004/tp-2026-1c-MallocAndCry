@@ -3,6 +3,11 @@
 #include "contextos.h"
 #include "instrucciones.h"
 #include "procesos.h"
+#include "memory_stick.h"
+
+uint32_t memoria_total = 0;
+t_list* lista_huecos_libres;
+pthread_mutex_t mutex_huecos = PTHREAD_MUTEX_INITIALIZER;
 
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
@@ -60,30 +65,42 @@ void* atender_conexion(void* arg) {
                 // CODIGO CPU
                 break;
 
-            case MEMORY_STICK_HANDSHAKE:
-                int ms_id = *(int*)list_get(paquete,1);
-                int ms_tamano = *(int*)list_get(paquete,2);
+            case MEMORY_STICK_HANDSHAKE: {
+                int ms_id = *(int *)list_get(paquete, 1);
+                int ms_tamano = *(int *)list_get(paquete, 2);
 
-                log_info(logger, "[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes", socket_cliente,ms_id,ms_tamano);
-                //AGREGA EN LA LISTA DE MSs
-                t_ms_info* ms_info = malloc(sizeof(t_ms_info));
-                ms_info->id = ms_id;
-                ms_info->tamano = ms_tamano;
-                ms_info->socket = socket_cliente;
+                log_info(logger, "[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes", socket_cliente, ms_id, ms_tamano);
 
-                pthread_mutex_lock(&mutex_lista_ms);
-                list_add(lista_ms,ms_info);
-                pthread_mutex_unlock(&mutex_lista_ms);
+                uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
+                //ver si me sirve de algo tener una lista de ms
+                int resultado = nuevo_memory_stick(ms_id, ms_tamano, socket_cliente);
 
-                log_info(logger,"Memory sticks conectados: %d",list_size(lista_ms));
-                
-                //***AVISO A KERNEL SCHEDULER TAMAÑO DE NUEVO MEMORY STICK 
-                t_paquete *respuesta = crear_paquete(NUEVO_MEMORY_STICK, crear_buffer());
-                agregar_a_paquete(respuesta, &ms_tamano, sizeof(int));
-                enviar_paquete(respuesta, km->socket_kernel_scheduler, logger);
-                eliminar_paquete(respuesta);
-                // CODIGO MEMORY STICK
+                if(resultado) {
+                    agregar_hueco_libre(base_nuevo_ms, ms_tamano);
+
+                    //logs temporales para pruebas
+                    pthread_mutex_lock(&mutex_huecos);
+                    log_info(logger, "Cantidad de huecos libres: %d", list_size(lista_huecos_libres));
+                    pthread_mutex_unlock(&mutex_huecos);
+                    pthread_mutex_lock(&mutex_lista_ms);
+                    log_info(logger, "Memory sticks conectados: %d", list_size(lista_ms));
+                    pthread_mutex_unlock(&mutex_lista_ms);
+                    pthread_mutex_lock(&mutex_memoria_total);
+                    log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
+                    pthread_mutex_unlock(&mutex_memoria_total);
+                    log_info(logger, "Hueco agregado -> Base:%u Tamaño:%u", base_nuevo_ms, ms_tamano);
+
+                    //descomentar cuando ks reciba o espere nuevo tamaño de memoria
+                    /*t_paquete* respuesta = crear_paquete(NUEVO_MEMORY_STICK, crear_buffer());
+                    agregar_a_paquete(respuesta, &ms_tamano, sizeof(int));
+                    enviar_paquete(respuesta, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(respuesta);*/
+                } else {
+                    log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
+                }
+                //tambien tengo que avisar a las cpus sobre nuevo ms,enviarles el puerto
                 break;
+            }
 
             case KERNEL_SCHEDULER_HANDSHAKE:
                 log_info(logger, "[Socket %d] Operación KERNEL SCHEDULER recibida", socket_cliente);
@@ -112,6 +129,7 @@ void* atender_conexion(void* arg) {
                 { //************************ENVIO CONFIRMACION O ERROR DE CREACION DE PROCESO A KS********************
                 t_paquete *respuesta = crear_paquete(CREACION_DE_PROCESO_OK, crear_buffer());
                 enviar_paquete(respuesta, socket_cliente, logger);
+                eliminar_paquete(respuesta);
                 }
                 else
                 {
@@ -193,18 +211,18 @@ void* atender_conexion(void* arg) {
                 }
             break;
             }
-            case ESCRITURA_DE_DATOS: ///***STDIN
+            case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
             {
             }
             break;
-            case LECTURA_DE_DATOS: ///***STDOUT
+            case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
             {
             }
             break;
-            case FINALIZAR_PROCESO: ///***EXIT
+            case FINALIZAR_PROCESO: ///***ESPERO EXIT DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
-                // BORRAR CTX,TABLA DE SEG DEL PROC,ENTRADAS DEL PROC EN LA TABLA DE SEG,PATH A INSTRUCCIONES? AVISAR A KS AL FINALIZAR TODO ESTO?
+                int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger);
             }
             break;
             case SUSPENSION_DE_PROCESO:
@@ -216,28 +234,26 @@ void* atender_conexion(void* arg) {
             {/// SWAP + MS
             }
             break;
-            case ELIMINACION_DE_SEGMENTO: ///***MEM_FREE??????
+            case ELIMINACION_DE_SEGMENTO: ///***ESPERO MEM_FREE DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
-                // int eliminacion_de_seg(pid_recibido,id_seg_recibido);
-                // ELIMINA DE LA TABLA DEL PROCESO Y DE LA TABLA DE SEG ESTE ID SEG
+                int eliminar_segmento(int pid, int id_segmento, t_log* logger);
             }
             break;
-            case CREACION_DE_SEGMENTO: ///***MEM_ALLOC
+            case CREACION_DE_SEGMENTO: ///***ESPERO MEM_ALLOC DE KS
             
             {   //RECIBO PAQUETE DE PARTE DE KERNEL SCHEDULER CON LOS SIG DATOS
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
                 int tamano_recibido = *(int *)list_get(paquete, 3);
-
-                //creacion_de_segmento(pid_recibido,id_seg_recibido,tamano_recibido);
-            
+                int crear_segmento(int pid_recibido, int id_seg_recibido, uint32_t tamano_recibido,t_log* logger); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
+             //deberia enviar confirmacion a ks de que se creó correctamente el segmento???
             }
             break;
             case ACTUALIZAR_CONTEXTO:
             {
-                // CUANDO ENC CPU HAY UNA INTERRUPCION O SYSCALL,EL PROCESO ES DESALOJADO Y CPU ENVIA A KM LOS REGISTROS ACTUALIZADOS
+        
                 int pid = *(int*)list_get(paquete, 1);
                 t_registros registros_nuevos;
                 registros_nuevos.PC  = *(uint32_t*)list_get(paquete, 2);
@@ -251,6 +267,16 @@ void* atender_conexion(void* arg) {
                 registros_nuevos.EDX = *(uint32_t*)list_get(paquete, 10);
                 registros_nuevos.SI  = *(uint32_t*)list_get(paquete, 11);
                 registros_nuevos.DI  = *(uint32_t*)list_get(paquete, 12);
+                
+                //logs temporales solo para verificar********
+                log_info(logger, "## Contexto recibido - PID: %d", pid);
+                log_info(logger, "   PC=%u AX=%u BX=%u CX=%u DX=%u", 
+                    registros_nuevos.PC, registros_nuevos.AX, registros_nuevos.BX, 
+                    registros_nuevos.CX, registros_nuevos.DX);
+                log_info(logger, "   EAX=%u EBX=%u ECX=%u EDX=%u SI=%u DI=%u",
+                    registros_nuevos.EAX, registros_nuevos.EBX, registros_nuevos.ECX,
+                    registros_nuevos.EDX, registros_nuevos.SI, registros_nuevos.DI);
+                //*********
 
                 actualizar_contexto(pid, &registros_nuevos);
                 log_info(logger, "Contexto actualizado - PID: %d", pid);

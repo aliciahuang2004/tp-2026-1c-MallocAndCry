@@ -45,7 +45,7 @@ typedef enum{
     REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
     CONTEXT_RESPONSE, // KM -> CPU: acá tenes el contexto 
 
-    CREACION_DE_PROCESO,
+    CREACION_DE_PROCESO,   
     PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
     RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
     ERROR_INSTRUCCION,
@@ -59,7 +59,7 @@ typedef enum{
     SUSPENSION_DE_PROCESO,
     DESUSPENSION_DE_PROCESO,
     ELIMINACION_DE_SEGMENTO,
-    CREACION_DE_SEGMENTO,
+    CREACION_DE_SEGMENTO,       //ks envia este protocolo a km para que km pueda crear el segmento 
     ACTUALIZAR_CONTEXTO,            
     PROCESO_DESALOJADO,
     PROCESO_DESALOJADO_QUANTUM,
