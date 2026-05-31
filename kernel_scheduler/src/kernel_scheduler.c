@@ -149,7 +149,7 @@ void* atender_cliente_scheduler(void* arg) {
                     queue_push(colaCPUs, nuevaCPU);
                     pthread_mutex_unlock(&mutex_CPU);
 
-                    log_info(logger, "CPU registrada con éxito en colaCPUs. Creando proceso inicial...");
+                    log_info(logger, "CPU registrada con éxito en colaCPUs");
                     
                     pthread_t hilo_cpu;
                     int* socket_cpu_ptr = malloc(sizeof(int));
@@ -158,6 +158,7 @@ void* atender_cliente_scheduler(void* arg) {
                     pthread_detach(hilo_cpu);
 
                     if(!kernel->procesoInicialCreado){
+                        log_info(logger, "Creando proceso inicial...");
                         crearProceso(pathInicial, 0);
                         kernel->procesoInicialCreado = true; 
                     }

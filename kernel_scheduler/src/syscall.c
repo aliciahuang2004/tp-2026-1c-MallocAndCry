@@ -65,6 +65,7 @@ void crearMutex(char* nombreMutex){
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
     pthread_mutex_lock(&mutex_diccionario);
     t_mutex* mutex = dictionary_get(diccionario_mutex, nombreMutex);
+    t_cpu_conectada* cpu = buscarCpuPorSocket(socket_cpu);
     
     if(mutex == NULL) {
         log_error(kernel->logger, "Error: El proceso %d solicitó un Mutex inexistente: %s", pidSolicitaSyscall, nombreMutex);
@@ -78,6 +79,7 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
         pthread_mutex_unlock(&mutex_diccionario);
         
         log_info(kernel->logger, "## (<%d>) Toma el Mutex <%s>", pidSolicitaSyscall, nombreMutex); 
+        enviarPIDAcpu(pidSolicitaSyscall,cpu);
         
     } else {
         int* pid_ptr = malloc(sizeof(int));
@@ -85,7 +87,7 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
         queue_push(mutex->cola_bloqueados, pid_ptr);
         pthread_mutex_unlock(&mutex_diccionario);
 
-        t_pcb* pcb = buscarPcbporPID(pidSolicitaSyscall);
+        t_pcb* pcb = buscarPcbporPIDEnColaExec(pidSolicitaSyscall);
         if(pcb != NULL){
             pcb->estado = BLOCK;
             pthread_mutex_lock(&mutex_BLOCK);
@@ -94,7 +96,6 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
             log_info(kernel->logger, "## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>", pcb->pid); 
         }
 
-        t_cpu_conectada* cpu = buscarCpuPorSocket(socket_cpu);
         if(cpu != NULL) {
             cpu->libre = true;
             cpu->pidEjecutando = -1;

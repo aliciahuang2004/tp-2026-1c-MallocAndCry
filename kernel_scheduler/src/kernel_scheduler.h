@@ -168,7 +168,8 @@ void ejecutarPorFIFO();
 void ejecutarPorRR();
 void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
-t_pcb* buscarPcbporPID(int pid);
+t_pcb* buscarPcbporPIDEnColaExec(int pid);
+void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu);
 
 //void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);

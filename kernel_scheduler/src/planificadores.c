@@ -292,7 +292,7 @@ void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu){
     // buscar pid del pcb en cola exec
     // sacarlo de cola exec
     // agregarlo a ready
-    t_pcb* pcb = buscarPcbporPID(pid);
+    t_pcb* pcb = buscarPcbporPIDEnColaExec(pid);
 
     if(pcb != NULL){
         pcb->estado = READY;
@@ -306,10 +306,11 @@ void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu){
     cpu->pidEjecutando = -1;
 
     sem_post(&sem_procesosReady);
+    sem_post(&sem_hayCPUs);
     
 }
 
-t_pcb* buscarPcbporPID(int pid){
+t_pcb* buscarPcbporPIDEnColaExec(int pid){
     t_pcb* pcbEncontrado = NULL;
     t_queue* colaAux = queue_create();
 
@@ -336,6 +337,22 @@ t_pcb* buscarPcbporPID(int pid){
     return pcbEncontrado;
 }
 
+void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu){
+    t_pcb* pcb = buscarPcbporPIDEnColaExec(pid);
+
+    if(pcb != NULL){
+        pcb->estado = BLOCK;
+        pthread_mutex_lock(&mutex_BLOCK);
+        queue_push(colaBLOCK, pcb);
+        pthread_mutex_unlock(&mutex_BLOCK);
+        log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>",pcb->pid);
+    }
+    //LIBERAR CPU
+    cpu->libre = true;
+    cpu->pidEjecutando = -1;
+    sem_post(&sem_hayCPUs);
+}
+
 void* atender_cpu(void* socket_cpu_ptr){
     int socket_cpu = *(int*)socket_cpu_ptr;
     free(socket_cpu_ptr); // Liberamos el puntero que reservamos en el handshake
@@ -351,45 +368,42 @@ void* atender_cpu(void* socket_cpu_ptr){
         t_cpu_conectada* cpu_emisora = buscar_cpu_por_socket(socket_cpu);
 
         switch (cod_op) {
-            case MUTEX_CREATE: {
+            case MUTEX_CREATE:{
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MUTEX_CREATE>", pidSolicitaSyscall);
                 crearMutex(nombreMutex);
+                enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
             }
-
-            case MUTEX_LOCK: {
+            case MUTEX_LOCK:{
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MUTEX_LOCK>", pidSolicitaSyscall);
                 tomarMutex(pidSolicitaSyscall, nombreMutex, socket_cpu);
                 break;
             }
-
-            case MUTEX_UNLOCK: {
+            case MUTEX_UNLOCK:{
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>", pidSolicitaSyscall);
                 liberarMutex(pidSolicitaSyscall, nombreMutex);
+                enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
             }
-
-            case MEM_ALLOC: { //POSIBLE BLOQUEADO => PEDIMOS DESALOJO
+            case MEM_ALLOC: {//POSIBLE BLOQUEADO => PEDIMOS DESALOJO
                 int idSegmento = *(int*) list_get(paquete, 2);
                 int tamanio = *(int*) list_get(paquete, 3);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_ALLOC> idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
                 break;
             }
-
-            case MEM_FREE: { // NO BLOQUEA
+            case MEM_FREE: {// NO BLOQUEA
                 int idSegmento = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_FREE> idSegmento=%d", pidSolicitaSyscall, idSegmento);
                 break;
             }
-
-            case SLEEP: { //BLOQUEA
+            case SLEEP:  {//BLOQUEA
                 int tiempo_ms = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## PID: %d - Solicitó Syscall SLEEP por %d ms", pidSolicitaSyscall, tiempo_ms);
 
-                t_pcb* pcb = buscarPcbporPID(pidSolicitaSyscall);
+                t_pcb* pcb = buscarPcbporPIDEnColaExec(pidSolicitaSyscall);
                 if (pcb) {
                     pcb->estado = BLOCK;
                     log_info(kernel->logger, "## PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK (Motivo: SLEEP)", pcb->pid);
@@ -419,13 +433,12 @@ void* atender_cpu(void* socket_cpu_ptr){
                 liberar_cpu_y_notificar(cpu_emisora);
                 break;
             }
-
-            case STDIN: {
+            case STDIN:{
                 uint32_t dir_logica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## PID: %d - Solicitó Syscall STDIN (dir=%u, tam=%u)", pidSolicitaSyscall, dir_logica, tamano);
 
-                t_pcb* pcb = buscarPcbporPID(pidSolicitaSyscall);
+                t_pcb* pcb = buscarPcbporPIDEnColaExec(pidSolicitaSyscall);
                 if (pcb) {
                     pcb->estado = BLOCK;
                     log_info(kernel->logger, "## PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK (Motivo: STDIN)", pcb->pid);
@@ -456,13 +469,12 @@ void* atender_cpu(void* socket_cpu_ptr){
                 liberar_cpu_y_notificar(cpu_emisora);
                 break;
             }
-
-            case STDOUT: {
+            case STDOUT:{
                 uint32_t dir_logica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## PID: %d - Solicitó Syscall STDOUT (dir=%u, tam=%u)", pidSolicitaSyscall, dir_logica, tamano);
 
-                t_pcb* pcb = buscarPcbporPID(pidSolicitaSyscall);
+                t_pcb* pcb = buscarPcbporPIDEnColaExec(pidSolicitaSyscall);
                 if (pcb) {
                     pcb->estado = BLOCK;
                     log_info(kernel->logger, "## PID: %d - Estado Anterior: EXEC - Estado Actual: BLOCK (Motivo: STDOUT)", pcb->pid);
@@ -493,21 +505,19 @@ void* atender_cpu(void* socket_cpu_ptr){
                 liberar_cpu_y_notificar(cpu_emisora);
                 break;
             }
-
-            case INIT_PROC: { // NO BLOQUEA
+            case INIT_PROC: {// NO BLOQUEA
                 char* path_script = (char*) list_get(paquete, 2);
                 int prioridad = *(int*) list_get(paquete, 3);
                 log_info(kernel->logger, "## CPU solicita creación de proceso: %s (prioridad %d)", path_script, prioridad);
                 crearProceso(path_script, prioridad);
+                enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
             }
-
-            case EXIT_PROC: { // NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
+            case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
                 liberar_cpu_y_notificar(cpu_emisora);
                 break;
             }
-
             default:
                 log_warning(kernel->logger, "Operación desconocida de CPU: %d", cod_op);
                 break;
@@ -515,7 +525,7 @@ void* atender_cpu(void* socket_cpu_ptr){
 
         list_destroy_and_destroy_elements(paquete, free);
     }
-    }
+}
 
 
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
