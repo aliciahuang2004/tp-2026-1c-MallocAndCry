@@ -1,8 +1,22 @@
 ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+
 ./bin/memory_stick ms1.config 1024 1
 ./bin/memory_stick ms2.config 2048 2
+./bin/memory_stick ms3.config 1024 3
+./bin/memory_stick ms4.config 4096 4
+
 ./bin/cpu cpu.config 1
+
 ./bin/kernel_memory kernel_memory.config 
+
+./bin/io io.config STDIN
+./bin/io io.config STDOUT
+./bin/io io.config SLEEP
+
+
+pkill -f kernel_memory
+fuser -k 9001/tcp
+sleep 1
 valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
 
 pkill -f kernel_memory
@@ -12,3 +26,11 @@ fuser -k 9001/tcp
 fuser -k 9002/tcp
 
 SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
+
+
+SET AX 9
+SET BX 3
+SET CX 1
+NOOP
+NOOP
+EXIT

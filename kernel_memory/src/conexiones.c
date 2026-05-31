@@ -235,6 +235,27 @@ void* atender_conexion(void* arg) {
             
             }
             break;
+            case ACTUALIZAR_CONTEXTO:
+            {
+                // CUANDO ENC CPU HAY UNA INTERRUPCION O SYSCALL,EL PROCESO ES DESALOJADO Y CPU ENVIA A KM LOS REGISTROS ACTUALIZADOS
+                int pid = *(int*)list_get(paquete, 1);
+                t_registros registros_nuevos;
+                registros_nuevos.PC  = *(uint32_t*)list_get(paquete, 2);
+                registros_nuevos.AX  = *(uint8_t*)list_get(paquete, 3);
+                registros_nuevos.BX  = *(uint8_t*)list_get(paquete, 4);
+                registros_nuevos.CX  = *(uint8_t*)list_get(paquete, 5);
+                registros_nuevos.DX  = *(uint8_t*)list_get(paquete, 6);
+                registros_nuevos.EAX = *(uint32_t*)list_get(paquete, 7);
+                registros_nuevos.EBX = *(uint32_t*)list_get(paquete, 8);
+                registros_nuevos.ECX = *(uint32_t*)list_get(paquete, 9);
+                registros_nuevos.EDX = *(uint32_t*)list_get(paquete, 10);
+                registros_nuevos.SI  = *(uint32_t*)list_get(paquete, 11);
+                registros_nuevos.DI  = *(uint32_t*)list_get(paquete, 12);
+
+                actualizar_contexto(pid, &registros_nuevos);
+                log_info(logger, "Contexto actualizado - PID: %d", pid);
+            }
+            break;
         
         default:
           log_error(logger, "[Socket %d] Código de operación desconocido: %d", socket_cliente, codigo_operacion);
