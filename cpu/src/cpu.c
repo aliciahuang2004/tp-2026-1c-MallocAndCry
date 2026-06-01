@@ -212,11 +212,15 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         char* cadena_leida = fetch_instruccion(cpu, contexto);
 
-        //sumo uno al PC
-        if(cadena_leida != NULL){
-            contexto ->registros.PC +=1;
+        if (cadena_leida == NULL) {
+            log_error(cpu->logger, "Abortando ciclo de instrucción para PID %d debido a error en Fetch.", contexto->pid);
+            ejecutando = 0; 
+            break;         
         }
-        
+
+        //sumo uno al PC
+        contexto->registros.PC += 1;
+
         //DECODE
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
         
