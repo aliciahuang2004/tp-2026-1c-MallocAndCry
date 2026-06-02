@@ -161,9 +161,12 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     
     //armo paquete
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
-
+    
+    int id_cpu_int = atoi(cpu->id); 
+    
     agregar_a_paquete(paquete, &pid, sizeof(int));
-    agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
+    agregar_a_paquete(paquete, &id_cpu_int, sizeof(int)); 
+
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
@@ -279,8 +282,6 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
     
-    log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
-
     t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
     agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
     agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); // es necesario pasarle lo registros?
