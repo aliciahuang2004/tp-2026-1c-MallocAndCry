@@ -64,5 +64,6 @@ t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 int recibir_operacion(int socket_cliente);
 void enviar_operacion(int socket_cliente, op_code codigo);
+uint32_t aumentar_memoria_total(uint32_t tamano);
 
 #endif /* KERNEL_MEMORY_H */

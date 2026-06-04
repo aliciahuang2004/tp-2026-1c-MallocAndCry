@@ -4,6 +4,10 @@
 #include "instrucciones.h"
 #include "procesos.h"
 #include "memory_stick.h"
+#include "estructuras.h"
+#include "huecos.h"
+#include "compactacion.h"
+#include "segmentos.h"
 
 uint32_t memoria_total = 0;
 t_list* lista_huecos_libres;
@@ -52,7 +56,18 @@ void* atender_conexion(void* arg) {
         t_list* paquete = recibir_paquete(socket_cliente);
         
         if (!paquete) {
+        t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
+
+            if(ms != NULL) {
+                
+                //para caso de corrupcion de memoria
+               manejar_desconexion_memory_stick(ms, km, logger);
+            } else {
+                log_warning(logger, "Se desconectó un módulo no identificado. Socket:%d", socket_cliente);
+            }
+            //DEBERIA TENER EN CUENTA QUÉ MODULO SE DESCONECTÓ? MAS ALLA DE LOS MS (aunque no se dijo nada sobre la desconexion de otros módulos)
             log_error(logger, "Error al recibir paquete o cliente desconectado en socket %d.", socket_cliente);
+
             break; // Salimos del bucle si el cliente se cae
         }
 
@@ -67,12 +82,14 @@ void* atender_conexion(void* arg) {
 
             case MEMORY_STICK_HANDSHAKE: {
                 int ms_id = *(int *)list_get(paquete, 1);
-                int ms_tamano = *(int *)list_get(paquete, 2);
+                uint32_t ms_tamano = *(int *)list_get(paquete, 2);
+                char* ms_puerto = (char*) list_get(paquete, 3);
 
-                log_info(logger, "[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes", socket_cliente, ms_id, ms_tamano);
+                log_info(logger,"[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
 
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
-                //ver si me sirve de algo tener una lista de ms
+
+                 //ver si me sirve de algo tener una lista de ms,me sirve para detectar al ms caido
                 int resultado = nuevo_memory_stick(ms_id, ms_tamano, socket_cliente);
 
                 if(resultado) {
@@ -98,7 +115,7 @@ void* atender_conexion(void* arg) {
                 } else {
                     log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
                 }
-                //tambien tengo que avisar a las cpus sobre nuevo ms,enviarles el puerto
+                //tambien tengo que avisar a las cpus sobre nuevo ms,enviarles el "ms_puerto"
                 break;
             }
 
@@ -222,7 +239,7 @@ void* atender_conexion(void* arg) {
             case FINALIZAR_PROCESO: ///***ESPERO EXIT DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
-                int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger);
+                eliminar_proceso(pid_recibido,km,logger);
             }
             break;
             case SUSPENSION_DE_PROCESO:
@@ -238,7 +255,7 @@ void* atender_conexion(void* arg) {
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
-                int eliminar_segmento(int pid, int id_segmento, t_log* logger);
+                eliminar_segmento(pid_recibido,id_seg_recibido,logger);
             }
             break;
             case CREACION_DE_SEGMENTO: ///***ESPERO MEM_ALLOC DE KS
@@ -246,10 +263,11 @@ void* atender_conexion(void* arg) {
             {   //RECIBO PAQUETE DE PARTE DE KERNEL SCHEDULER CON LOS SIG DATOS
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
-                int tamano_recibido = *(int *)list_get(paquete, 3);
-                int crear_segmento(int pid_recibido, int id_seg_recibido, uint32_t tamano_recibido,t_log* logger); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
-             //deberia enviar confirmacion a ks de que se creó correctamente el segmento???
-            }
+                uint32_t tamano_recibido = *(int *)list_get(paquete, 3);
+                crear_segmento(pid_recibido, id_seg_recibido,tamano_recibido,logger,km); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
+             //deberia enviar confirmacion a ks de que se creó correctamente el segmento???si
+             //tengo que contemplar posible compactacion
+             }
             break;
             case ACTUALIZAR_CONTEXTO:
             {
@@ -280,6 +298,12 @@ void* atender_conexion(void* arg) {
 
                 actualizar_contexto(pid, &registros_nuevos);
                 log_info(logger, "Contexto actualizado - PID: %d", pid);
+            }
+            break;
+            case CPUS_DESALOJADAS://ANTES DEBERIA DESARROLLAR LAS ESCRITURAS,LECTURAS DE SEGMENTOS
+            {/// KS DEBERIA ENVIAR "CPUS_DESALOJADAS" CUANDO TERMINA DE DESALOJAR A TODAS LAS CPUS,
+            //PARA COMENZAR CON LA COMPACTACION EN KM 
+            //(CREO TEMPORALMENTE UNA TABLA GLOBAL DE SEGMENTOS EN "comenzar_compactacion")
             }
             break;
         

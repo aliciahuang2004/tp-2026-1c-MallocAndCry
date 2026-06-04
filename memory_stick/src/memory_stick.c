@@ -87,6 +87,7 @@ void enviar_handshake(t_memory_stick* ms){
   t_paquete* paquete = crear_paquete(MEMORY_STICK_HANDSHAKE, crear_buffer());
   agregar_a_paquete(paquete,&ms->id, sizeof(int));
   agregar_a_paquete(paquete,&ms->tamano,  sizeof(int));
+  agregar_a_paquete(paquete,ms->puerto_escucha,strlen(ms->puerto_escucha) + 1);
   enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
   eliminar_paquete(paquete);
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);

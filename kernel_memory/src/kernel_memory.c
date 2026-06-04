@@ -1,5 +1,5 @@
 #include "kernel_memory.h"
-
+#include "procesos.h"
 
 t_list* lista_ms;
 pthread_mutex_t mutex_lista_ms = PTHREAD_MUTEX_INITIALIZER;

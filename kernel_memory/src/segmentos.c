@@ -5,10 +5,10 @@
 #include "procesos.h"
 
 
-int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger) {
+int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_kernel_memory* km) {
     pthread_mutex_lock(&mutex_huecos);
 
-    t_hueco* hueco = buscar_hueco(tamano,logger);
+    t_hueco* hueco = buscar_hueco(tamano,km,logger);
 
     if(hueco == NULL) {
         pthread_mutex_unlock(&mutex_huecos);

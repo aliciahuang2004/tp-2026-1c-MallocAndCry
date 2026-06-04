@@ -2,6 +2,7 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 #include <commons/collections/dictionary.h>
+#include "compactacion.h"
 
 void agregar_hueco_libre(uint32_t base, uint32_t tamano)
 {
@@ -32,52 +33,68 @@ void consumir_hueco(t_hueco* hueco, uint32_t tamano) {
 
 }
 
-t_hueco* buscar_hueco(uint32_t tamano,t_log* logger) {
+t_hueco* buscar_hueco(uint32_t tamano,t_kernel_memory* km,t_log* logger) {
 
-    t_kernel_memory* km ;//??????????revisar si esta bien
     if(strcmp(km->allocation_strategy, "BEST") == 0)
-        return buscar_hueco_best_fit(tamano,logger);
+        return buscar_hueco_best_fit(tamano,km,logger);
 
-    return buscar_hueco_worst_fit(tamano,logger);
+    return buscar_hueco_worst_fit(tamano,km,logger);
 }
 
-t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_log* logger) {
+t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logger) {
     t_hueco* mejor = NULL;
+    uint32_t total_huecos = 0;
 
-    for(int i = 0; i < list_size(lista_huecos_libres); i++) {
+    for (int i = 0; i < list_size(lista_huecos_libres); i++) {
         t_hueco* hueco = list_get(lista_huecos_libres, i);
-
-        if(hueco->tamano >= tamano) {
-            if(mejor == NULL || hueco->tamano < mejor->tamano) {
+        total_huecos += hueco->tamano;  // ← acumulás siempre
+        if (hueco->tamano >= tamano) {
+            if (mejor == NULL || hueco->tamano < mejor->tamano) {
                 mejor = hueco;
             }
         }
     }
-        if(mejor != NULL)
-            log_info(logger,
-                    "BEST FIT eligio hueco Base:%u Tamaño:%u",mejor->base,mejor->tamano);
-        else
-            log_info(logger,"BEST FIT no encontro hueco");
+
+    if (mejor != NULL) {
+        log_info(logger, "BEST FIT eligio hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
+    } else {
+        log_info(logger, "BEST FIT no encontro hueco");
+        if (total_huecos >= tamano) {
+            log_info(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
+            avisar_compactacion(km,logger);
+        } else {
+            log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
+        }
+    }
     return mejor;
 }
 
-t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_log* logger) {
+t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logger) {
     t_hueco* peor = NULL;
+    uint32_t total_huecos = 0;
 
-
-    for(int i = 0; i < list_size(lista_huecos_libres); i++) {
+    for (int i = 0; i < list_size(lista_huecos_libres); i++) {
         t_hueco* hueco = list_get(lista_huecos_libres, i);
-
-        if(hueco->tamano >= tamano) {
-            if(peor == NULL || hueco->tamano > peor->tamano) {
+        total_huecos += hueco->tamano;  // acumulo todos los huecos libres en caso de necesitarlo
+        if (hueco->tamano >= tamano) {
+            if (peor == NULL || hueco->tamano > peor->tamano) {
                 peor = hueco;
             }
         }
     }
-        if(peor != NULL)
-            log_info(logger,"WORST FIT eligio hueco Base:%u Tamaño:%u",peor->base,peor->tamano);
-        else
-            log_info(logger,"WORST FIT no encontro hueco");
+
+    if (peor != NULL) {
+        log_info(logger, "WORST FIT eligio hueco Base:%u Tamaño:%u", peor->base, peor->tamano);
+    } else {
+        log_info(logger, "WORST FIT no encontro hueco");
+        if (total_huecos >= tamano) {
+            log_info(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
+            avisar_compactacion(km,logger);
+        } else {
+            log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
+            //ver "qué hacer" cuando no hay espacio disponible
+        }
+    }
     return peor;
 }
 
