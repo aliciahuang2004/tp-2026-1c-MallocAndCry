@@ -1,2 +1,4 @@
-INIT_PROC hola.txt 1
+INIT_PROC proceso.txt 1
+CREATE_MUTEX unmutex
+
 EXIT

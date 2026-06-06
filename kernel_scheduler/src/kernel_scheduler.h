@@ -123,7 +123,8 @@ void liberarMutex(int pidLiberaMutex,char* nombreMutex);
 void hacerSleep(int pid,int tiempo_ms);
 void hacerStdOut(int pidSolicitaSyscall,int direccionALeer, int tamanioLectura);
 void hacerStdIn(int pidSolicitaSyscall,int direccionAEscribir, int tamanioLectura);
-void finalizarProceso();
+void finalizarProceso(int pid);
+void eliminarProceso(int pid, op_code motivo);
 
 //Planificador
 

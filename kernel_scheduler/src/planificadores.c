@@ -515,6 +515,7 @@ void* atender_cpu(void* socket_cpu_ptr){
             }
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
+                finalizarProceso(pidSolicitaSyscall);
                 liberar_cpu_y_notificar(cpu_emisora);
                 break;
             }

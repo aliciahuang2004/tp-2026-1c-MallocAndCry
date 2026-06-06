@@ -186,8 +186,61 @@ void hacerStdIn(int pidSolicitaSyscall,int direccionAEscribir, int tamanioLectur
     */
 }
 
-void finalizarProceso(){
-    // ELEGIR PCB A DESTRUIR
-    // DESTRUIR PCB
-    // LOG FINALIZACION
+void finalizarProceso(int pid){
+
+    t_pcb* pcb = buscarPcbporPIDEnColaExec(pid);
+    if(pcb != NULL){
+        pcb->estado = EXIT;
+        pthread_mutex_lock(&mutex_EXIT);
+        queue_push(colaEXIT, pcb);
+        pthread_mutex_unlock(&mutex_EXIT);
+        log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
+        
+        eliminarProceso(pid, EXIT_PROC);
+        
+    }
+}
+
+void eliminarProceso(int pid, op_code motivo ){
+
+    t_queue* colaAux = queue_create();
+    t_pcb* pcbEncontrado = NULL;
+
+    pthread_mutex_lock(&mutex_EXIT);
+    int cantidad = queue_size(colaEXEC);
+
+    for(int i = 0; i < cantidad; i++){
+        t_pcb* pcb = queue_pop(colaEXIT);
+        if(pcb->pid == pid && pcbEncontrado == NULL){
+            pcbEncontrado = pcb;
+        }else{
+            queue_push(colaAux,pcb);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(colaEXIT, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+
+    pthread_mutex_unlock(&mutex_EXIT);
+
+    if (pcbEncontrado->path != NULL) {
+        free(pcbEncontrado->path);
+    }
+
+    free(pcbEncontrado);
+
+
+    switch (motivo)
+    {
+    case EXIT_PROC:
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <SYSCALL EXIT>",pid);
+        break;
+    
+    default:
+        log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
+        break;
+    }
+    
 }
