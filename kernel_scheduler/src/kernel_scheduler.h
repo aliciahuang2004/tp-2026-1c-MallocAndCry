@@ -108,10 +108,6 @@ int recibir_operacion(int socket_cliente);
 //funciones de cliente
 void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 
-// funciones de IO
-void enviar_peticion_io(int socket_io, t_solicitud_io* solicitud, t_log* logger);
-void* esperar_finalizacion_io(void* args);
-
 //SYSCALL
 //Crear proceso
 t_pcb* crear_PCB(char* path, int prioridad);
@@ -120,9 +116,9 @@ void enviarPathYPidKM(int pid, char* path);
 void crearMutex(char* nombreMutex);
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu);
 void liberarMutex(int pidLiberaMutex,char* nombreMutex);
-void hacerSleep(int pid,int tiempo_ms);
-void hacerStdOut(int pidSolicitaSyscall,int direccionALeer, int tamanioLectura);
-void hacerStdIn(int pidSolicitaSyscall,int direccionAEscribir, int tamanioLectura);
+void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
+void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void finalizarProceso(int pid);
 void eliminarProceso(int pid, op_code motivo);
 
@@ -171,6 +167,7 @@ void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPIDEnColaExec(int pid);
 void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu);
+t_pcb* pasarProcesoExecABlockSinLiberar(int pid);
 
 //void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
@@ -198,6 +195,6 @@ void liberar_solicitud_io(t_solicitud_io* solicitud);
 void enviar_operacion_a_io(t_interfaz_conectada* interfaz, t_solicitud_io* solicitud);
 void imprimir_lista_interfaces_io(t_log* logger);
 
-t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
-void liberar_cpu_y_notificar(t_cpu_conectada* cpu);
+// IO handlers (en io.c)
+void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio);
 #endif /* KERNEL_SCHEDULER_H*/

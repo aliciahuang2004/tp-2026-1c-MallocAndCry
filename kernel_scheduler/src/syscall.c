@@ -87,20 +87,8 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu){
         queue_push(mutex->cola_bloqueados, pid_ptr);
         pthread_mutex_unlock(&mutex_diccionario);
 
-        t_pcb* pcb = buscarPcbporPIDEnColaExec(pidSolicitaSyscall);
-        if(pcb != NULL){
-            pcb->estado = BLOCK;
-            pthread_mutex_lock(&mutex_BLOCK);
-            queue_push(colaBLOCK, pcb);
-            pthread_mutex_unlock(&mutex_BLOCK);
-            log_info(kernel->logger, "## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>", pcb->pid); 
-        }
-
-        if(cpu != NULL) {
-            cpu->libre = true;
-            cpu->pidEjecutando = -1;
-        }
-        sem_post(&sem_hayCPUs);
+        // Usar pasarProcesoExecABlock para hacer la transición completa
+        pasarProcesoExecABlock(pidSolicitaSyscall, cpu);
     }
 }
 
@@ -142,48 +130,6 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex){
     } else {
         pthread_mutex_unlock(&mutex_diccionario);
     }
-}
-
-void hacerSleep(int pid,int tiempo_ms){
-    
-    t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
-
-    agregar_a_paquete(paquete, &pid, sizeof(int));
-    agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
-    agregar_a_paquete(paquete, &tiempo_ms, sizeof(int));
-    //enviar_paquete(paquete, socketIO, kernel->logger);
-
-    eliminar_paquete(paquete);
-    
-}
-
-void hacerStdOut(int pidSolicitaSyscall,int direccionALeer, int tamanioLectura){
-    /*
-    //PEDIR A KM DATOS DE LA DIRECCION RECIBIDA
-
-    // ENVIAR A IO LOS DATOS RECIBIDOS DE KM
-                
-    */
-}
-
-void hacerStdIn(int pidSolicitaSyscall,int direccionAEscribir, int tamanioLectura){
-    /*
-    //PEDIR A IO INGRESO DE DATOS
-    t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(IO_REQUEST, buffer);
-
-    agregar_a_paquete(paquete, &pid, sizeof(int));
-    agregar_a_paquete(paquete, OP_SLEEP, sizeof(t_io_operation));
-    agregar_a_paquete(paquete, &tamanioLectura, sizeof(int));
-    enviar_paquete(paquete, socketIO, kernel->logger);
-
-    eliminar_paquete(paquete);
-
-    //recibirpaquete con los datos
-
-    // ENVIAR A KM LOS DATOS DE IO
-    */
 }
 
 void finalizarProceso(int pid){

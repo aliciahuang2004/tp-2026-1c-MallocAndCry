@@ -288,18 +288,6 @@ void* atender_cliente_scheduler(void* arg) {
     return NULL;
 }
 
-int recibir_operacion(int socket_cliente)
-{
-	int cod_op;
-	if (recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
-		return cod_op;
-	else
-	{
-		close(socket_cliente);
-		return -1;
-	}
-}
-
 t_queue* obtener_cola_bloqueados_por_tipo(t_tipo_io tipo) {
     switch (tipo) {
         case IO_SLEEP: return cola_bloqueados_sleep;
