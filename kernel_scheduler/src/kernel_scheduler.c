@@ -134,34 +134,36 @@ void* atender_cliente_scheduler(void* arg) {
 
         switch (cod_op) {
             case CPU_HANDSHAKE:
-                {
+                {   //Lee el ID de la CPU (si lo envió, si no se asigna uno por defecto)
                     int* id_cpu_ptr = (int*) list_get(paquete, 1);
                     int id_cpu = 1;
                     if (id_cpu_ptr != NULL) {
                         id_cpu = *id_cpu_ptr;
                     }
+                    //Crea la estructura que representa a esa CPU
                     t_cpu_conectada* nuevaCPU = malloc(sizeof(t_cpu_conectada));
                     nuevaCPU->socket_cliente = datos->socket_cliente;
                     nuevaCPU->id_cpu = id_cpu;
                     nuevaCPU->libre = true;
                     nuevaCPU->pidEjecutando = -1; // no ejecuta ninguno
+                    // La agrega a la cola de CPUs disponibles 
                     pthread_mutex_lock(&mutex_CPU);
                     queue_push(colaCPUs, nuevaCPU);
                     pthread_mutex_unlock(&mutex_CPU);
 
-                    log_info(logger, "CPU registrada con éxito en colaCPUs");
-                    
+                    log_info(logger, "## CPU %d Conectada", id_cpu);
+                    // Crea un hilo dedicado para atender a esa CPU
                     pthread_t hilo_cpu;
                     int* socket_cpu_ptr = malloc(sizeof(int));
                     *socket_cpu_ptr = nuevaCPU->socket_cliente;
                     pthread_create(&hilo_cpu, NULL, atender_cpu, socket_cpu_ptr);
                     pthread_detach(hilo_cpu);
 
-                    if(!kernel->procesoInicialCreado){
+                   /* if(!kernel->procesoInicialCreado){
                         log_info(logger, "Creando proceso inicial...");
                         crearProceso(pathInicial, 0);
                         kernel->procesoInicialCreado = true; 
-                    }
+                    }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
                     sem_post(&sem_hayCPUs);
                 }
         
@@ -227,7 +229,7 @@ void* atender_cliente_scheduler(void* arg) {
 
                 t_pcb* pcb_a_desbloquear = NULL;
 
-                // 🌟 RECOLECTAMOS LA SOLICITUD QUE YA TERMINÓ
+                // RECOLECTAMOS LA SOLICITUD QUE YA TERMINÓ
                 pthread_mutex_lock(mutex_tipo);
                 if (!queue_is_empty(cola_tipo)) {
                     t_solicitud_io* solicitud_terminada = queue_pop(cola_tipo); // <-- Ahora sí sacamos la que terminó
@@ -252,7 +254,7 @@ void* atender_cliente_scheduler(void* arg) {
                     log_error(logger, "Error: El PID %d terminó pero no había nada en la cola.", pid_io);
                 }
 
-                // 🌟 PLANIFICACIÓN DE I/O CONTINUA (MULTIPLEXADO)
+                
                 // Si la cola no quedó vacía, significa que hay otro proceso esperando el dispositivo
                 pthread_mutex_lock(mutex_tipo);
                 if (!queue_is_empty(cola_tipo)) {
