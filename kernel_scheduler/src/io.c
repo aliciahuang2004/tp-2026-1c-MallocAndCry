@@ -7,7 +7,7 @@ void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio) {
     }
 
     t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(LECTURA_MEMORIA, buffer);
+    t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, buffer);
 
     agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
     agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
