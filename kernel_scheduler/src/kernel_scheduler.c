@@ -78,13 +78,17 @@ void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler){
 
   kernel_scheduler->socket_kernel_memory = crear_conexion(kernel_scheduler->logger,kernel_scheduler->ip_kernel_memory,kernel_scheduler->puerto_kernel_memory);
   
-  if(kernel_scheduler->socket_kernel_memory != -1){
-    log_info(kernel_scheduler->logger,COLOR_VERDE "## Conexión al Kernel Memory exitosa. IP:%s, Puerto: %s\033[0m",kernel_scheduler->ip_kernel_memory,kernel_scheduler->puerto_kernel_memory);
+    if(kernel_scheduler->socket_kernel_memory == -1){
+        log_error(kernel_scheduler->logger, "Error al conectar con kernel memory");  
+        exit(EXIT_FAILURE); 
+    }
 
-  }else{
-    log_error(kernel_scheduler->logger,"Error al conectar con kernel memory");  
-    exit(EXIT_FAILURE); 
-  }
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
+    enviar_paquete(paquete, kernel_scheduler->socket_kernel_memory, kernel_scheduler->logger);
+    eliminar_paquete(paquete);
+
+    log_info(kernel_scheduler->logger, "## Conectado a Kernel Memory");
   
 }
 
