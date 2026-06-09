@@ -45,9 +45,24 @@ void manejar_desconexion_memory_stick(t_ms_info* ms, t_kernel_memory* km, t_log*
     enviar_paquete(aviso, km->socket_kernel_scheduler, logger);
     eliminar_paquete(aviso);
 }
-/*manejar_desconexion_memory_stick(ms, km, logger);
-CUANDO SE DESCONECTA UN MS:
-AVISO A KS
-KS DEBE FINALIZAR TODOS LOS PROCESOS:ESTA FINALIZACION SOLO SE HACE EN KS O TAMBIEN EN KM?
-KS FINALIZA CON MENSAJE BLUE SCREEN OF DEATH
-*/
+
+void agregar_posicion_ms(t_resultado_hueco r,int ms_id,t_log*logger){
+    t_ms_pos* ms_pos = malloc(sizeof(t_ms_pos));
+    memset(ms_pos, 0, sizeof(t_ms_pos));
+    ms_pos->id = ms_id;
+    ms_pos->base_global = r.base;
+    ms_pos->limite_global = r.limite;
+    pthread_mutex_lock(&mutex_lista_dir_global_ms);
+    list_add(lista_dir_global_ms, ms_pos);
+    //****************log temp************
+    log_info(logger, "=== Lista de Memory Sticks (%d en total) ===", list_size(lista_dir_global_ms));
+    for(int i = 0; i < list_size(lista_dir_global_ms); i++) {
+        t_ms_pos* ms = list_get(lista_dir_global_ms, i);
+        log_info(logger, "  [%d] MS ID:%d | base global:%u | limite global:%u",
+                 i, ms->id, ms->base_global, ms->limite_global);
+    }
+    log_info(logger, "==========================================");
+    //****************log temp**************
+    pthread_mutex_unlock(&mutex_lista_dir_global_ms);
+}
+

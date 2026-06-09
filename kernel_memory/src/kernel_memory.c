@@ -2,6 +2,10 @@
 #include "procesos.h"
 
 t_list* lista_ms;
+t_list* lista_dir_global_ms;
+t_list* cpus_conectadas;
+pthread_mutex_t mutex_cpus_conectadas = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_lista_dir_global_ms = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ms = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_memoria_total = PTHREAD_MUTEX_INITIALIZER;
 

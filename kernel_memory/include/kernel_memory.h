@@ -47,6 +47,11 @@ extern t_dictionary* tabla_contextos;
 
 extern uint32_t memoria_total;
 
+extern t_list* lista_dir_global_ms;
+
+extern t_list* cpus_conectadas;
+
+
 //MUTEX
 extern pthread_mutex_t mutex_procesos;
 
@@ -59,6 +64,11 @@ extern pthread_mutex_t mutex_swap;
 extern pthread_mutex_t mutex_tabla_contextos;
 
 extern pthread_mutex_t mutex_memoria_total;
+
+extern pthread_mutex_t mutex_lista_dir_global_ms;
+
+extern pthread_mutex_t mutex_cpus_conectadas;
+
 
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);

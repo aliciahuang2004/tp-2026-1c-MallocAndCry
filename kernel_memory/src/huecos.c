@@ -4,24 +4,30 @@
 #include <commons/collections/dictionary.h>
 #include "compactacion.h"
 
-void agregar_hueco_libre(uint32_t base, uint32_t tamano)
+t_resultado_hueco agregar_hueco_libre(uint32_t base, uint32_t tamano)
 {
+    t_resultado_hueco resultado = {0, 0}; // valores por defecto si falla
+
     t_hueco* hueco = malloc(sizeof(t_hueco));
-
     if(hueco == NULL)
-        return;
+        return resultado;
 
-    hueco->base = base;
+    hueco->base   = base;
     hueco->tamano = tamano;
+    hueco->limite = base + tamano - 1;
+
+    resultado.base   = hueco->base;
+    resultado.limite = hueco->limite;
 
     pthread_mutex_lock(&mutex_huecos);
     list_add(lista_huecos_libres, hueco);
     pthread_mutex_unlock(&mutex_huecos);
 
+    return resultado;
 }
 
 
-void consumir_hueco(t_hueco* hueco, uint32_t tamano) {
+void consumir_hueco(t_hueco* hueco, uint32_t tamano) {//revisar que hace esta funcion
 
     hueco->base += tamano;
     hueco->tamano -= tamano;
@@ -56,7 +62,7 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logge
     }
 
     if (mejor != NULL) {
-        log_info(logger, "BEST FIT eligio hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
+        log_info(logger, "ALGORITMO BEST FIT eligió hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
     } else {
         log_info(logger, "BEST FIT no encontro hueco");
         if (total_huecos >= tamano) {
@@ -84,7 +90,7 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
     }
 
     if (peor != NULL) {
-        log_info(logger, "WORST FIT eligio hueco Base:%u Tamaño:%u", peor->base, peor->tamano);
+        log_info(logger, "ALGORITMO WORST FIT eligió hueco con Base:%u Tamaño:%u", peor->base, peor->tamano);
     } else {
         log_info(logger, "WORST FIT no encontro hueco");
         if (total_huecos >= tamano) {
@@ -92,16 +98,18 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
             avisar_compactacion(km,logger);
         } else {
             log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
-            //ver "qué hacer" cuando no hay espacio disponible
+            //ver "qué hacer" cuando no hay espacio disponible (SEGUN  ISSUE NO VA A PASAR QUE NO HAYA ESPACIO DISPONIBLE PARA CREAR UN SEGMENTO)
         }
     }
     return peor;
 }
 
-void loguear_huecos(t_log* logger) {//para probar que la lista de huecos se use correctamente
+void loguear_huecos(t_log* logger)
+{
     log_info(logger, "----- LISTA DE HUECOS -----");
-    for(int i = 0; i < list_size(lista_huecos_libres); i++) {
+    for(int i = 0; i < list_size(lista_huecos_libres); i++)
+    {
         t_hueco* hueco = list_get(lista_huecos_libres, i);
-        log_info(logger, "Hueco[%d] Base:%u Tamaño:%u", i, hueco->base, hueco->tamano);
+        log_info(logger,"Hueco[%d] Base:%u Limite:%u Tamaño:%u",i,hueco->base,hueco->limite,hueco->tamano);
     }
 }

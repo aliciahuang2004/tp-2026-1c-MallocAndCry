@@ -67,7 +67,10 @@ typedef enum{
     PROCESO_DESALOJADO_COMPACTACION,
     CORRUPCION_MEMORIA,                  //km envia esto a ks para avisar que un ms se desconectó            
     INICIAR_COMPACTACION,
-    CPUS_DESALOJADAS            
+    CPUS_DESALOJADAS,
+    AUMENTO_DE_MEMORIA,
+    SEG_MAX_SIZE,
+    MS_NUEVO_CPU          
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

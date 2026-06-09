@@ -39,6 +39,41 @@ void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     }
 }
 
+void agregar_cpu_conectada(int cpu_id, int socket_cliente)
+{
+    t_cpu* cpu = malloc(sizeof(t_cpu));
+    if(cpu == NULL)
+        return;
+
+    cpu->id     = cpu_id;
+    cpu->socket = socket_cliente;
+
+    pthread_mutex_lock(&mutex_cpus_conectadas);
+    list_add(cpus_conectadas, cpu);
+    pthread_mutex_unlock(&mutex_cpus_conectadas);
+}
+
+void avisar_cpus_conectadas(int ms_id, char* ms_puerto, int ms_ip,t_log* logger)
+{
+    pthread_mutex_lock(&mutex_cpus_conectadas);
+
+    int total = list_size(cpus_conectadas);
+    log_info(logger, "Avisando nuevo MS ID:%d a %d CPUs conectadas", ms_id, total);
+
+    for(int i = 0; i < list_size(cpus_conectadas); i++) {
+        t_cpu* cpu = list_get(cpus_conectadas, i);
+
+        t_paquete* paquete = crear_paquete(MS_NUEVO_CPU, crear_buffer());
+        agregar_a_paquete(paquete, &ms_id,sizeof(int));
+        agregar_a_paquete(paquete, ms_puerto,strlen(ms_puerto) + 1);
+        agregar_a_paquete(paquete, &ms_ip,sizeof(int));
+        enviar_paquete(paquete, cpu->socket, logger);
+        eliminar_paquete(paquete);
+
+        log_info(logger, "  [%d/%d] Aviso enviado a CPU ID:%d socket:%d",i + 1, total, cpu->id, cpu->socket);
+    }
+    pthread_mutex_unlock(&mutex_cpus_conectadas);
+}
 
 void* atender_conexion(void* arg) {
     t_hacerConnect* datos = (t_hacerConnect*) arg;
@@ -65,7 +100,7 @@ void* atender_conexion(void* arg) {
             } else {
                 log_warning(logger, "Se desconectó un módulo no identificado. Socket:%d", socket_cliente);
             }
-            //DEBERIA TENER EN CUENTA QUÉ MODULO SE DESCONECTÓ? MAS ALLA DE LOS MS (aunque no se dijo nada sobre la desconexion de otros módulos)
+            //DEBERIA TENER EN CUENTA QUÉ MODULO SE DESCONECTÓ? MAS ALLA DE LOS MS (aunque no se dijo nada sobre la desconexion de otros módulos),si deberia ver cuando una cpu se desconecta
             log_error(logger, "Error al recibir paquete o cliente desconectado en socket %d.", socket_cliente);
 
             break; // Salimos del bucle si el cliente se cae
@@ -77,45 +112,48 @@ void* atender_conexion(void* arg) {
             case CPU_HANDSHAKE:
                 int cpu_id = *(int *)list_get(paquete, 1);
                 log_info(logger, "CPU ID:%d conectada en socket %d", cpu_id, socket_cliente);
-                // CODIGO CPU
+            //ALMACENO EL CPU CON ID Y SOCKET EN "cpus_conectadas"
+               agregar_cpu_conectada(cpu_id, socket_cliente);
+            //*********ENVIA SEGMENT MAX SIZE APENAS SE CONECTA CPU*************************DESCOMENTAR CUANDO CPU ESPERE SEG_MAX_SIZE
+               /* t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
+                agregar_a_paquete(respuesta, &km->segment_max_size, sizeof(int));
+                enviar_paquete(respuesta, socket_cliente, logger);
+                eliminar_paquete(respuesta);
+                */
                 break;
 
             case MEMORY_STICK_HANDSHAKE: {
                 int ms_id = *(int *)list_get(paquete, 1);
                 uint32_t ms_tamano = *(int *)list_get(paquete, 2);
                 char* ms_puerto = (char*) list_get(paquete, 3);
+                //int ms_ip = *(int *)list_get(paquete, 4);
 
-                log_info(logger,"[Socket %d] MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
+                log_info(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
 
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
 
-                 //ver si me sirve de algo tener una lista de ms,me sirve para detectar al ms caido
                 int resultado = nuevo_memory_stick(ms_id, ms_tamano, socket_cliente);
 
                 if(resultado) {
-                    agregar_hueco_libre(base_nuevo_ms, ms_tamano);
+                    t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);//acá obtengo base y limite global del ms
+                    loguear_huecos(logger);
+                    agregar_posicion_ms(r,ms_id,logger);//ACA GUARDA BASE Y LIMITE GLOBAL DE LOS MS,FALTA PROBAR.ACA KM BUSCA A QUÉ MS ENVIAR PETICION DE ESCRITURA,LECTURA
 
-                    //logs temporales para pruebas
-                    pthread_mutex_lock(&mutex_huecos);
-                    log_info(logger, "Cantidad de huecos libres: %d", list_size(lista_huecos_libres));
-                    pthread_mutex_unlock(&mutex_huecos);
-                    pthread_mutex_lock(&mutex_lista_ms);
-                    log_info(logger, "Memory sticks conectados: %d", list_size(lista_ms));
-                    pthread_mutex_unlock(&mutex_lista_ms);
                     pthread_mutex_lock(&mutex_memoria_total);
                     log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
                     pthread_mutex_unlock(&mutex_memoria_total);
-                    log_info(logger, "Hueco agregado -> Base:%u Tamaño:%u", base_nuevo_ms, ms_tamano);
-
-                    //descomentar cuando ks reciba o espere nuevo tamaño de memoria
-                    /*t_paquete* respuesta = crear_paquete(NUEVO_MEMORY_STICK, crear_buffer());
-                    agregar_a_paquete(respuesta, &ms_tamano, sizeof(int));
-                    enviar_paquete(respuesta, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(respuesta);*/
+                   
+                   //AVISO A KS QUE HAY MAS MEMORIA DISPONIBLE:
+                    t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
+                    agregar_a_paquete(respuesta,&memoria_total,sizeof(int));
+                    enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(respuesta);
+                    //AVISO A TODAS LAS CPUS:
+                    int ms_ip = 127001;
+                    avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger);              
                 } else {
                     log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
                 }
-                //tambien tengo que avisar a las cpus sobre nuevo ms,enviarles el "ms_puerto"
                 break;
             }
 
@@ -230,6 +268,28 @@ void* atender_conexion(void* arg) {
             }
             case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
             {
+                int direccion_fisica_global = *(int*) list_get(paquete, 1);
+                //VER SI ES NECESARIO MAS DATOS----int pc_recibido  = *(int*) list_get(paquete, 2);
+                char* contenido_a_escribir = (char*) list_get(paquete, 3);
+
+                /*
+                llamo a escribir_en_memoria(direccion_fisica,contenido_a_escribir,?)
+                
+                1-caso solo debo escribir en un ms
+                ms recibe una direccion y un contenido y automaticamente escribe donde le piden? o como hace ms?
+
+                TOMO direccion_fisica_global Y LO PASO COMO PARAMETRO A UNA FUNCION "buscar_direccion_local" VA A RECORRER
+                "lista_ms" o alguna otra lista que contenga la base y el limite global de los ms conectados
+                HARÁ LA CUENTA direccion_fisica_global - base global del ms = direccion local dentro del ms desde donde escribir o leer,retorna este dato
+                direccion_local=buscar_direccion_local(direccion_fisica_global,?)
+                LLAMO A OTRA FUNCION "avisar_a_ms(direccion_local,contenido_a_escribir,?) QUE VA A ENVIAR PAQUETE PARA QUE ESCRIBA 
+                necesita acceder a una lista de ms con sus sockets como dato y buscar ms por id
+
+                2-caso debo escribir en dos ms LO VEO DESPUES DE LOGRAR caso 1
+                 aca km deberia calcular si el tamaño y la direccion fisica entra en un ms o mas de uno
+                 si entra en mas de uno CREAR ESTRATEGIA :enviar tantas peticiones de escritura como cantidad de ms en los que haya que escribir
+                */
+
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
@@ -286,15 +346,15 @@ void* atender_conexion(void* arg) {
                 registros_nuevos.SI  = *(uint32_t*)list_get(paquete, 11);
                 registros_nuevos.DI  = *(uint32_t*)list_get(paquete, 12);
                 
-                //logs temporales solo para verificar********
-                log_info(logger, "## Contexto recibido - PID: %d", pid);
-                log_info(logger, "   PC=%u AX=%u BX=%u CX=%u DX=%u", 
+                //logs temporales solo para pruebas***********
+                log_info(logger, "## Contexto actualizado recibido - PID: %d", pid);
+                log_info(logger, "   PC=%u  AX=%u   BX=%u   CX=%u   DX=%u", 
                     registros_nuevos.PC, registros_nuevos.AX, registros_nuevos.BX, 
                     registros_nuevos.CX, registros_nuevos.DX);
-                log_info(logger, "   EAX=%u EBX=%u ECX=%u EDX=%u SI=%u DI=%u",
+                log_info(logger, "   EAX=%u     EBX=%u    ECX=%u   EDX=%u   SI=%u   DI=%u",
                     registros_nuevos.EAX, registros_nuevos.EBX, registros_nuevos.ECX,
                     registros_nuevos.EDX, registros_nuevos.SI, registros_nuevos.DI);
-                //*********
+                //********************************************
 
                 actualizar_contexto(pid, &registros_nuevos);
                 log_info(logger, "Contexto actualizado - PID: %d", pid);

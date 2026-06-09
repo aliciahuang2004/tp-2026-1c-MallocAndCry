@@ -33,14 +33,14 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
     segmento->id_segmento = id_segmento;
     segmento->base = base_segmento;
-    segmento->limite = tamano;
+    segmento->limite = base_segmento + tamano - 1;
     segmento->memory_stick_id = -1;//VER SI ESTE DATO ES NECESARIO TENERLO ACÁ
     segmento->en_swap = false;
     segmento->bloque_swap = -1;
 
     list_add(proceso->contexto->tabla_segmentos, segmento);
     pthread_mutex_unlock(&mutex_procesos);
-    log_info(logger,"Segmento creado PID:%d SEG:%d BASE:%u LIMITE:%u",pid,id_segmento,segmento->base,segmento->limite);//para probar
+    log_info(logger,"Segmento creado para PID:%d ID SEG:%d BASE:%u LIMITE:%u",pid,id_segmento,segmento->base,segmento->limite);//para probar
 
     loguear_segmentos_proceso(proceso, logger);//para probar
 
@@ -49,12 +49,12 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
 void loguear_segmentos_proceso(t_proceso* proceso, t_log* logger) {//para probar
 
-    log_info(logger,"----- SEGMENTOS PID %d -----",proceso->pid);
+    log_info(logger,"----- SEGMENTOS DE PID %d -----",proceso->pid);
 
     for(int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
         t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
 
-        log_info(logger,"SEG:%d BASE:%u LIMITE:%u",seg->id_segmento,seg->base,seg->limite);
+        log_info(logger,"ID SEG:%d BASE:%u LIMITE:%u",seg->id_segmento,seg->base,seg->limite);
     }
 }
 
