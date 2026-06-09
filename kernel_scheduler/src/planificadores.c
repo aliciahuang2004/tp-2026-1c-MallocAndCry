@@ -409,9 +409,11 @@ void* atender_cpu(void* socket_cpu_ptr){
                 int pidSolicitaSyscall = *(int*) list_get(paquete, 1);
                 int idSegmento = *(int*) list_get(paquete, 2);
                 int tamanio = *(int*) list_get(paquete, 3);
+                
                 printf("PID=%d SEG=%d TAM=%d\n",pidSolicitaSyscall,idSegmento,tamanio);
-                fflush(stdout);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_ALLOC> idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
+                
+                pasarProcesoExecABlock(pidSolicitaSyscall, cpu_emisora);
                 //KS DEBERIA ENVIAR ESTOS DATOS EN UN PAQUETE A KM CON PROTOCOLO CREACION_DE_SEGMENTO A TRAVÉS DEL SOCKET DE KM
                 t_paquete* solicitud = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
                 agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
@@ -506,4 +508,27 @@ void liberar_cpu_y_notificar(t_cpu_conectada* cpu) {
         
         log_debug(kernel->logger, "Se liberó la CPU en el socket %d y se notificó al corto plazo.", cpu->socket_cliente);
     }
+}
+t_cpu_conectada* buscar_cpu_por_pid(int pid) {
+    t_cpu_conectada* encontrada = NULL;
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidad = queue_size(colaCPUs);
+
+    for (int i = 0; i < cantidad; i++) {
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if (cpu->pidEjecutando == pid && encontrada == NULL) {
+            encontrada = cpu;
+        }
+        queue_push(colaAux, cpu);
+    }
+
+    while (!queue_is_empty(colaAux)) {
+        queue_push(colaCPUs, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_CPU);
+
+    return encontrada;
 }

@@ -15,6 +15,13 @@ int main(int argc, char* argv[]) {
     // Conexión con Kernel Memory 
     kernel= kernel_scheduler; // Asignar el kernel_scheduler a la variable global para su uso en otros módulos
     conectar_con_kernel_memory(kernel_scheduler);
+    iniciar_semaforos_datos_recibidos();
+    pthread_t hilo_escucha_km;
+    if (pthread_create(&hilo_escucha_km, NULL, atender_kernel_memory, NULL) != 0) {
+        log_error(kernel_scheduler->logger, "No se pudo crear el hilo de escucha de Kernel Memory");
+        return EXIT_FAILURE;
+    }
+    pthread_detach(hilo_escucha_km);
 
     iniciarPlanificadorLargoPlazo(kernel_scheduler);
     iniciarPlanificadorLCortoPlazo(kernel_scheduler);

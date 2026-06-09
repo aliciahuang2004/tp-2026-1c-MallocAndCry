@@ -168,7 +168,6 @@ void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPIDEnColaExec(int pid);
 void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu);
 t_pcb* pasarProcesoExecABlockSinLiberar(int pid);
-
 //void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
 t_pcb* sacardeColaBlockPorPID(int pid);
@@ -196,7 +195,16 @@ void enviar_operacion_a_io(t_interfaz_conectada* interfaz, t_solicitud_io* solic
 void imprimir_lista_interfaces_io(t_log* logger);
 
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
+t_cpu_conectada* buscar_cpu_por_pid(int pid);
 void liberar_cpu_y_notificar(t_cpu_conectada* cpu);
 // IO handlers (en io.c)
 void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio);
+
+// Para kernel memory
+extern sem_t           sem_datos_listos;
+extern void*           km_datos_buffer;
+extern uint32_t        km_datos_size;
+extern pthread_mutex_t mutex_lectura_km;
+void iniciar_semaforos_datos_recibidos(void);
+void* atender_kernel_memory(void* arg)
 #endif /* KERNEL_SCHEDULER_H*/

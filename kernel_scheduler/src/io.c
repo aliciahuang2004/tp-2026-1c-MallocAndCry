@@ -6,41 +6,32 @@ void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio) {
         return NULL;
     }
 
+    pthread_mutex_lock(&mutex_lectura_km);
+
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, buffer);
-
     agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
     agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
 
     int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
-    if (resultado != 0) {
-        log_error(kernel->logger, "Error al solicitar datos a Kernel Memory (dir=%u, tam=%u)", dir_logica, tamanio);
-        eliminar_paquete(paquete);
-        return NULL;
-    }
     eliminar_paquete(paquete);
 
-    // Recibir respuesta con los datos
-    t_list* respuesta = recibir_paquete(kernel->socket_kernel_memory);
-    if (respuesta == NULL) {
-        log_error(kernel->logger, "Error al recibir datos de Kernel Memory");
+    if (resultado != 0) {
+        log_error(kernel->logger, "Error al solicitar datos a KM (dir=%u, tam=%u)", dir_logica, tamanio);
+        pthread_mutex_unlock(&mutex_lectura_km);
         return NULL;
     }
 
-    // Extraer los datos del paquete (elemento 0 es cod_op, elemento 1 son los datos)
-    void* datos = malloc(tamanio);
-    if (list_size(respuesta) > 1) {
-        void* datos_recibidos = list_get(respuesta, 1);
-        memcpy(datos, datos_recibidos, tamanio);
-        log_debug(kernel->logger, "Datos obtenidos de KM: dir=%u, tamanio=%u bytes", dir_logica, tamanio);
-    } else {
-        log_error(kernel->logger, "Respuesta de KM vacía o incompleta");
-        free(datos);
-        list_destroy_and_destroy_elements(respuesta, free);
-        return NULL;
-    }
+    sem_wait(&sem_datos_listos);  // el listener hace sem_post cuando llega DATOS_LEIDOS
 
-    list_destroy_and_destroy_elements(respuesta, free);
+    void* datos = malloc(km_datos_size);
+    memcpy(datos, km_datos_buffer, km_datos_size);
+    free(km_datos_buffer);
+    km_datos_buffer = NULL;
+
+    log_debug(kernel->logger, "Datos obtenidos de KM: dir=%u, tamanio=%u bytes", dir_logica, km_datos_size);
+
+    pthread_mutex_unlock(&mutex_lectura_km);
     return datos;
 }
 
