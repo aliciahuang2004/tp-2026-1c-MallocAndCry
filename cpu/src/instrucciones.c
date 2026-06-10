@@ -231,3 +231,44 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
     }
     
 }
+
+bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, uint32_t tamano_a_operar, uint32_t* dir_fisica_out, int* ms_id_out) {
+    
+    uint32_t tamanio_segmento = (uint32_t)cpu->segment_max_size; 
+
+    int num_segmento = dir_logica / tamanio_segmento;
+    int desplazamiento = dir_logica % tamanio_segmento;
+
+
+    //busco el segmento en la tabla del proceso
+    t_segmento* segmento_encontrado = NULL;
+    for (int i = 0; i < list_size(ctx->tabla_segmentos); i++) {
+        t_segmento* seg = list_get(ctx->tabla_segmentos, i);
+        if (seg->id_segmento == num_segmento) {
+            segmento_encontrado = seg;
+            break;
+        }
+    }
+
+    //1era validacion: el segmento no existe
+    if (segmento_encontrado == NULL) {
+        log_error(cpu->logger, "SEG_FAULT: El segmento %d no existe para la dirección lógica %u", num_segmento, dir_logica);
+        return false;
+    }
+
+    //2da validacion: el acceso excede el límite del segmento
+    if (desplazamiento + tamano_a_operar > segmento_encontrado->limite) {
+        log_error(cpu->logger, "SEG_FAULT: Desplazamiento (%d) + Tamaño (%u) excede el límite (%u) del Segmento %d", 
+                  desplazamiento, tamano_a_operar, segmento_encontrado->limite, num_segmento);
+        return false;
+    }
+
+    // Paso las validaciones, se traduce la dirección lógica a física
+    *dir_fisica_out = segmento_encontrado->base + desplazamiento;
+    *ms_id_out = segmento_encontrado->memory_stick_id;
+
+    log_debug(cpu->logger, "Traducción exitosa: Dir. Lógica %u -> Dir. Física %u (Segmento %d, Desplazamiento %d)", 
+              dir_logica, *dir_fisica_out, num_segmento, desplazamiento);
+
+    return true;
+}

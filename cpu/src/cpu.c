@@ -52,6 +52,23 @@ int conectar_kernel_memory(t_cpu* cpu) {
         }
         
         eliminar_paquete(paquete);
+
+        //RECIBO EL MAXIMO TAMAÑO DE SEGMENTO 
+        t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
+        if (!respuesta) {
+            log_error(cpu->logger, "Error al recibir respuesta de Kernel Memory después del Handshake");
+            return -1;
+        }
+
+        int cod_op = *(int*)list_get(respuesta, 0);
+        if(cod_op == SEG_MAX_SIZE){
+            cpu->segment_max_size = *(int*)list_get(respuesta, 1);
+            log_info(cpu->logger, "Tamaño máximo de segmento recibido de Kernel Memory: %d bytes", cpu->segment_max_size);
+        } else {
+            log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory después del Handshake: %d", cod_op);
+        }
+        list_destroy_and_destroy_elements(respuesta, free);
+
         log_info(cpu->logger, "## CPU conectada a Kernel Memory en %s:%s", cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
         return 1;
     }
