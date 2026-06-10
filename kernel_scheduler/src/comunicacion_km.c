@@ -10,6 +10,7 @@ pthread_mutex_t mutex_lectura_km = PTHREAD_MUTEX_INITIALIZER;
 void iniciar_semaforos_datos_recibidos(void) {
     sem_init(&sem_datos_listos, 0, 0);
 }
+
 void* atender_kernel_memory(void* arg) {
     log_info(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
 
@@ -54,7 +55,7 @@ void* atender_kernel_memory(void* arg) {
                         "KM Listener: CREACION_DE_SEGMENTO_OK - no se encontró PID %d en BLOCK", pid);
             }
             break;
-        }
+            }
 
             case AUMENTO_DE_MEMORIA: {
                 uint32_t memoria_total = *(uint32_t*) list_get(paquete, 1);

@@ -206,5 +206,5 @@ extern void*           km_datos_buffer;
 extern uint32_t        km_datos_size;
 extern pthread_mutex_t mutex_lectura_km;
 void iniciar_semaforos_datos_recibidos(void);
-void* atender_kernel_memory(void* arg)
+void* atender_kernel_memory(void* arg);
 #endif /* KERNEL_SCHEDULER_H*/

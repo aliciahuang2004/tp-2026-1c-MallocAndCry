@@ -182,7 +182,8 @@ void* atender_conexion(void* arg) {
                 
                  if (resultado == 0)
                 { //************************ENVIO CONFIRMACION O ERROR DE CREACION DE PROCESO A KS********************
-                t_paquete *respuesta = crear_paquete(CREACION_DE_PROCESO_OK, crear_buffer());
+                t_paquete *respuesta = crear_paquete(CREACION_DE_PROCESO_OK, crear_buffer());   
+                agregar_a_paquete(respuesta, &pid_nuevo, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
                 eliminar_paquete(respuesta);
                 }
@@ -190,6 +191,7 @@ void* atender_conexion(void* arg) {
                 {
                 log_error(logger, "ERROR AL EJECUTAR CREACION_DE_PROCESO PARA PID %d", pid_nuevo);
                 t_paquete *error = crear_paquete(CREACION_DE_PROCESO_ERROR, crear_buffer());
+                agregar_a_paquete(error, &pid_nuevo, sizeof(int));
                 enviar_paquete(error, socket_cliente, logger);
                 eliminar_paquete(error);
                 }
