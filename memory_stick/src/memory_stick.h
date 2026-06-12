@@ -20,6 +20,7 @@ typedef struct
 {
   int socket_cliente;
   int cpu_id;  
+  t_memory_stick* ms;
 } t_cpu_context;
 
 

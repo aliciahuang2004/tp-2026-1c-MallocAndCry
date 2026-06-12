@@ -21,7 +21,18 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    if (conectar_memory_stick(cpu, cpu->ip_memory_stick_inicial, cpu->puerto_memory_stick_inicial) == -1) {
+    sem_init(&sem_contexto_recibido, 0, 0);
+    sem_init(&sem_instruccion_recibida, 0, 0);
+
+    pthread_t hilo_km;
+    if (pthread_create(&hilo_km, NULL, escuchar_kernel_memory, cpu) != 0) {
+        log_error(cpu->logger, "Error al crear el hilo de Kernel Memory");
+        return -1;
+    }
+    pthread_detach(hilo_km);
+
+
+    if (conectar_memory_stick(cpu, cpu->ip_memory_stick_inicial, cpu->puerto_memory_stick_inicial,0) == -1) {
         log_warning(cpu->logger, "Error en la conexion con memory stick.");
     }
 

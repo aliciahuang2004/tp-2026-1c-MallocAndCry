@@ -2,6 +2,11 @@
 #include "instrucciones.h"
 #include <sys/select.h>
 
+sem_t sem_contexto_recibido;
+sem_t sem_instruccion_recibida;
+t_contexto* buffer_contexto = NULL;
+char* buffer_instruccion = NULL;
+
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     t_cpu* cpu = malloc(sizeof(t_cpu));
     cpu->id = strdup(id_cpu); 
@@ -52,23 +57,6 @@ int conectar_kernel_memory(t_cpu* cpu) {
         }
         
         eliminar_paquete(paquete);
-
-        //RECIBO EL MAXIMO TAMAÑO DE SEGMENTO 
-        t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
-        if (!respuesta) {
-            log_error(cpu->logger, "Error al recibir respuesta de Kernel Memory después del Handshake");
-            return -1;
-        }
-
-        int cod_op = *(int*)list_get(respuesta, 0);
-        if(cod_op == SEG_MAX_SIZE){
-            cpu->segment_max_size = *(int*)list_get(respuesta, 1);
-            log_info(cpu->logger, "Tamaño máximo de segmento recibido de Kernel Memory: %d bytes", cpu->segment_max_size);
-        } else {
-            log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory después del Handshake: %d", cod_op);
-        }
-        list_destroy_and_destroy_elements(respuesta, free);
-
         log_info(cpu->logger, "## CPU conectada a Kernel Memory en %s:%s", cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
         return 1;
     }
@@ -99,17 +87,15 @@ int conectar_kernel_scheduler(t_cpu* cpu) {
     return -1;
 }
 
-int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto) {
-    if (ip == NULL || puerto == NULL) return -1; // cuando no hay stick configurado
+int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto, int ms_id) {
+    if (ip == NULL || puerto == NULL) return -1;
 
     int socket_ms = crear_conexion(cpu->logger, ip, puerto);
     
     if (socket_ms != -1) {
         int id_cpu_int = atoi(cpu->id);
-
         t_buffer *buffer = crear_buffer();
         t_paquete *paquete = crear_paquete(CPU_HANDSHAKE, buffer);
-
         agregar_a_paquete(paquete, &id_cpu_int, sizeof(int));
         
         if (enviar_paquete(paquete, socket_ms, cpu->logger) == -1) {
@@ -117,18 +103,81 @@ int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto) {
              eliminar_paquete(paquete);
              return -1;
         }
-        
         eliminar_paquete(paquete);
         
-        // Guardamos el socket en nuestra lista para usarlo en el futuro
-        list_add(cpu->sockets_memory_sticks, (void*)(intptr_t)socket_ms);
-        log_info(cpu->logger, "## CPU conectada a Memory Stick en %s:%s", ip, puerto);
+        // Creamos y guardamos la estructura en la lista
+        t_ms_conectado* ms_conectado = malloc(sizeof(t_ms_conectado));
+        ms_conectado->id = ms_id;
+        ms_conectado->socket = socket_ms;
+
+        list_add(cpu->sockets_memory_sticks, ms_conectado);
+        log_info(cpu->logger, "## CPU conectada a Memory Stick (ID: %d) en %s:%s", ms_id, ip, puerto);
         
-        return 1;
+        return socket_ms;
     }
     return -1;
 }
 
+// hilo que atiende permanentemente a Kernel Memory
+void* escuchar_kernel_memory(void* arg) {
+    t_cpu* cpu = (t_cpu*) arg;
+    log_info(cpu->logger, "Hilo de escucha de Kernel Memory iniciado.");
+
+    while (1) {
+        t_list* paquete = recibir_paquete(cpu->socket_kernel_memory);
+        if (paquete == NULL) {
+            log_error(cpu->logger, "Se perdió la conexión con Kernel Memory.");
+            break;
+        }
+
+        int cod_op = *(int*)list_get(paquete, 0);
+
+        switch (cod_op) {
+            case MS_NUEVO_CPU: {
+                int ms_id = *(int*)list_get(paquete, 1);
+                char* ms_puerto = (char*)list_get(paquete, 2);
+                char ip_str[16] = "127.0.0.1"; // Asumimos IP local para las pruebas
+
+                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en puerto %s", ms_id, ms_puerto);
+                conectar_memory_stick(cpu, ip_str, ms_puerto, ms_id);
+                break;
+            }
+            case CONTEXT_RESPONSE: {
+                buffer_contexto = malloc(sizeof(t_contexto));
+                buffer_contexto->pid = *(int*)list_get(paquete, 1);
+                buffer_contexto->registros.PC = *(uint32_t*)list_get(paquete, 2);
+                buffer_contexto->registros.AX = *(uint8_t*)list_get(paquete, 3);
+                buffer_contexto->registros.BX = *(uint8_t*)list_get(paquete, 4);
+                buffer_contexto->registros.CX = *(uint8_t*)list_get(paquete, 5);
+                buffer_contexto->registros.DX = *(uint8_t*)list_get(paquete, 6);
+                buffer_contexto->registros.EAX = *(uint32_t*)list_get(paquete, 7);
+                buffer_contexto->registros.EBX = *(uint32_t*)list_get(paquete, 8);
+                buffer_contexto->registros.ECX = *(uint32_t*)list_get(paquete, 9);
+                buffer_contexto->registros.EDX = *(uint32_t*)list_get(paquete, 10);
+                buffer_contexto->registros.SI = *(uint32_t*)list_get(paquete, 11);
+                buffer_contexto->registros.DI = *(uint32_t*)list_get(paquete, 12);
+                
+                sem_post(&sem_contexto_recibido);
+                break;
+            }
+            case RESPUESTA_INSTRUCCION: {
+                char* str_recibido = (char*)list_get(paquete, 1);
+                buffer_instruccion = strdup(str_recibido);
+                sem_post(&sem_instruccion_recibida);
+                break;
+            }
+            case SEG_MAX_SIZE: {
+                cpu->segment_max_size = *(int*)list_get(paquete, 1);
+                log_info(cpu->logger, "Tamaño de segmento recibido: %d", cpu->segment_max_size);
+                break;
+            }
+            default:
+                log_warning(cpu->logger, "Código de KM desconocido: %d", cod_op);
+        }
+        list_destroy_and_destroy_elements(paquete, free);
+    }
+    return NULL;
+}
 void liberar_cpu(t_cpu* cpu) {
     if (!cpu) return;
     if (cpu->config) terminar_programa(cpu->logger, cpu->config); 

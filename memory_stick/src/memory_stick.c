@@ -93,7 +93,7 @@ void enviar_handshake(t_memory_stick* ms){
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);
 }
 
-void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
+ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
 
     if (servidor_fd < 0) {
         log_error(ms->logger, "Servidor inválido en rutina_recepcion: %d", servidor_fd);
@@ -103,7 +103,6 @@ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
     pthread_t hilo_exec;
     int temp_socket_cpu;
 
-    
     log_debug(ms->logger,"Hilo servidor listo");
 
     while(1){
@@ -121,28 +120,69 @@ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
       }
 
       int cpu_id = *(int*) list_get(paquete_ID_CPU,1);
-
       log_debug(ms->logger,"CLIENTE CONECTADO");
 
+      // <-- AQUÍ AGREGAS ms AL CONTEXTO -->
       t_cpu_context* ctx = malloc(sizeof(t_cpu_context));
       ctx->cpu_id = cpu_id;
       ctx->socket_cliente = temp_socket_cpu;
-
+      ctx->ms = ms; 
 
       if (pthread_create(&hilo_exec,NULL,rutina_operaciones,ctx) != 0){
         log_error(ms->logger , "ERROR AL CREAR HILO SERVIDOR");
         free(ctx);
         close(temp_socket_cpu);
-      }else{
-      pthread_detach(hilo_exec);
-      log_debug(ms->logger , "HILO SERVIDOR CREADO");
+      } else {
+        pthread_detach(hilo_exec);
+        log_debug(ms->logger , "HILO SERVIDOR CREADO");
       }
-      
+    }
+}
+
+// Reemplaza toda la función "rutina_operaciones" por esto:
+void* rutina_operaciones (void* args){
+    t_cpu_context* ctx = (t_cpu_context*) args;
+    int socket_cpu = ctx->socket_cliente;
+    int cpu_id = ctx->cpu_id;
+    t_memory_stick* ms = ctx->ms;
+    
+    log_info(ms->logger, "[CPU %d] Inicia hilo de operaciones en socket %d", cpu_id, socket_cpu);
+
+    while (1) {
+        t_list* paquete = recibir_paquete(socket_cpu);
+        
+        if (paquete == NULL) {
+            log_error(ms->logger, "[CPU %d] Se ha desconectado o hubo un error en la conexión.", cpu_id);
+            break; 
+        }
+
+        int cod_op = *(int*) list_get(paquete, 0);
+
+        switch (cod_op) {
+            case LECTURA_DE_DATOS: {
+                log_info(ms->logger, "[CPU %d] Petición de LECTURA recibida", cpu_id);
+                // Ejemplo de simulación de retardo (MEMORY_DELAY viene en microsegundos si lo multiplicas x1000)
+                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+                
+                // TODO: Logica de lectura
+                break;
+            }
+            case ESCRITURA_DE_DATOS: {
+                log_info(ms->logger, "[CPU %d] Petición de ESCRITURA recibida", cpu_id);
+                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+                
+                // TODO: Logica de escritura
+                break;
+            }
+            default:
+                log_warning(ms->logger, "[CPU %d] Código de operación desconocido: %d", cpu_id, cod_op);
+                break;
+        }
+        
+        list_destroy_and_destroy_elements(paquete, free);
     }
 
- }
-
-void* rutina_operaciones (void* args){
-  printf("hola!");
-  return NULL;
+    close(socket_cpu);
+    free(ctx);
+    return NULL;
 }
