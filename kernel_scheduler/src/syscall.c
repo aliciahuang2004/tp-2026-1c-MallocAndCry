@@ -15,6 +15,30 @@ void crearProceso(char* path, int prioridad){
     
     enviarPathYPidKM(pcbNuevo->pid,path);
     //AGREGAR A COLA NEW, es realmente necesario?
+    /*
+    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    switch (cop_op){
+        case CREACION_DE_PROCESO_OK:
+            log_debug(kernel->logger,"Kernel Memory recibio correctamente el path");
+
+            pthread_mutex_lock(&mutex_NEW);
+            queue_push(colaNEW, pcbNuevo);
+            pthread_mutex_unlock(&mutex_NEW);
+
+            log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
+            
+            pasarProcesoNewAReady();
+            break;
+        case CREACION_DE_PROCESO_ERROR:
+            log_error(kernel->logger,"Kernel Memory no logro inicializar el proceso");
+            //ACA DEBERIA DESCARTAR EL PROCESO? O REINTENTO ENVIAR PATH?
+            break;
+        
+        default:
+            log_warning(kernel->logger, "Operación desconocida por parte de Kernel Memory al crear el proceso");
+            break;
+    }*/
+
     pthread_mutex_lock(&mutex_NEW);
     queue_push(colaNEW, pcbNuevo);
     pthread_mutex_unlock(&mutex_NEW);
@@ -22,6 +46,7 @@ void crearProceso(char* path, int prioridad){
     log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
     
     pasarProcesoNewAReady();
+    
 }
 
 void enviarPathYPidKM(int pid, char* path){
@@ -141,6 +166,8 @@ void finalizarProceso(int pid){
         queue_push(colaEXIT, pcb);
         pthread_mutex_unlock(&mutex_EXIT);
         log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
+
+        //PEDIMOS LIBERACION EN KM DE SEGMENTOS ASOCIADOS AL PID?
         
         eliminarProceso(pid, EXIT_PROC);
         
@@ -188,5 +215,72 @@ void eliminarProceso(int pid, op_code motivo ){
         log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
         break;
     }
+    
+}
+
+void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
+
+    t_paquete* solicitud = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
+    
+    agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
+    agregar_a_paquete(solicitud,&tamanio,sizeof(int));
+    
+    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    
+    eliminar_paquete(solicitud);
+
+
+    int cod_op = recibir_operacion(kernel->socket_kernel_memory);
+
+    switch(cod_op){
+        case INICIAR_COMPACTACION:
+            
+            // pedirDesalojoPorCompactacion();
+            // reencolar procesos
+            t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
+            
+            agregar_a_paquete(paquete,&pidSolicitaSyscall,sizeof(int));
+
+            enviar_paquete(paquete,kernel->socket_kernel_memory,kernel->logger);
+        
+            eliminar_paquete(paquete);
+
+            int cod_op2 = recibir_operacion(kernel->socket_kernel_memory);
+            if(cod_op2 == CREACION_DE_SEGMENTO_OK) {
+                log_info(kernel->logger, "Compactación finalizada, reactivando planificador");
+                // reactivar planificador
+            }
+            break;
+
+        /*case ERROR_SEGMENTO:
+            log_error(kernel->logger, "Error al crear segmento");
+            break;
+        */
+
+        case CREACION_DE_SEGMENTO_OK:
+            log_info(kernel->logger, "Se creo el segmento");
+            //volver a enviar proceso a cpu
+            break;
+    }    
+  
+}
+
+void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
+
+    t_paquete* solicitud = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
+    
+    agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
+    
+    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    
+    eliminar_paquete(solicitud);
+
+    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    /*if (cop_op == LIBERAR_MEMORIA_OK){
+        // podria verificar que se libera y pasar de suspReady a Ready y semaforo ready
+    }*/
+
     
 }

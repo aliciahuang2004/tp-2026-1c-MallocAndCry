@@ -70,8 +70,12 @@ typedef struct {
     int socket_kernel_memory;
     int socket_io;  // Socket para comunicarse con IO
     char* planification_algorithm;
+    char** queues_algorithms;
     int rr_quantum;
+    char* queues_preemption;
+    int suspension_time;
     bool procesoInicialCreado;
+    int cantidadColasMultinivel;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -128,6 +132,7 @@ extern int pidParaAsignar;
 
 extern t_queue* colaNEW;
 extern t_queue* colaREADY;
+extern t_queue** colaREADY;
 extern t_queue* colaREADY_SUSP;
 extern t_queue* colaEXEC;
 extern t_queue* colaBLOCK;
@@ -137,6 +142,7 @@ extern t_queue* colaCPUs;
 
 extern pthread_mutex_t mutex_NEW;
 extern pthread_mutex_t mutex_READY;
+extern pthread_mutex_t mutex_READY_CMN;
 extern pthread_mutex_t mutex_READY_SUSP;
 extern pthread_mutex_t mutex_BLOCK;
 extern pthread_mutex_t mutex_BLOCK_SUSP;

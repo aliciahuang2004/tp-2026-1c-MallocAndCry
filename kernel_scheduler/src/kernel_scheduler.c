@@ -27,8 +27,15 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->ip_kernel_memory = config_get_string_value(kernel_scheduler->config, "IP_KERNEL_MEMORY");
     kernel_scheduler->puerto_kernel_memory = config_get_string_value(kernel_scheduler->config, "PUERTO_KERNEL_MEMORY");
     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
+    kernel_scheduler->queues_algorithms = config_get_array_value(kernel_scheduler->config, "QUEUES_ALGORITHMS");
     kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
-    kernel_scheduler->procesoInicialCreado = false;
+    kernel_scheduler->queues_preemption = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
+    kernel_scheduler->suspension_time = config_get_int_value(kernel_scheduler->config,"SUSPENSION_TIMEOUT");
+    kernel_scheduler->procesoInicialCreado = false; 
+    kernel_scheduler->cantidadColasMultinivel = 0;   
+    while(kernel_scheduler->queues_algorithms[kernel_scheduler->cantidadColasMultinivel] != NULL) {
+        kernel_scheduler->cantidadColasMultinivel++;
+    }
     lista_interfaces_io = list_create(); // Inicializamos la lista de interfaces IO
     cola_bloqueados_sleep = queue_create();
     cola_bloqueados_stdin = queue_create();

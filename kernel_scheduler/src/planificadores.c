@@ -8,6 +8,7 @@ pthread_mutex_t mutex_diccionario;
 
 t_queue* colaNEW;
 t_queue* colaREADY;
+t_queue** colasREADY;
 t_queue* colaREADY_SUSP;
 t_queue* colaEXEC;
 t_queue* colaBLOCK;
@@ -17,6 +18,7 @@ t_queue* colaCPUs;
 
 pthread_mutex_t mutex_NEW;
 pthread_mutex_t mutex_READY;
+pthread_mutex_t mutexColas[];
 pthread_mutex_t mutex_READY_SUSP;
 pthread_mutex_t mutex_BLOCK;
 pthread_mutex_t mutex_BLOCK_SUSP;
@@ -25,15 +27,27 @@ pthread_mutex_t mutex_EXIT;
 pthread_mutex_t mutex_CPU;
 
 sem_t sem_procesosReady;
+sem_t sem_hayProcesos[];
 sem_t sem_hayCPUs;
 
 t_kernel_scheduler* kernel;
 void iniciarPlanificadorLargoPlazo(){
     colaNEW = queue_create();
+    
     colaREADY = queue_create();
-
-    pthread_mutex_init(&mutex_NEW, NULL);
     pthread_mutex_init(&mutex_READY, NULL);
+
+    if (strcmp(kernel->planification_algorithm, "CMN") == 0)
+    {
+        for (int i = 0; kernel->cantidadColasMultinivel; i++){
+            colasREADY[i]= queue_create();
+            pthread_mutex_init (&mutexColas[kernel->cantidadColasMultinivel], NULL);
+            sem_init(&sem_hayProcesos[i],0,0);
+        }
+    }
+    
+    pthread_mutex_init(&mutex_NEW, NULL);
+    
 
     sem_init(&sem_procesosReady,0,0);
 }
@@ -115,11 +129,20 @@ void pasarProcesoNewAReady(){
         pthread_mutex_unlock(&mutex_NEW);
 
         pcb->estado = READY;
-        
-        pthread_mutex_lock(&mutex_READY);
-        queue_push(colaREADY, pcb);
-        pthread_mutex_unlock(&mutex_READY);
 
+        if (strcmp(kernel->planification_algorithm, "FIFO") == 0 && strcmp(kernel->planification_algorithm, "RR") == 0){
+            pthread_mutex_lock(&mutex_READY);
+            queue_push(colaREADY, pcb);
+            pthread_mutex_unlock(&mutex_READY);
+            //sem_post(&sem_procesosReady);
+        }
+        if (strcmp(kernel->planification_algorithm, "CMN" == 0)){
+            pthread_mutex_lock(&mutexColas[pcb->prioridad]);
+            queue_push(colasREADY[pcb->prioridad], pcb);
+            pthread_mutex_unlock(&mutexColas[pcb->prioridad]);
+            //sem_post(&sem_procesosReady);
+        }
+        
         log_info(kernel->logger,"## (<%d>) Pasa del estado <NEW> al estado <READY>",pcb->pid);
         sem_post(&sem_procesosReady);
     }else{
@@ -140,17 +163,17 @@ void* loop_corto_plazo(void* args) {
 
 void pasarProcesoReadyAExec(){
     if (strcmp(kernel->planification_algorithm, "FIFO") == 0){
-        log_info(kernel->logger,"EJECUCION POR FIFO");
+        //log_info(kernel->logger,"EJECUCION POR FIFO");
         ejecutarPorFIFO();
     }
     if (strcmp(kernel->planification_algorithm, "RR") == 0){
-        log_info(kernel->logger,"EJECUCION POR RR");
+        //log_info(kernel->logger,"EJECUCION POR RR");
         ejecutarPorRR();
     }
 
     if(strcmp(kernel->planification_algorithm, "CMN") == 0){
-        //COLAS MULTINIVEL
-        log_info(kernel->logger,"EJECUCION COLAS MULTINIVEL");
+        //log_info(kernel->logger,"EJECUCION COLAS MULTINIVEL");
+        ejecutarPORCMN();
     }
 }
 
@@ -200,6 +223,34 @@ void ejecutarPorRR(){
         }else{
             pthread_mutex_unlock(&mutex_READY);
         } 
+    }
+}
+
+void ejecutarPORCMN(){
+
+    //REVISAR porque por el momento no desaloja
+
+    for(int nivel=0; nivel < kernel->cantidadColasMultinivel; nivel++) {
+        pthread_mutex_lock(&mutexColas[nivel]);
+        if(!queue_is_empty(colasREADY[nivel])) {
+            t_pcb* pcb = queue_pop(colasREADY[nivel]);
+            pthread_mutex_unlock(&mutexColas[nivel]);
+
+            char* algoritmo = kernel->queues_algorithms[nivel];
+
+            pthread_mutex_lock(&mutex_READY);
+            queue_push(colaREADY,pcb);
+            pthread_mutex_unlock(&mutex_READY);
+
+            if (strcmp(algoritmo,"FIFO") == 0){
+                ejecutarPorFIFO();
+            }
+            if (strcmp(algoritmo,"RR") == 0){
+                ejecutarPorRR();
+            }
+        } else{
+            pthread_mutex_unlock(&mutexColas[nivel]);
+        }
     }
 }
 
@@ -406,25 +457,21 @@ void* atender_cpu(void* socket_cpu_ptr){
                 //lineas agregadas para prueba en km 407 a 409,412,413,415 a 421.
                 printf("\n\n*********** ENTRE A MEM_ALLOC ***********\n");//este log lo agregué porque en mis pruebas cuando cpu envía syscall mem_alloc a ks,aveces entraba en el switch de "atender_cliente_scheduler" y a veces en este
                 fflush(stdout);
-                int pidSolicitaSyscall = *(int*) list_get(paquete, 1);
+                
                 int idSegmento = *(int*) list_get(paquete, 2);
                 int tamanio = *(int*) list_get(paquete, 3);
-                
                 printf("PID=%d SEG=%d TAM=%d\n",pidSolicitaSyscall,idSegmento,tamanio);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_ALLOC> idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
-                
+                asignarMemoria(idSegmento, tamanio);
+
                 pasarProcesoExecABlock(pidSolicitaSyscall, cpu_emisora);
                 //KS DEBERIA ENVIAR ESTOS DATOS EN UN PAQUETE A KM CON PROTOCOLO CREACION_DE_SEGMENTO A TRAVÉS DEL SOCKET DE KM
-                t_paquete* solicitud = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
-                agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
-                agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
-                agregar_a_paquete(solicitud,&tamanio,sizeof(int));
-                enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
-                eliminar_paquete(solicitud);
+                
                 break;
             }
             case MEM_FREE: {// NO BLOQUEA
                 int idSegmento = *(int*) list_get(paquete, 2);
+                liberarMemoria(pidSolicitaSyscall, idSegmento);
                 //KS DEBERIA ENVIAR ESTE DATO CON PROTOCOLO ELIMINACION_DE_SEGMENTO A TRAVÉS DEL SOCKET DE KM GUARDADO EN kernel_scheduler->socket_kernel_memory EN FUNCION CONECTAR_KERNEL_MEMORY 
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_FREE> idSegmento=%d", pidSolicitaSyscall, idSegmento);
                 break;
@@ -496,6 +543,7 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
 
     return encontrada;
 }
+
 void liberar_cpu_y_notificar(t_cpu_conectada* cpu) {
     if (cpu != NULL) {
         pthread_mutex_lock(&mutex_CPU);
@@ -509,6 +557,7 @@ void liberar_cpu_y_notificar(t_cpu_conectada* cpu) {
         log_debug(kernel->logger, "Se liberó la CPU en el socket %d y se notificó al corto plazo.", cpu->socket_cliente);
     }
 }
+
 t_cpu_conectada* buscar_cpu_por_pid(int pid) {
     t_cpu_conectada* encontrada = NULL;
     t_queue* colaAux = queue_create();
@@ -531,4 +580,18 @@ t_cpu_conectada* buscar_cpu_por_pid(int pid) {
     pthread_mutex_unlock(&mutex_CPU);
 
     return encontrada;
+}
+
+void pedirDesalojoPorCompactacion(){
+
+    //para cada cpu ocupada
+    //obtener cpu o los datos por separado: pid y cpuSocket
+        t_buffer* buffer = crear_buffer();
+        t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO_COMPACTACION, buffer);
+        // agregar_a_paquete(paquete, &pid, sizeof(int));
+
+        // enviar_paquete(paquete, cpu->socket_cliente, kernel->logger);
+
+        eliminar_paquete(paquete);
+    
 }
