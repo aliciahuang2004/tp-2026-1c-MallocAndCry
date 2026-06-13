@@ -136,10 +136,10 @@ void* escuchar_kernel_memory(void* arg) {
             case MS_NUEVO_CPU: {
                 int ms_id = *(int*)list_get(paquete, 1);
                 char* ms_puerto = (char*)list_get(paquete, 2);
-                char ip_str[16] = "127.0.0.1"; // Asumimos IP local para las pruebas
+                char* ms_ip = (char*)list_get(paquete, 3); 
 
-                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en puerto %s", ms_id, ms_puerto);
-                conectar_memory_stick(cpu, ip_str, ms_puerto, ms_id);
+                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
+                conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id);
                 break;
             }
             case CONTEXT_RESPONSE: {
@@ -231,7 +231,6 @@ void esperar_proceso(t_cpu* cpu) {
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
     
-    // 1. Armo y envío el paquete pidiendo el contexto
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
     int id_cpu_int = atoi(cpu->id); 
     agregar_a_paquete(paquete, &pid, sizeof(int));
@@ -240,14 +239,10 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    // 2. Me bloqueo acá hasta que el hilo 'escuchar_kernel_memory' reciba los datos, 
-    //    arme el struct y haga el sem_post(&sem_contexto_recibido)
     sem_wait(&sem_contexto_recibido);
 
-    // 3. Tomo el contexto que el hilo de escucha me dejó preparado en la variable global
     t_contexto* contexto_recibido = buffer_contexto;
     
-    // 4. Limpio el buffer global para el próximo ciclo
     buffer_contexto = NULL; 
 
     if (contexto_recibido != NULL) {
