@@ -30,6 +30,7 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->queues_algorithms = config_get_array_value(kernel_scheduler->config, "QUEUES_ALGORITHMS");
     kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
     kernel_scheduler->queues_preemption = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
+    kernel_scheduler->queue_preemption = (strcmp(kernel_scheduler->queues_preemption, "TRUE") == 0);
     kernel_scheduler->suspension_time = config_get_int_value(kernel_scheduler->config,"SUSPENSION_TIMEOUT");
     kernel_scheduler->procesoInicialCreado = false; 
     kernel_scheduler->cantidadColasMultinivel = 0;   
@@ -75,6 +76,13 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    }
    if(kernel_scheduler->planification_algorithm){
     free(kernel_scheduler->planification_algorithm);
+   }
+
+   if(kernel_scheduler->queues_algorithms){
+    string_array_destroy(kernel_scheduler->queues_algorithms);
+   }
+   if(kernel_scheduler->queues_preemption){
+    free(kernel_scheduler->queues_preemption);
    }
    
    free(kernel_scheduler);
@@ -254,13 +262,8 @@ void* atender_cliente_scheduler(void* arg) {
                 // Devolvemos el proceso recuperado a READY
                 if (pcb_a_desbloquear != NULL) {
                     log_info(logger, "## PID: %d - Estado Anterior: BLOCK - Estado Actual: READY", pcb_a_desbloquear->pid);
-                    pcb_a_desbloquear->estado = READY;
+                    encolarProcesoEnReady(pcb_a_desbloquear); // Esto se encargará de ponerlo en la cola correcta según el algoritmo
 
-                    pthread_mutex_lock(&mutex_READY);
-                    queue_push(colaREADY, pcb_a_desbloquear);
-                    pthread_mutex_unlock(&mutex_READY);
-
-                    sem_post(&sem_procesosReady); // Notificar al corto plazo
                 } else {
                     log_error(logger, "Error: El PID %d terminó pero no había nada en la cola.", pid_io);
                 }

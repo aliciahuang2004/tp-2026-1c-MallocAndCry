@@ -138,13 +138,8 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex){
             pthread_mutex_unlock(&mutex_diccionario);
             t_pcb* pcb_desbloqueado = sacardeColaBlockPorPID(proximo_pid);
             if(pcb_desbloqueado != NULL){
-                pcb_desbloqueado->estado = READY;
-                pthread_mutex_lock(&mutex_READY);
-                queue_push(colaREADY, pcb_desbloqueado);
-                pthread_mutex_unlock(&mutex_READY);
-                
                 log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pcb_desbloqueado->pid); 
-                sem_post(&sem_procesosReady);
+                encolarProcesoEnReady(pcb_desbloqueado); // Esto se encarga de ponerlo en la cola correcta segun el algoritmo
             }
         } else {
             // No hay nadie en la cola de espera, el mutex queda libre 

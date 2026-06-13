@@ -73,6 +73,7 @@ typedef struct {
     char** queues_algorithms;
     int rr_quantum;
     char* queues_preemption;
+    bool queue_preemption; // para usarlo en la logica de desalojo
     int suspension_time;
     bool procesoInicialCreado;
     int cantidadColasMultinivel;
@@ -99,6 +100,10 @@ typedef struct {
     pthread_mutex_t mutex;
 } t_mutex;
 
+typedef enum {
+    ALGORITMO_FIFO,
+    ALGORITMO_RR
+} t_algoritmo_cola;
 
 // funciones de inicializacion
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
@@ -131,8 +136,8 @@ void eliminarProceso(int pid, op_code motivo);
 extern int pidParaAsignar;
 
 extern t_queue* colaNEW;
-extern t_queue* colaREADY;
-extern t_queue** colaREADY;
+extern t_queue* colaREADY; // cola unica para FIFO/RR
+extern t_queue** colaREADY_multinivel; // array de colas para algoritmos multinivel
 extern t_queue* colaREADY_SUSP;
 extern t_queue* colaEXEC;
 extern t_queue* colaBLOCK;
@@ -142,7 +147,13 @@ extern t_queue* colaCPUs;
 
 extern pthread_mutex_t mutex_NEW;
 extern pthread_mutex_t mutex_READY;
-extern pthread_mutex_t mutex_READY_CMN;
+//extern pthread_mutex_t mutex_READY_CMN;
+// Array de mutexes para CMN - uno por cola
+// pthread_mutex_t* porque es un puntero a un array de mutexes
+extern pthread_mutex_t* mutexColas;
+
+// Array de algoritmos por cola - uno por prioridad
+extern t_algoritmo_cola* algoritmos_por_cola;
 extern pthread_mutex_t mutex_READY_SUSP;
 extern pthread_mutex_t mutex_BLOCK;
 extern pthread_mutex_t mutex_BLOCK_SUSP;
@@ -170,6 +181,12 @@ void* loop_corto_plazo(void* args);
 void ejecutarPorFIFO();
 void ejecutarPorRR();
 void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
+
+void ejecutarPorCMN();
+void encolarProcesoEnReady(t_pcb* pcb);
+void verificarDesalojoPorPrioridad(t_pcb* pcbNuevo, int indiceColaNueva);
+void pedirDesalojoPorPrioridad(int pid, t_cpu_conectada* cpu);
+
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPIDEnColaExec(int pid);
 void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu);
