@@ -29,7 +29,7 @@ void enviar_handshake (t_memory_stick* ms);
 t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano,int id);
 void verificar_memory_stick(t_memory_stick* ms);
 void destruir_memory_stick(t_memory_stick* ms);
-void *rutina_operaciones(void *arg);
+void *rutina_operaciones(void *argumentos);
 void rutina_recepcion(t_memory_stick* ms,int servidor_fd);
 #ifndef MEMORY_STICK_H_
 #define MEMORY_STICK_H_

@@ -122,7 +122,6 @@ void enviar_handshake(t_memory_stick* ms){
       int cpu_id = *(int*) list_get(paquete_ID_CPU,1);
       log_debug(ms->logger,"CLIENTE CONECTADO");
 
-      // <-- AQUÍ AGREGAS ms AL CONTEXTO -->
       t_cpu_context* ctx = malloc(sizeof(t_cpu_context));
       ctx->cpu_id = cpu_id;
       ctx->socket_cliente = temp_socket_cpu;
@@ -139,12 +138,11 @@ void enviar_handshake(t_memory_stick* ms){
     }
 }
 
-// Reemplaza toda la función "rutina_operaciones" por esto:
-void* rutina_operaciones (void* args){
-    t_cpu_context* ctx = (t_cpu_context*) args;
-    int socket_cpu = ctx->socket_cliente;
-    int cpu_id = ctx->cpu_id;
-    t_memory_stick* ms = ctx->ms;
+void* rutina_operaciones (void* argumentos){
+    t_cpu_context* contexto = (t_cpu_context*) argumentos;
+    int socket_cpu = contexto->socket_cliente;
+    int cpu_id = contexto->cpu_id;
+    t_memory_stick* ms = contexto->ms;
     
     log_info(ms->logger, "[CPU %d] Inicia hilo de operaciones en socket %d", cpu_id, socket_cpu);
 
@@ -161,17 +159,49 @@ void* rutina_operaciones (void* args){
         switch (cod_op) {
             case LECTURA_DE_DATOS: {
                 log_info(ms->logger, "[CPU %d] Petición de LECTURA recibida", cpu_id);
-                // Ejemplo de simulación de retardo (MEMORY_DELAY viene en microsegundos si lo multiplicas x1000)
                 usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
                 
-                // TODO: Logica de lectura
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+                int tamanio = *(int*) list_get(paquete, 2);
+              
+                log_info(ms->logger, "## Lectura de %d bytes", tamanio);
+
+                if (dir_fisica + tamanio > ms->tamano) {
+                    log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+                    break;
+                }
+
+                void* datos_leidos = malloc(tamanio);
+                memcpy(datos_leidos, ms->memoria + dir_fisica, tamanio);
+
+                t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
+                agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
+                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
+                
+                eliminar_paquete(paquete_respuesta);
+                free(datos_leidos);
                 break;
             }
             case ESCRITURA_DE_DATOS: {
                 log_info(ms->logger, "[CPU %d] Petición de ESCRITURA recibida", cpu_id);
                 usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
                 
-                // TODO: Logica de escritura
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+                int tamanio = *(int*) list_get(paquete, 2);
+                void* datos_a_escribir = list_get(paquete, 3);
+                
+                log_info(ms->logger, "## Escritura de %d bytes", tamanio);
+
+                if (dir_fisica + tamanio > ms->tamano) {
+                    log_error(ms->logger, "Error: Intento de escritura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+                    break;
+                }
+
+                memcpy(ms->memoria + dir_fisica, datos_a_escribir, tamanio);
+
+                t_paquete* paquete_respuesta = crear_paquete(IO_OK, crear_buffer()); 
+                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
+                eliminar_paquete(paquete_respuesta);
                 break;
             }
             default:
@@ -183,6 +213,7 @@ void* rutina_operaciones (void* args){
     }
 
     close(socket_cpu);
-    free(ctx);
+    free(contexto);
     return NULL;
 }
+
