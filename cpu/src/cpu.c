@@ -133,13 +133,13 @@ void* escuchar_kernel_memory(void* arg) {
         int cod_op = *(int*)list_get(paquete, 0);
 
         switch (cod_op) {
-            case MS_NUEVO_CPU: {
+            case MS_NUEVO_CPU: { //ID, Puerto, IP
                 int ms_id = *(int*)list_get(paquete, 1);
                 char* ms_puerto = (char*)list_get(paquete, 2);
-                char ip_str[16] = "127.0.0.1"; // Asumimos IP local para las pruebas
+                char* ms_ip = (char*)list_get(paquete, 3); 
 
-                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en puerto %s", ms_id, ms_puerto);
-                conectar_memory_stick(cpu, ip_str, ms_puerto, ms_id);
+                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
+                conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id);
                 break;
             }
             case CONTEXT_RESPONSE: {
@@ -173,8 +173,8 @@ void* escuchar_kernel_memory(void* arg) {
             }
             case ERROR_INSTRUCCION: {
                 log_error(cpu->logger, "Kernel Memory reportó un error al intentar leer la instrucción.");
-                buffer_instruccion = NULL; // Dejamos el buffer en NULL para que fetch_instruccion sepa que falló
-                sem_post(&sem_instruccion_recibida); // Destrabamos el hilo principal
+                buffer_instruccion = NULL; 
+                sem_post(&sem_instruccion_recibida); 
                 break;
             }
             default:
@@ -231,7 +231,6 @@ void esperar_proceso(t_cpu* cpu) {
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
     
-    // 1. Armo y envío el paquete pidiendo el contexto
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
     int id_cpu_int = atoi(cpu->id); 
     agregar_a_paquete(paquete, &pid, sizeof(int));
@@ -240,14 +239,10 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    // 2. Me bloqueo acá hasta que el hilo 'escuchar_kernel_memory' reciba los datos, 
-    //    arme el struct y haga el sem_post(&sem_contexto_recibido)
     sem_wait(&sem_contexto_recibido);
 
-    // 3. Tomo el contexto que el hilo de escucha me dejó preparado en la variable global
     t_contexto* contexto_recibido = buffer_contexto;
     
-    // 4. Limpio el buffer global para el próximo ciclo
     buffer_contexto = NULL; 
 
     if (contexto_recibido != NULL) {
@@ -335,17 +330,15 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 } 
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
-    // Armo y envío paquete
+
     t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
     agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
     agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); 
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    // Esperamos a que el hilo 'escuchar_kernel_memory' reciba el string y nos avise
     sem_wait(&sem_instruccion_recibida);
 
-    // Tomamos la instrucción del buffer global y lo limpiamos
     char* instruccion_leida = buffer_instruccion;
     buffer_instruccion = NULL; 
    
