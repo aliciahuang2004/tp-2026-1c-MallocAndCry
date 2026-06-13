@@ -171,6 +171,12 @@ void* escuchar_kernel_memory(void* arg) {
                 log_info(cpu->logger, "Tamaño de segmento recibido: %d", cpu->segment_max_size);
                 break;
             }
+            case ERROR_INSTRUCCION: {
+                log_error(cpu->logger, "Kernel Memory reportó un error al intentar leer la instrucción.");
+                buffer_instruccion = NULL; // Dejamos el buffer en NULL para que fetch_instruccion sepa que falló
+                sem_post(&sem_instruccion_recibida); // Destrabamos el hilo principal
+                break;
+            }
             default:
                 log_warning(cpu->logger, "Código de KM desconocido: %d", cod_op);
         }
@@ -225,50 +231,32 @@ void esperar_proceso(t_cpu* cpu) {
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
     
-    //armo paquete
+    // 1. Armo y envío el paquete pidiendo el contexto
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
-    
     int id_cpu_int = atoi(cpu->id); 
-    
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete, &id_cpu_int, sizeof(int)); 
 
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    //espero respuesta
-    t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
-    if (!respuesta) {
-        log_error(cpu->logger, "Error al recibir contexto de Kernel Memory para PID %d", pid);
-        return NULL;
-    }
+    // 2. Me bloqueo acá hasta que el hilo 'escuchar_kernel_memory' reciba los datos, 
+    //    arme el struct y haga el sem_post(&sem_contexto_recibido)
+    sem_wait(&sem_contexto_recibido);
 
-    int cod_op = *(int*)list_get(respuesta, 0);
-    t_contexto* contexto_recibido = NULL;
+    // 3. Tomo el contexto que el hilo de escucha me dejó preparado en la variable global
+    t_contexto* contexto_recibido = buffer_contexto;
+    
+    // 4. Limpio el buffer global para el próximo ciclo
+    buffer_contexto = NULL; 
 
-    if(cod_op == CONTEXT_RESPONSE) {
-        contexto_recibido = malloc(sizeof(t_contexto));
-        //TODO aca deberia recibir tmb los registros, consultar qué datos mas deberia recibir para el contexto
-        contexto_recibido->pid = *(int*)list_get(respuesta, 1);
-        contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 2); 
-        contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 3);
-        contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 4);
-        contexto_recibido->registros.CX = *(uint8_t*)list_get(respuesta, 5);
-        contexto_recibido->registros.DX = *(uint8_t*)list_get(respuesta, 6);
-        contexto_recibido->registros.EAX = *(uint32_t*)list_get(respuesta, 7);
-        contexto_recibido->registros.EBX = *(uint32_t*)list_get(respuesta, 8);
-        contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 9);
-        contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 10);
-        contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 11);
-        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 12);
+    if (contexto_recibido != NULL) {
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
-        log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
+        log_error(cpu->logger, "Error: El buffer_contexto llegó nulo");
     }
 
-    list_destroy_and_destroy_elements(respuesta, free);
     return contexto_recibido;
-
 }
 
 void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
@@ -347,37 +335,19 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 } 
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
-    
+    // Armo y envío paquete
     t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
     agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
-    agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); // es necesario pasarle lo registros?
-
+    agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); 
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    //espero respuesta
-    t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
-    if (!respuesta) {
-        log_error(cpu->logger, "Error al recibir instrucción de Kernel Memory para PID %d", contexto->pid);
-        return NULL;
-    }
+    // Esperamos a que el hilo 'escuchar_kernel_memory' reciba el string y nos avise
+    sem_wait(&sem_instruccion_recibida);
 
-    int cod_op = *(int*)list_get(respuesta, 0);
-    char* instruccion_leida = NULL;
-
-    if(cod_op == RESPUESTA_INSTRUCCION){ //todavia no tengo este tipo operacion
-        char* str_recibido = (char*)list_get(respuesta, 1); // asumo que el string viene en la posicion 1 del paquete
-        instruccion_leida = strdup(str_recibido); // duplico el string para devolverlo, luego se debe liberar
-    }
-    else {
-        log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
-    }
-
-    list_destroy_and_destroy_elements(respuesta, free);
-
-    // deberia sumar un 1 al PC pero lo deberia hacer en la otra funcion
-
-
+    // Tomamos la instrucción del buffer global y lo limpiamos
+    char* instruccion_leida = buffer_instruccion;
+    buffer_instruccion = NULL; 
    
     return instruccion_leida;
 }
