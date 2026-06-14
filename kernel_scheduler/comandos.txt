@@ -1,14 +1,25 @@
 ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 
-./bin/memory_stick ms1.config 1024 1
-./bin/memory_stick ms2.config 2048 2
-./bin/memory_stick ms3.config 1024 3
-./bin/memory_stick ms4.config 4096 4
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+run
+bt
 
+gdb --args ./bin/memory_stick ms1.config 100 1
+./bin/memory_stick ms1.config 100 1
+gdb --args ./bin/memory_stick ms2.config 200 2
+./bin/memory_stick ms2.config 200 2
+gdb --args ./bin/memory_stick ms3.config 150 3
+./bin/memory_stick ms3.config 150 3
+gdb --args ./bin/memory_stick ms4.config 400 4
+./bin/memory_stick ms4.config 400 4
+
+gdb --args ./bin/cpu cpu.config 1 
 ./bin/cpu cpu.config 1
 
 ./bin/kernel_memory kernel_memory.config 
-
+gdb --args ./bin/kernel_memory kernel_memory.config 
+run
+bt
 ./bin/io io.config STDIN
 ./bin/io io.config STDOUT
 ./bin/io io.config SLEEP

@@ -14,6 +14,7 @@ typedef struct {
     char* ip_kernel_memory;   //memory_stick conexion cliente a kernel_memory
     char* puerto_kernel_memory; //=
     int   kernel_mem_socket;    //socket de la conexion al servidor kernel memory
+    char* ip_escucha;
 } t_memory_stick;
 
 typedef struct 

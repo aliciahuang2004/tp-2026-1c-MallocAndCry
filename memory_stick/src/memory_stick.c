@@ -27,6 +27,7 @@ t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     ms ->puerto_escucha = config_get_string_value(ms->config,"PUERTO_ESCUCHA");
     ms ->ip_kernel_memory = config_get_string_value(ms->config,"IP_KERNEL_MEMORY");
     ms ->puerto_kernel_memory = config_get_string_value(ms->config,"PUERTO_KERNEL_MEMORY");
+    ms ->ip_escucha = config_get_string_value(ms->config,"IP_ESCUCHA");
 
    //loggeo que todo se cargò correctamente
    log_debug(ms->logger, "El mòdulo Memory Stick se inicializò correctamente");
@@ -42,6 +43,7 @@ void verificar_memory_stick(t_memory_stick* ms) {
     log_debug(ms->logger, "Puerto de escucha: %s", ms->puerto_escucha);
     log_debug(ms->logger, "IP Kernel Memory: %s", ms->ip_kernel_memory);
     log_debug(ms->logger, "Puerto Kernel Memory: %s", ms->puerto_kernel_memory);
+    log_debug(ms->logger, "Ip de escucha: %s", ms->ip_escucha);
 }
 
 int conectar_al_kernelmem(t_memory_stick* ms){
@@ -88,6 +90,7 @@ void enviar_handshake(t_memory_stick* ms){
   agregar_a_paquete(paquete,&ms->id, sizeof(int));
   agregar_a_paquete(paquete,&ms->tamano,  sizeof(int));
   agregar_a_paquete(paquete,ms->puerto_escucha,strlen(ms->puerto_escucha) + 1);
+  agregar_a_paquete(paquete,ms->ip_escucha,strlen(ms->ip_escucha) + 1);
   enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
   eliminar_paquete(paquete);
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);

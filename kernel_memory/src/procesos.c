@@ -74,11 +74,11 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
 
     for (int i = 0; i < cant_segmentos; i++) {
         t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
-        bases[i] = seg->base;
-        limites[i] = seg->limite;
+        bases[i] = seg->base_global;
+        limites[i] = seg->limite_global;
     }
 
-    free(proceso->contexto->registros);
+    free(proceso->contexto);
 
     list_destroy_and_destroy_elements(proceso->contexto->tabla_segmentos, free);
 
