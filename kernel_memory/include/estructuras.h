@@ -76,7 +76,7 @@ typedef struct {
 
     int id;
 
-    uint32_t base_global;//REVISAR SI LO BORRO
+    //uint32_t base_global;//REVISAR SI LO BORRO
 
     uint32_t tamano;
 
@@ -101,6 +101,14 @@ typedef struct {
     int socket;
 
 } t_cpu;
+
+typedef struct {
+    int ms_id;
+    uint32_t dir_local;
+    uint32_t tamano_a_copiar;
+    void* datos_bloque;
+} t_fragmento_escritura;
+
 
 /*
 typedef struct {

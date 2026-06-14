@@ -58,7 +58,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
     list_add(proceso->contexto->tabla_segmentos, segmento);
     pthread_mutex_unlock(&mutex_procesos);
     log_info(logger,"Segmento creado para PID:%d ID SEG:%d BASE:%u LIMITE:%u",pid,id_segmento,segmento->base_global,segmento->limite_global);//para probar
-    loguear_tabla_segmentos(proceso->contexto->tabla_segmentos,logger);
+    //loguear_tabla_segmentos(proceso->contexto->tabla_segmentos,logger);
     loguear_segmentos_proceso(proceso, logger);//para probar
 
     return 1;

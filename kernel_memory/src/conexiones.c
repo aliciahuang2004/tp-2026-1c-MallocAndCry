@@ -282,30 +282,31 @@ void* atender_conexion(void* arg) {
             }  
             break;
         
-            case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
+           case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
             {
-                int direccion_fisica_global = *(int*) list_get(paquete, 1);
-                //VER SI ES NECESARIO MAS DATOS----int pc_recibido  = *(int*) list_get(paquete, 2);
+                uint32_t direccion_fisica_global = *(int*) list_get(paquete, 1);
+                int pid_recibido  = *(int*) list_get(paquete, 2);
                 char* contenido_a_escribir = (char*) list_get(paquete, 3);
 
-                /*
-                llamo a escribir_en_memoria(direccion_fisica,contenido_a_escribir,?)
-                
-                1-caso solo debo escribir en un ms
-                ms recibe una direccion y un contenido y automaticamente escribe donde le piden? o como hace ms?
+                // Calculamos el tamaño del contenido que nos mandó la CPU
+                int tamano_contenido = strlen(contenido_a_escribir) + 1; 
 
-                TOMO direccion_fisica_global Y LO PASO COMO PARAMETRO A UNA FUNCION "buscar_direccion_local" VA A RECORRER
-                "lista_ms" o alguna otra lista que contenga la base y el limite global de los ms conectados
-                HARÁ LA CUENTA direccion_fisica_global - base global del ms = direccion local dentro del ms desde donde escribir o leer,retorna este dato
-                direccion_local=buscar_direccion_local(direccion_fisica_global,?)
-                LLAMO A OTRA FUNCION "avisar_a_ms(direccion_local,contenido_a_escribir,?) QUE VA A ENVIAR PAQUETE PARA QUE ESCRIBA 
-                necesita acceder a una lista de ms con sus sockets como dato y buscar ms por id
+                // 1. LLAMADA: La función crea internamente la lista y nos la devuelve llena
+                t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano_contenido,logger);
 
-                2-caso debo escribir en dos ms LO VEO DESPUES DE LOGRAR caso 1
-                 aca km deberia calcular si el tamaño y la direccion fisica entra en un ms o mas de uno
-                 si entra en mas de uno CREAR ESTRATEGIA :enviar tantas peticiones de escritura como cantidad de ms en los que haya que escribir
-                */
+                if (lista_fragmentos_temp != NULL) {
+                    // Paso 2: Enviar cada fragmento a su respectivo Memory Stick
+                    enviar_fragmentos_escritura(lista_fragmentos_temp, contenido_a_escribir, logger);
 
+                    // Paso 3: Esperar las respuestas de confirmación de los MS y responder a CPU...
+                    // (Aquí agregarías la lógica para recibir los "IO_OK" de los MS antes de responderle a la CPU)
+
+                    // Paso 4: Limpieza absoluta de la memoria temporal del hilo
+                    list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
+                } else {
+                    log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
+                    // Enviar código de error a la CPU si corresponde...
+                }   
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
@@ -315,7 +316,20 @@ void* atender_conexion(void* arg) {
             case FINALIZAR_PROCESO: ///***ESPERO EXIT DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
-                eliminar_proceso(pid_recibido,km,logger);
+                int respuesta = eliminar_proceso(pid_recibido,km,logger);
+            
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {//******************************NO ES OBLIGATORIO PODRIA SIMPLEMENTE AGREGAR UN LOG PARA QUE EN KS NO TENGA QUE ESPERAR ESTE MSJ**********
+                    t_paquete* resp = crear_paquete(FIN_PROC_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
             }
             break;
             case SUSPENSION_DE_PROCESO:
@@ -331,7 +345,20 @@ void* atender_conexion(void* arg) {
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
-                eliminar_segmento(pid_recibido,id_seg_recibido,logger);
+                int respuesta = eliminar_segmento(pid_recibido,id_seg_recibido,logger);
+
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
             }
             break;
             case CREACION_DE_SEGMENTO: 

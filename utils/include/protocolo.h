@@ -74,7 +74,12 @@ typedef enum{
     CPUS_DESALOJADAS,
     AUMENTO_DE_MEMORIA,
     SEG_MAX_SIZE,
-    MS_NUEVO_CPU          
+    MS_NUEVO_CPU,
+    ELIMINACION_DE_SEG_OK,
+    ELIMINACION_DE_SEG_ERROR,
+    FIN_PROC_OK,
+    FIN_PROC_ERROR,
+    ESCRITURA_EN_MS             
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
