@@ -71,6 +71,7 @@ typedef enum{
     PROCESO_DESALOJADO_COMPACTACION,
     CORRUPCION_MEMORIA,                  //km envia esto a ks para avisar que un ms se desconectó            
     INICIAR_COMPACTACION,
+    COMPACTACION_TERMINADA,   // KM avisa que terminó de compactar (debe incluir el PID)
     CPUS_DESALOJADAS,
     AUMENTO_DE_MEMORIA,
     SEG_MAX_SIZE,

@@ -104,6 +104,12 @@ typedef enum {
     ALGORITMO_FIFO,
     ALGORITMO_RR
 } t_algoritmo_cola;
+// Solicitud de segmento pendiente de confirmación por parte de KM
+// (se guarda para poder reintentar CREACION_DE_SEGMENTO tras una compactación)
+typedef struct {
+    int idSegmento;
+    int tamanio;
+} t_solicitud_segmento;
 
 // funciones de inicializacion
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
@@ -122,12 +128,18 @@ void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 t_pcb* crear_PCB(char* path, int prioridad);
 void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
+// Mutex
 void crearMutex(char* nombreMutex);
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu);
 void liberarMutex(int pidLiberaMutex,char* nombreMutex);
+//IO
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
 void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+//Memoria (MEM_ALLOC / MEM_FREE)
+void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
+void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
+//Finalizar proceso
 void finalizarProceso(int pid);
 void eliminarProceso(int pid, op_code motivo);
 
@@ -165,6 +177,12 @@ extern pthread_mutex_t mutex_diccionario;
 
 extern sem_t sem_procesosReady;
 extern sem_t sem_hayCPUs;
+// Solicitudes de CREACION_DE_SEGMENTO pendientes de respuesta de KM (key: pid como string)
+extern t_dictionary* diccionario_segmentos_pendientes;
+extern pthread_mutex_t mutex_segmentos_pendientes;
+
+// planificador de corto plazo durante una compactación (valor inicial 1 = libre)
+extern sem_t sem_compactacion;
 
 extern int cpu_socket;
 
@@ -194,7 +212,10 @@ t_pcb* pasarProcesoExecABlockSinLiberar(int pid);
 //void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
 t_pcb* sacardeColaBlockPorPID(int pid);
-
+// Desalojo y reencolado por compactación de memoria (en compactacion.c)
+void encolarProcesoEnReadyAlPrincipio(t_pcb* pcb);
+void pasarProcesoExecAReadyAlFrente(int pid, t_cpu_conectada* cpu);
+void desalojarTodasLasCPUsPorCompactacion(void);
 
 void* atender_cpu(void* socket_cpu_ptr);
 // IO globals (colas por tipo y lista de interfaces)

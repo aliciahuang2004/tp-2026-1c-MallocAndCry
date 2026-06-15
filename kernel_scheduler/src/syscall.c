@@ -214,51 +214,26 @@ void eliminarProceso(int pid, op_code motivo ){
 }
 
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
+    // Guardo la solicitud para poder reintentarla si KM pide compactación
+    t_solicitud_segmento* solicitud = malloc(sizeof(t_solicitud_segmento));
+    solicitud->idSegmento = idSegmento;
+    solicitud->tamanio = tamanio;
 
-    t_paquete* solicitud = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
+    char* key = string_itoa(pidSolicitaSyscall);
+    pthread_mutex_lock(&mutex_segmentos_pendientes);
+    dictionary_put(diccionario_segmentos_pendientes, key, solicitud);
+    pthread_mutex_unlock(&mutex_segmentos_pendientes);
+    free(key);
+
+    t_paquete* solicitud_paquete = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
+    agregar_a_paquete(solicitud_paquete,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud_paquete,&idSegmento,sizeof(int));
+    agregar_a_paquete(solicitud_paquete,&tamanio,sizeof(int));
     
-    agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
-    agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
-    agregar_a_paquete(solicitud,&tamanio,sizeof(int));
+    enviar_paquete(solicitud_paquete,kernel->socket_kernel_memory,kernel->logger);
+    eliminar_paquete(solicitud_paquete);
     
-    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
-    
-    eliminar_paquete(solicitud);
-
-
-    int cod_op = recibir_operacion(kernel->socket_kernel_memory);
-
-    switch(cod_op){
-        case INICIAR_COMPACTACION:
-            
-            // pedirDesalojoPorCompactacion();
-            // reencolar procesos
-            t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
-            
-            agregar_a_paquete(paquete,&pidSolicitaSyscall,sizeof(int));
-
-            enviar_paquete(paquete,kernel->socket_kernel_memory,kernel->logger);
-        
-            eliminar_paquete(paquete);
-
-            int cod_op2 = recibir_operacion(kernel->socket_kernel_memory);
-            if(cod_op2 == CREACION_DE_SEGMENTO_OK) {
-                log_info(kernel->logger, "Compactación finalizada, reactivando planificador");
-                // reactivar planificador
-            }
-            break;
-
-        /*case ERROR_SEGMENTO:
-            log_error(kernel->logger, "Error al crear segmento");
-            break;
-        */
-
-        case CREACION_DE_SEGMENTO_OK:
-            log_info(kernel->logger, "Se creo el segmento");
-            //volver a enviar proceso a cpu
-            break;
-    }    
-  
+    log_info(kernel->logger, "## (<%d>) Solicita CREACION_DE_SEGMENTO a KM - idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
 }
 
 void liberarMemoria(int pidSolicitaSyscall, int idSegmento){

@@ -5,6 +5,9 @@ int pidParaAsignar = 0;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
+t_dictionary* diccionario_segmentos_pendientes;
+pthread_mutex_t mutex_segmentos_pendientes;
+sem_t sem_compactacion;
 
 t_queue* colaNEW;
 t_queue* colaREADY;
@@ -61,6 +64,10 @@ void iniciarPlanificadorLCortoPlazo(){
     // Inicialización del almacenamiento global de Mutexes
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
+
+    diccionario_segmentos_pendientes = dictionary_create();
+    pthread_mutex_init(&mutex_segmentos_pendientes, NULL);
+    sem_init(&sem_compactacion, 0, 1);
 
     if (strcmp(kernel->planification_algorithm, "CMN") == 0) {
         int n = kernel->cantidadColasMultinivel;
@@ -177,6 +184,8 @@ void* loop_corto_plazo(void* args) {
     while(1) {
         sem_wait(&sem_hayCPUs);
         sem_wait(&sem_procesosReady);
+        sem_wait(&sem_compactacion);
+        sem_post(&sem_compactacion);
         pasarProcesoReadyAExec();
     }
     return NULL;
@@ -556,18 +565,4 @@ t_cpu_conectada* buscar_cpu_por_pid(int pid) {
     pthread_mutex_unlock(&mutex_CPU);
 
     return encontrada;
-}
-
-void pedirDesalojoPorCompactacion(){
-
-    //para cada cpu ocupada
-    //obtener cpu o los datos por separado: pid y cpuSocket
-        t_buffer* buffer = crear_buffer();
-        t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO_COMPACTACION, buffer);
-        // agregar_a_paquete(paquete, &pid, sizeof(int));
-
-        // enviar_paquete(paquete, cpu->socket_cliente, kernel->logger);
-
-        eliminar_paquete(paquete);
-    
 }
