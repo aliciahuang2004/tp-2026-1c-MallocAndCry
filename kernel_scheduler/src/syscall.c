@@ -34,7 +34,7 @@ void enviarPathYPidKM(int pid, char* path){
     int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
 
     if (resultado != 0) {
-        log_error(kernel->logger, "Error al enviar el Path a Kernel Memory");
+        log_error(kernel->logger, "Error al enviar el Path a Kernel Memory para el proceso con PID: %s", pid);
         exit(EXIT_FAILURE);
     }
     eliminar_paquete(paquete);
@@ -132,6 +132,31 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex){
     }
 }
 
+void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
+
+    t_paquete* solicitud = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
+    
+    agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
+    
+    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    
+    eliminar_paquete(solicitud);
+
+    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    switch (cod op){
+        case ELIMINACION_DE_SEGMENTO_OK:
+            log_info(kernel->logger, "## (<%d>) libero segmento : %d ", pidSolicitaSyscall, idSegmento); 
+            break;
+        case ELIMINACION_DE_SEGMENTO_ERROR:
+            log_error(kernel->logger, "Error: El proceso %d no logro liberar segmento: %d", pidSolicitaSyscall, idSegmento);
+            break;
+        default:
+            log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
+            break;
+    }
+}
+
 void finalizarProceso(int pid){
 
     t_pcb* pcb = buscarPcbporPIDEnColaExec(pid);
@@ -149,7 +174,7 @@ void finalizarProceso(int pid){
         int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
 
         if (resultado != 0) {
-            log_error(kernel->logger, "Error al enviar pedido de eliminacion de segmentos de proceso con PID: %s a finalizar",pid);
+            log_error(kernel->logger, "Error al enviar pedido de eliminacion de segmentos de proceso con PID: %d a finalizar",pid);
             exit(EXIT_FAILURE);
         }
         eliminar_paquete(paquete);
