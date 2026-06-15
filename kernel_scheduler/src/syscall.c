@@ -141,6 +141,18 @@ void finalizarProceso(int pid){
         queue_push(colaEXIT, pcb);
         pthread_mutex_unlock(&mutex_EXIT);
         log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
+
+        t_paquete* paquete = crear_paquete(ELIMINACION_DE_SEGMENTO, buffer); 
+
+        agregar_a_paquete(paquete, &pid, sizeof(int));
+
+        int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+
+        if (resultado != 0) {
+            log_error(kernel->logger, "Error al enviar pedido de eliminacion de segmentos de proceso con PID: %s a finalizar",pid);
+            exit(EXIT_FAILURE);
+        }
+        eliminar_paquete(paquete);
         
         eliminarProceso(pid, EXIT_PROC);
         
