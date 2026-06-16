@@ -246,7 +246,7 @@ t_cpu_conectada* buscar_cpu_por_pid(int pid);
 void liberar_cpu_y_notificar(t_cpu_conectada* cpu);
 // IO handlers (en io.c)
 void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio);
-
+void enviarEscrituraAKM(int pid, uint32_t dir_logica, uint32_t tamano, void* datos);
 // Para kernel memory
 extern sem_t           sem_datos_listos;
 extern void*           km_datos_buffer;

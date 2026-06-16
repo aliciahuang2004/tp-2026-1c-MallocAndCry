@@ -255,6 +255,14 @@ void* atender_cliente_scheduler(void* arg) {
                     if (solicitud_terminada != NULL) {
                         
                         pcb_a_desbloquear = solicitud_terminada->pcb;
+                        if (interfaz->tipo == IO_STDIN && list_size(paquete) > 2) {
+                            uint32_t datos_size    = *(uint32_t*) list_get(paquete, 2);
+                            void* datos_usuario = list_get(paquete, 3);
+                            if (datos_size > 0 && datos_usuario != NULL) {
+                                enviarEscrituraAKM(pid_io, solicitud_terminada->dir_logica, datos_size, datos_usuario);
+                                log_info(logger, "## PID: %d - Datos STDIN enviados a KM (dir=%u, tam=%u)", pid_io, solicitud_terminada->dir_logica, datos_size);
+                            }
+                        }
                         liberar_solicitud_io(solicitud_terminada); // <-- Recién acá la limpiamos de la memoria
                     }
                 }
