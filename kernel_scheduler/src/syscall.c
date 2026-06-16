@@ -175,7 +175,7 @@ void finalizarProceso(int pid){
         pthread_mutex_unlock(&mutex_EXIT);
         log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
 
-        t_paquete* paquete = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
+        t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO, crear_buffer());
         agregar_a_paquete(paquete, &pid, sizeof(int));
 
         int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
