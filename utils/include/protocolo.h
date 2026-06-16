@@ -65,12 +65,13 @@ typedef enum{
     DATOS_LEIDOS,        
 
     ACTUALIZAR_CONTEXTO,            
-    PROCESO_DESALOJADO,
+    PROCESO_DESALOJADO, //SYSCALL 
     PROCESO_DESALOJADO_QUANTUM,
     PROCESO_DESALOJADO_PRIORIDAD,
     PROCESO_DESALOJADO_COMPACTACION,
     CORRUPCION_MEMORIA,                  //km envia esto a ks para avisar que un ms se desconectó            
     INICIAR_COMPACTACION,
+    COMPACTACION_TERMINADA,   // KM avisa que terminó de compactar (debe incluir el PID)
     CPUS_DESALOJADAS,
     AUMENTO_DE_MEMORIA,
     SEG_MAX_SIZE,

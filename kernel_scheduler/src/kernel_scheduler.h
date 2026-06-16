@@ -48,6 +48,7 @@ typedef struct {
     int pid;
     t_pcb* pcb;
     t_io_operation tipo_operacion;
+    uint32_t dir_logica;
     uint32_t datos_size;
     void* datos;
 } t_solicitud_io;
@@ -70,8 +71,13 @@ typedef struct {
     int socket_kernel_memory;
     int socket_io;  // Socket para comunicarse con IO
     char* planification_algorithm;
+    char** queues_algorithms;
     int rr_quantum;
+    char* queues_preemption;
+    bool queue_preemption; // para usarlo en la logica de desalojo
+    int suspension_time;
     bool procesoInicialCreado;
+    int cantidadColasMultinivel;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -95,6 +101,18 @@ typedef struct {
     pthread_mutex_t mutex;
 } t_mutex;
 
+typedef enum {
+    ALGORITMO_FIFO,
+    ALGORITMO_RR
+} t_algoritmo_cola;
+
+t_algoritmo_cola parsear_algoritmo(char* algoritmo);
+// Solicitud de segmento pendiente de confirmación por parte de KM
+// (se guarda para poder reintentar CREACION_DE_SEGMENTO tras una compactación)
+typedef struct {
+    int idSegmento;
+    int tamanio;
+} t_solicitud_segmento;
 
 // funciones de inicializacion
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
@@ -113,12 +131,18 @@ void conectar_con_kernel_memory(t_kernel_scheduler* kernel_scheduler);
 t_pcb* crear_PCB(char* path, int prioridad);
 void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
+// Mutex
 void crearMutex(char* nombreMutex);
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, int socket_cpu);
 void liberarMutex(int pidLiberaMutex,char* nombreMutex);
+//IO
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
 void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+//Memoria (MEM_ALLOC / MEM_FREE)
+void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
+void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
+//Finalizar proceso
 void finalizarProceso(int pid);
 void eliminarProceso(int pid, op_code motivo);
 
@@ -127,7 +151,8 @@ void eliminarProceso(int pid, op_code motivo);
 extern int pidParaAsignar;
 
 extern t_queue* colaNEW;
-extern t_queue* colaREADY;
+extern t_queue* colaREADY; // cola unica para FIFO/RR
+extern t_queue** colasREADY_multinivel; // array de colas para algoritmos multinivel
 extern t_queue* colaREADY_SUSP;
 extern t_queue* colaEXEC;
 extern t_queue* colaBLOCK;
@@ -137,6 +162,13 @@ extern t_queue* colaCPUs;
 
 extern pthread_mutex_t mutex_NEW;
 extern pthread_mutex_t mutex_READY;
+//extern pthread_mutex_t mutex_READY_CMN;
+// Array de mutexes para CMN - uno por cola
+// pthread_mutex_t* porque es un puntero a un array de mutexes
+extern pthread_mutex_t* mutexColas;
+
+// Array de algoritmos por cola - uno por prioridad
+extern t_algoritmo_cola* algoritmos_por_cola;
 extern pthread_mutex_t mutex_READY_SUSP;
 extern pthread_mutex_t mutex_BLOCK;
 extern pthread_mutex_t mutex_BLOCK_SUSP;
@@ -148,6 +180,12 @@ extern pthread_mutex_t mutex_diccionario;
 
 extern sem_t sem_procesosReady;
 extern sem_t sem_hayCPUs;
+// Solicitudes de CREACION_DE_SEGMENTO pendientes de respuesta de KM (key: pid como string)
+extern t_dictionary* diccionario_segmentos_pendientes;
+extern pthread_mutex_t mutex_segmentos_pendientes;
+
+// planificador de corto plazo durante una compactación (valor inicial 1 = libre)
+extern sem_t sem_compactacion;
 
 extern int cpu_socket;
 
@@ -164,6 +202,12 @@ void* loop_corto_plazo(void* args);
 void ejecutarPorFIFO();
 void ejecutarPorRR();
 void pedirDesalojoPorFinDeQuantum(int pid, t_cpu_conectada* cpu);
+
+void ejecutarPorCMN();
+void encolarProcesoEnReady(t_pcb* pcb);
+void verificarDesalojoPorPrioridad(t_pcb* pcbNuevo, int indiceColaNueva);
+void pedirDesalojoPorPrioridad(int pid, t_cpu_conectada* cpu);
+
 void pasarProcesoExecAReady(int pid, t_cpu_conectada* cpu);
 t_pcb* buscarPcbporPIDEnColaExec(int pid);
 void pasarProcesoExecABlock(int pid, t_cpu_conectada* cpu);
@@ -171,7 +215,10 @@ t_pcb* pasarProcesoExecABlockSinLiberar(int pid);
 //void atender_cpu(int socket_cpu);
 t_cpu_conectada* buscarCpuPorSocket(int socket_cpu);
 t_pcb* sacardeColaBlockPorPID(int pid);
-
+// Desalojo y reencolado por compactación de memoria (en compactacion.c)
+void encolarProcesoEnReadyAlPrincipio(t_pcb* pcb);
+void pasarProcesoExecAReadyAlFrente(int pid, t_cpu_conectada* cpu);
+void desalojarTodasLasCPUsPorCompactacion(void);
 
 void* atender_cpu(void* socket_cpu_ptr);
 // IO globals (colas por tipo y lista de interfaces)
@@ -199,7 +246,7 @@ t_cpu_conectada* buscar_cpu_por_pid(int pid);
 void liberar_cpu_y_notificar(t_cpu_conectada* cpu);
 // IO handlers (en io.c)
 void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio);
-
+void enviarEscrituraAKM(int pid, uint32_t dir_logica, uint32_t tamano, void* datos);
 // Para kernel memory
 extern sem_t           sem_datos_listos;
 extern void*           km_datos_buffer;

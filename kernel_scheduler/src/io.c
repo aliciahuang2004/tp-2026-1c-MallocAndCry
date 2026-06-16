@@ -34,6 +34,17 @@ void* obtenerDatosDeKM(uint32_t dir_logica, uint32_t tamanio) {
     pthread_mutex_unlock(&mutex_lectura_km);
     return datos;
 }
+void enviarEscrituraAKM(int pid, uint32_t dir_logica, uint32_t tamano, void* datos) {
+    t_paquete* paquete = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete, &pid,        sizeof(int));
+    agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &tamano,     sizeof(uint32_t));
+    agregar_a_paquete(paquete, datos,       tamano);
+    enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    eliminar_paquete(paquete);
+    log_debug(kernel->logger, "ESCRITURA_DE_DATOS enviada a KM: PID=%d dir=%u tam=%u", pid, dir_logica, tamano);
+}
+
 
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     t_pcb* pcb = pasarProcesoExecABlockSinLiberar(pid);
@@ -85,6 +96,7 @@ void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectad
     params[0] = dir_logica;
     params[1] = tamano;
     t_solicitud_io* solicitud = crear_solicitud_io(pid, pcb, OP_STDIN, datos_size, params);
+    solicitud->dir_logica = dir_logica;
 
     // Encolar en cola de IO STDIN
     t_queue* cola_tipo = obtener_cola_bloqueados_por_tipo(IO_STDIN);

@@ -40,21 +40,66 @@ void* atender_kernel_memory(void* arg) {
 
             case CREACION_DE_SEGMENTO_OK: {
                 int pid = *(int*) list_get(paquete, 1);
-            log_debug(kernel->logger, "## KM confirmó creación de segmento - PID: %d", pid);
+                log_debug(kernel->logger, "## KM confirmó creación de segmento - PID: %d", pid);
+                
+                char* key = string_itoa(pid);
+                pthread_mutex_lock(&mutex_segmentos_pendientes);
+                dictionary_remove_and_destroy(diccionario_segmentos_pendientes, key, free);
+                pthread_mutex_unlock(&mutex_segmentos_pendientes);
+                free(key);
+                
+                t_pcb* pcb = sacardeColaBlockPorPID(pid);
+                if (pcb != NULL) {  
+                pcb->estado = EXEC;
+                pthread_mutex_lock(&mutex_EXEC);
+                queue_push(colaEXEC, pcb);
+                pthread_mutex_unlock(&mutex_EXEC);
 
-            t_pcb* pcb = sacardeColaBlockPorPID(pid);
-            if (pcb != NULL) {
-                pcb->estado = READY;
-                pthread_mutex_lock(&mutex_READY);
-                queue_push(colaREADY, pcb);
-                pthread_mutex_unlock(&mutex_READY);
-                log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pid);
-                sem_post(&sem_procesosReady);
-            } else {
-                log_error(kernel->logger,
-                        "KM Listener: CREACION_DE_SEGMENTO_OK - no se encontró PID %d en BLOCK", pid);
+                t_cpu_conectada* cpu = buscar_cpu_por_pid(pid);
+                if (cpu != NULL) {
+                    log_debug(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <EXEC> (misma CPU)", pid);
+                    enviarPIDAcpu(pid, cpu);
+                } else {
+                    log_error(kernel->logger, "CREACION_DE_SEGMENTO_OK - no se encontró CPU para PID %d", pid);
+                }
+                } else {
+                log_error(kernel->logger, "CREACION_DE_SEGMENTO_OK - no se encontró PID %d en BLOCK", pid);
             }
             break;
+            }
+            case INICIAR_COMPACTACION: {
+                log_debug(kernel->logger, "## KM solicitó compactación de memoria");
+
+                sem_wait(&sem_compactacion); // cierra el corto plazo
+
+                desalojarTodasLasCPUsPorCompactacion();
+
+                t_paquete* aviso = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
+                enviar_paquete(aviso, kernel->socket_kernel_memory, kernel->logger);
+                eliminar_paquete(aviso);
+
+                log_debug(kernel->logger, "## Se avisó a KM: CPUS_DESALOJADAS");
+                break;
+            }
+
+            case COMPACTACION_TERMINADA: {
+                int pid = *(int*) list_get(paquete, 1);
+                log_debug(kernel->logger, "## KM finalizó la compactación - PID pendiente: %d", pid);
+
+                sem_post(&sem_compactacion); // retoma planificación normal
+
+                char* key = string_itoa(pid);
+                pthread_mutex_lock(&mutex_segmentos_pendientes);
+                t_solicitud_segmento* solicitud = dictionary_get(diccionario_segmentos_pendientes, key);
+                pthread_mutex_unlock(&mutex_segmentos_pendientes);
+                free(key);
+
+                if (solicitud != NULL) {
+                    asignarMemoria(pid, solicitud->idSegmento, solicitud->tamanio);
+                } else {
+                    log_error(kernel->logger, "COMPACTACION_TERMINADA - no se encontró solicitud pendiente para PID %d", pid);
+                }
+                break;
             }
 
             case AUMENTO_DE_MEMORIA: {

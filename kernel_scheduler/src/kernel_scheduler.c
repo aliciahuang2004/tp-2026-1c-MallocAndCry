@@ -27,8 +27,16 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->ip_kernel_memory = config_get_string_value(kernel_scheduler->config, "IP_KERNEL_MEMORY");
     kernel_scheduler->puerto_kernel_memory = config_get_string_value(kernel_scheduler->config, "PUERTO_KERNEL_MEMORY");
     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
+    kernel_scheduler->queues_algorithms = config_get_array_value(kernel_scheduler->config, "QUEUES_ALGORITHMS");
     kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
-    kernel_scheduler->procesoInicialCreado = false;
+    kernel_scheduler->queues_preemption = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
+    kernel_scheduler->queue_preemption = (strcmp(kernel_scheduler->queues_preemption, "TRUE") == 0);
+    kernel_scheduler->suspension_time = config_get_int_value(kernel_scheduler->config,"SUSPENSION_TIMEOUT");
+    kernel_scheduler->procesoInicialCreado = false; 
+    kernel_scheduler->cantidadColasMultinivel = 0;   
+    while(kernel_scheduler->queues_algorithms[kernel_scheduler->cantidadColasMultinivel] != NULL) {
+        kernel_scheduler->cantidadColasMultinivel++;
+    }
     lista_interfaces_io = list_create(); // Inicializamos la lista de interfaces IO
     cola_bloqueados_sleep = queue_create();
     cola_bloqueados_stdin = queue_create();
@@ -68,6 +76,13 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    }
    if(kernel_scheduler->planification_algorithm){
     free(kernel_scheduler->planification_algorithm);
+   }
+
+   if(kernel_scheduler->queues_algorithms){
+    string_array_destroy(kernel_scheduler->queues_algorithms);
+   }
+   if(kernel_scheduler->queues_preemption){
+    free(kernel_scheduler->queues_preemption);
    }
    
    free(kernel_scheduler);
@@ -169,9 +184,9 @@ void* atender_cliente_scheduler(void* arg) {
                         kernel->procesoInicialCreado = true; 
                     }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
                     sem_post(&sem_hayCPUs);
+                    list_destroy_and_destroy_elements(paquete, free);
+                    return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 }
-        
-                break;
             case IO_HANDSHAKE:
                 log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
                 char* nombre_interfaz = (char*) list_get(paquete, 1);
@@ -238,7 +253,16 @@ void* atender_cliente_scheduler(void* arg) {
                 if (!queue_is_empty(cola_tipo)) {
                     t_solicitud_io* solicitud_terminada = queue_pop(cola_tipo); // <-- Ahora sí sacamos la que terminó
                     if (solicitud_terminada != NULL) {
+                        
                         pcb_a_desbloquear = solicitud_terminada->pcb;
+                        if (interfaz->tipo == IO_STDIN && list_size(paquete) > 2) {
+                            uint32_t datos_size    = *(uint32_t*) list_get(paquete, 2);
+                            void* datos_usuario = list_get(paquete, 3);
+                            if (datos_size > 0 && datos_usuario != NULL) {
+                                enviarEscrituraAKM(pid_io, solicitud_terminada->dir_logica, datos_size, datos_usuario);
+                                log_info(logger, "## PID: %d - Datos STDIN enviados a KM (dir=%u, tam=%u)", pid_io, solicitud_terminada->dir_logica, datos_size);
+                            }
+                        }
                         liberar_solicitud_io(solicitud_terminada); // <-- Recién acá la limpiamos de la memoria
                     }
                 }
@@ -247,13 +271,8 @@ void* atender_cliente_scheduler(void* arg) {
                 // Devolvemos el proceso recuperado a READY
                 if (pcb_a_desbloquear != NULL) {
                     log_info(logger, "## PID: %d - Estado Anterior: BLOCK - Estado Actual: READY", pcb_a_desbloquear->pid);
-                    pcb_a_desbloquear->estado = READY;
+                    encolarProcesoEnReady(pcb_a_desbloquear); // Esto se encargará de ponerlo en la cola correcta según el algoritmo
 
-                    pthread_mutex_lock(&mutex_READY);
-                    queue_push(colaREADY, pcb_a_desbloquear);
-                    pthread_mutex_unlock(&mutex_READY);
-
-                    sem_post(&sem_procesosReady); // Notificar al corto plazo
                 } else {
                     log_error(logger, "Error: El PID %d terminó pero no había nada en la cola.", pid_io);
                 }
@@ -383,12 +402,9 @@ void enviar_operacion_a_io(t_interfaz_conectada* interfaz, t_solicitud_io* solic
         agregar_a_paquete(paquete_a_io, &tamano, sizeof(uint32_t));
         log_debug(kernel->logger, "Enviando orden STDIN (Dir: %u, Tam: %u) a la interfaz %s", dir_logica, tamano, interfaz->nombre);
     } else if (solicitud->tipo_operacion == OP_STDOUT) {
-        uint32_t* params = solicitud->datos;
-        uint32_t dir_logica = params[0];
-        uint32_t tamano = params[1];
-        agregar_a_paquete(paquete_a_io, &dir_logica, sizeof(uint32_t));
-        agregar_a_paquete(paquete_a_io, &tamano, sizeof(uint32_t));
-        log_debug(kernel->logger, "Enviando orden STDOUT (Dir: %u, Tam: %u) a la interfaz %s", dir_logica, tamano, interfaz->nombre);
+        agregar_a_paquete(paquete_a_io, &solicitud->datos_size, sizeof(uint32_t));
+        agregar_a_paquete(paquete_a_io, solicitud->datos, solicitud->datos_size);
+        log_debug(kernel->logger, "Enviando datos STDOUT (%u bytes) a interfaz %s",  solicitud->datos_size, interfaz->nombre);
     }
 
     enviar_paquete(paquete_a_io, interfaz->socket_interfaz, kernel->logger);

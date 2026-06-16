@@ -15,6 +15,30 @@ void crearProceso(char* path, int prioridad){
     
     enviarPathYPidKM(pcbNuevo->pid,path);
     //AGREGAR A COLA NEW, es realmente necesario?
+    /*
+    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    switch (cop_op){
+        case CREACION_DE_PROCESO_OK:
+            log_debug(kernel->logger,"Kernel Memory recibio correctamente el path");
+
+            pthread_mutex_lock(&mutex_NEW);
+            queue_push(colaNEW, pcbNuevo);
+            pthread_mutex_unlock(&mutex_NEW);
+
+            log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
+            
+            pasarProcesoNewAReady();
+            break;
+        case CREACION_DE_PROCESO_ERROR:
+            log_error(kernel->logger,"Kernel Memory no logro inicializar el proceso");
+            //ACA DEBERIA DESCARTAR EL PROCESO? O REINTENTO ENVIAR PATH?
+            break;
+        
+        default:
+            log_warning(kernel->logger, "Operación desconocida por parte de Kernel Memory al crear el proceso");
+            break;
+    }*/
+
     pthread_mutex_lock(&mutex_NEW);
     queue_push(colaNEW, pcbNuevo);
     pthread_mutex_unlock(&mutex_NEW);
@@ -22,6 +46,7 @@ void crearProceso(char* path, int prioridad){
     log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
     
     pasarProcesoNewAReady();
+    
 }
 
 void enviarPathYPidKM(int pid, char* path){
@@ -113,13 +138,8 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex){
             pthread_mutex_unlock(&mutex_diccionario);
             t_pcb* pcb_desbloqueado = sacardeColaBlockPorPID(proximo_pid);
             if(pcb_desbloqueado != NULL){
-                pcb_desbloqueado->estado = READY;
-                pthread_mutex_lock(&mutex_READY);
-                queue_push(colaREADY, pcb_desbloqueado);
-                pthread_mutex_unlock(&mutex_READY);
-                
                 log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pcb_desbloqueado->pid); 
-                sem_post(&sem_procesosReady);
+                encolarProcesoEnReady(pcb_desbloqueado); // Esto se encarga de ponerlo en la cola correcta segun el algoritmo
             }
         } else {
             // No hay nadie en la cola de espera, el mutex queda libre 
@@ -225,5 +245,47 @@ void eliminarProceso(int pid, op_code motivo ){
         log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
         break;
     }
+    
+}
+
+void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
+    // Guardo la solicitud para poder reintentarla si KM pide compactación
+    t_solicitud_segmento* solicitud = malloc(sizeof(t_solicitud_segmento));
+    solicitud->idSegmento = idSegmento;
+    solicitud->tamanio = tamanio;
+
+    char* key = string_itoa(pidSolicitaSyscall);
+    pthread_mutex_lock(&mutex_segmentos_pendientes);
+    dictionary_put(diccionario_segmentos_pendientes, key, solicitud);
+    pthread_mutex_unlock(&mutex_segmentos_pendientes);
+    free(key);
+
+    t_paquete* solicitud_paquete = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());
+    agregar_a_paquete(solicitud_paquete,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud_paquete,&idSegmento,sizeof(int));
+    agregar_a_paquete(solicitud_paquete,&tamanio,sizeof(int));
+    
+    enviar_paquete(solicitud_paquete,kernel->socket_kernel_memory,kernel->logger);
+    eliminar_paquete(solicitud_paquete);
+    
+    log_info(kernel->logger, "## (<%d>) Solicita CREACION_DE_SEGMENTO a KM - idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
+}
+
+void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
+
+    t_paquete* solicitud = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
+    
+    agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
+    agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
+    
+    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    
+    eliminar_paquete(solicitud);
+
+  /*  int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    if (cop_op == LIBERAR_MEMORIA_OK){
+        // podria verificar que se libera y pasar de suspReady a Ready y semaforo ready
+    }*/
+
     
 }
