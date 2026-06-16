@@ -119,7 +119,18 @@ void* atender_kernel_memory(void* arg) {
                 sem_post(&sem_datos_listos);
                 break;
             }
-            
+            case ELIMINACION_DE_SEG_OK: {
+                int pid = *(int*) list_get(paquete, 1);
+                int id_seg = *(int*) list_get(paquete, 2);
+                log_info(kernel->logger, "## (<%d>) libero segmento : %d ", pid, id_seg); 
+            break;
+            }
+            case ELIMINACION_DE_SEG_ERROR: {
+                int pid = *(int*) list_get(paquete, 1);
+                int id_seg = *(int*) list_get(paquete, 2);
+                log_error(kernel->logger, "## (<%d>) no logro liberar segmento : %d ", pid, id_seg);
+            break;
+            }
             default:
                 log_warning(kernel->logger, "KM Listener: código de operación inesperado: %d", cod_op);
                 break;

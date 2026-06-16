@@ -59,7 +59,7 @@ void enviarPathYPidKM(int pid, char* path){
     int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
 
     if (resultado != 0) {
-        log_error(kernel->logger, "Error al enviar el Path a Kernel Memory para el proceso con PID: %s", pid);
+        log_error(kernel->logger, "Error al enviar el Path a Kernel Memory para el proceso con PID: %d", pid);
         exit(EXIT_FAILURE);
     }
     eliminar_paquete(paquete);
@@ -163,18 +163,6 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
     
     eliminar_paquete(solicitud);
 
-    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
-    switch (cod op){
-        case ELIMINACION_DE_SEGMENTO_OK:
-            log_info(kernel->logger, "## (<%d>) libero segmento : %d ", pidSolicitaSyscall, idSegmento); 
-            break;
-        case ELIMINACION_DE_SEGMENTO_ERROR:
-            log_error(kernel->logger, "Error: El proceso %d no logro liberar segmento: %d", pidSolicitaSyscall, idSegmento);
-            break;
-        default:
-            log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
-            break;
-    }
 }
 
 void finalizarProceso(int pid){
@@ -187,8 +175,7 @@ void finalizarProceso(int pid){
         pthread_mutex_unlock(&mutex_EXIT);
         log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
 
-        t_paquete* paquete = crear_paquete(ELIMINACION_DE_SEGMENTO, buffer); 
-
+        t_paquete* paquete = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
         agregar_a_paquete(paquete, &pid, sizeof(int));
 
         int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
@@ -271,7 +258,7 @@ void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
     log_info(kernel->logger, "## (<%d>) Solicita CREACION_DE_SEGMENTO a KM - idSegmento=%d tamanio=%d", pidSolicitaSyscall, idSegmento, tamanio);
 }
 
-void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
+/*void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
 
     t_paquete* solicitud = crear_paquete(ELIMINACION_DE_SEGMENTO, crear_buffer());
     
@@ -282,10 +269,10 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
     
     eliminar_paquete(solicitud);
 
-  /*  int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
     if (cop_op == LIBERAR_MEMORIA_OK){
         // podria verificar que se libera y pasar de suspReady a Ready y semaforo ready
-    }*/
+    }
 
     
-}
+}*/
