@@ -16,13 +16,11 @@ int main(int argc, char* argv[]) {
     
     //INICIA SERVIDOR
     int kernel_memory_fd = iniciar_servidor(kernel_memory->puerto_escucha);
-    log_info(kernel_memory->logger, "--------- Servidor KERNEL MEMORY listo para recibir una conexion - FD: %i / puerto: %s --------" , kernel_memory_fd, kernel_memory->puerto_escucha);
+    log_debug(kernel_memory->logger, "Servidor listo para recibir una conexion - FD: %i / puerto: %s" , kernel_memory_fd, kernel_memory->puerto_escucha);
 
     lista_ms = list_create();
-    lista_dir_global_ms = list_create();
     tabla_contextos = dictionary_create();
-    lista_huecos_libres = list_create();
-    cpus_conectadas = list_create();
+
     esperarConexiones(kernel_memory,kernel_memory_fd);
 
     void* atender_conexion(void* arg);

@@ -20,7 +20,7 @@ typedef struct {
     int socket_kernel_scheduler;
     int socket_kernel_memory;
     t_list* sockets_memory_sticks; // Para manejar múltiples sticks dinámicos
-    int segment_max_size; //tamaño máximo del segmento que nos pasa el kernel memory
+    
 } t_cpu;
 
 //estructura de registros
@@ -39,18 +39,10 @@ typedef struct {
 
 }t_registros;
 
-typedef struct {
-    int id_segmento;
-    uint32_t base;
-    uint32_t limite;
-    int memory_stick_id;
-} t_segmento;
-
 //estructura de contexto
 typedef struct {// consultar 
     int pid;
     t_registros registros;
-    t_list* tabla_segmentos; // lista de t_segmento
 } t_contexto;
 
 typedef enum {
