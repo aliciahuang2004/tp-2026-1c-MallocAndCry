@@ -247,8 +247,8 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
     
     eliminar_paquete(solicitud);
 
-    int cop_op = recibir_operacion(kernel->socket_kernel_memory);
-    /*if (cop_op == LIBERAR_MEMORIA_OK){
+  /*  int cop_op = recibir_operacion(kernel->socket_kernel_memory);
+    if (cop_op == LIBERAR_MEMORIA_OK){
         // podria verificar que se libera y pasar de suspReady a Ready y semaforo ready
     }*/
 

@@ -48,6 +48,7 @@ typedef struct {
     int pid;
     t_pcb* pcb;
     t_io_operation tipo_operacion;
+    uint32_t dir_logica;
     uint32_t datos_size;
     void* datos;
 } t_solicitud_io;
@@ -104,6 +105,8 @@ typedef enum {
     ALGORITMO_FIFO,
     ALGORITMO_RR
 } t_algoritmo_cola;
+
+t_algoritmo_cola parsear_algoritmo(char* algoritmo);
 // Solicitud de segmento pendiente de confirmación por parte de KM
 // (se guarda para poder reintentar CREACION_DE_SEGMENTO tras una compactación)
 typedef struct {
@@ -149,7 +152,7 @@ extern int pidParaAsignar;
 
 extern t_queue* colaNEW;
 extern t_queue* colaREADY; // cola unica para FIFO/RR
-extern t_queue** colaREADY_multinivel; // array de colas para algoritmos multinivel
+extern t_queue** colasREADY_multinivel; // array de colas para algoritmos multinivel
 extern t_queue* colaREADY_SUSP;
 extern t_queue* colaEXEC;
 extern t_queue* colaBLOCK;

@@ -184,9 +184,9 @@ void* atender_cliente_scheduler(void* arg) {
                         kernel->procesoInicialCreado = true; 
                     }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
                     sem_post(&sem_hayCPUs);
+                    list_destroy_and_destroy_elements(paquete, free);
+                    return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 }
-        
-                break;
             case IO_HANDSHAKE:
                 log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
                 char* nombre_interfaz = (char*) list_get(paquete, 1);
@@ -253,6 +253,7 @@ void* atender_cliente_scheduler(void* arg) {
                 if (!queue_is_empty(cola_tipo)) {
                     t_solicitud_io* solicitud_terminada = queue_pop(cola_tipo); // <-- Ahora sí sacamos la que terminó
                     if (solicitud_terminada != NULL) {
+                        
                         pcb_a_desbloquear = solicitud_terminada->pcb;
                         liberar_solicitud_io(solicitud_terminada); // <-- Recién acá la limpiamos de la memoria
                     }
@@ -393,12 +394,9 @@ void enviar_operacion_a_io(t_interfaz_conectada* interfaz, t_solicitud_io* solic
         agregar_a_paquete(paquete_a_io, &tamano, sizeof(uint32_t));
         log_debug(kernel->logger, "Enviando orden STDIN (Dir: %u, Tam: %u) a la interfaz %s", dir_logica, tamano, interfaz->nombre);
     } else if (solicitud->tipo_operacion == OP_STDOUT) {
-        uint32_t* params = solicitud->datos;
-        uint32_t dir_logica = params[0];
-        uint32_t tamano = params[1];
-        agregar_a_paquete(paquete_a_io, &dir_logica, sizeof(uint32_t));
-        agregar_a_paquete(paquete_a_io, &tamano, sizeof(uint32_t));
-        log_debug(kernel->logger, "Enviando orden STDOUT (Dir: %u, Tam: %u) a la interfaz %s", dir_logica, tamano, interfaz->nombre);
+        agregar_a_paquete(paquete_a_io, &solicitud->datos_size, sizeof(uint32_t));
+        agregar_a_paquete(paquete_a_io, solicitud->datos, solicitud->datos_size);
+        log_debug(kernel->logger, "Enviando datos STDOUT (%u bytes) a interfaz %s",  solicitud->datos_size, interfaz->nombre);
     }
 
     enviar_paquete(paquete_a_io, interfaz->socket_interfaz, kernel->logger);
