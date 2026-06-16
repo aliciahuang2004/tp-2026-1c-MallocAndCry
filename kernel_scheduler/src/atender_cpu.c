@@ -46,9 +46,10 @@ void* atender_cpu(void* socket_cpu_ptr){
             }
             case MEM_FREE: {// NO BLOQUEA
                 int idSegmento = *(int*) list_get(paquete, 2);
-                liberarMemoria(pidSolicitaSyscall, idSegmento);
                 //KS DEBERIA ENVIAR ESTE DATO CON PROTOCOLO ELIMINACION_DE_SEGMENTO A TRAVÉS DEL SOCKET DE KM GUARDADO EN kernel_scheduler->socket_kernel_memory EN FUNCION CONECTAR_KERNEL_MEMORY 
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MEM_FREE> idSegmento=%d", pidSolicitaSyscall, idSegmento);
+                liberarMemoria(pidSolicitaSyscall, idSegmento);
+                enviarPIDAcpu(pidSolicitaSyscall, cpu_emisora);
                 break;
             }
             case SLEEP:  {

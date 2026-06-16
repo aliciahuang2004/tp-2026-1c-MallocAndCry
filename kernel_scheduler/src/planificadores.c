@@ -57,10 +57,11 @@ void iniciarPlanificadorLCortoPlazo(){
     //colaREADY inicia con planificador largo
     colaEXEC = queue_create();
     colaBLOCK = queue_create();
+    colaEXIT = queue_create();
 
-    pthread_mutex_init(&mutex_EXEC, NULL);
     pthread_mutex_init(&mutex_BLOCK, NULL);
-
+    pthread_mutex_init(&mutex_EXEC, NULL);
+    pthread_mutex_init(&mutex_EXIT, NULL);
     // Inicialización del almacenamiento global de Mutexes
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);

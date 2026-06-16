@@ -5,7 +5,7 @@ t_pcb* crear_PCB(char* path, int prioridad){
     pcbCreado->pid = pidParaAsignar;
     pcbCreado->prioridad = prioridad;
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
-    pcbCreado->path = path;
+    pcbCreado->path = strdup(path);
     pidParaAsignar ++;
     return pcbCreado;
 }
@@ -197,7 +197,7 @@ void eliminarProceso(int pid, op_code motivo ){
     t_pcb* pcbEncontrado = NULL;
 
     pthread_mutex_lock(&mutex_EXIT);
-    int cantidad = queue_size(colaEXEC);
+    int cantidad = queue_size(colaEXIT);
 
     for(int i = 0; i < cantidad; i++){
         t_pcb* pcb = queue_pop(colaEXIT);
@@ -214,7 +214,10 @@ void eliminarProceso(int pid, op_code motivo ){
     queue_destroy(colaAux);
 
     pthread_mutex_unlock(&mutex_EXIT);
-
+    if (pcbEncontrado == NULL) {
+        log_error(kernel->logger, "eliminarProceso: PID %d no encontrado en colaEXIT", pid);
+        return;
+    }
     if (pcbEncontrado->path != NULL) {
         free(pcbEncontrado->path);
     }

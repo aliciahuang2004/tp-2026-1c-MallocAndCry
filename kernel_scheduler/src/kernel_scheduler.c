@@ -62,7 +62,7 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    if (kernel_scheduler->config) {
        config_destroy(kernel_scheduler->config);
    }
-   if (kernel_scheduler->puerto_escucha) {
+ /*  if (kernel_scheduler->puerto_escucha) {
        free(kernel_scheduler->puerto_escucha);
    }
    if (kernel_scheduler->ip_kernel_memory) {
@@ -76,14 +76,14 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
    }
    if(kernel_scheduler->planification_algorithm){
     free(kernel_scheduler->planification_algorithm);
-   }
+   }*/
 
    if(kernel_scheduler->queues_algorithms){
     string_array_destroy(kernel_scheduler->queues_algorithms);
    }
-   if(kernel_scheduler->queues_preemption){
+  /* if(kernel_scheduler->queues_preemption){
     free(kernel_scheduler->queues_preemption);
-   }
+   }*/
    
    free(kernel_scheduler);
 
