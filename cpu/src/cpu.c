@@ -52,6 +52,23 @@ int conectar_kernel_memory(t_cpu* cpu) {
         }
         
         eliminar_paquete(paquete);
+
+        //RECIBO EL MAXIMO TAMAÑO DE SEGMENTO 
+        t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
+        if (!respuesta) {
+            log_error(cpu->logger, "Error al recibir respuesta de Kernel Memory después del Handshake");
+            return -1;
+        }
+
+        int cod_op = *(int*)list_get(respuesta, 0);
+        if(cod_op == SEG_MAX_SIZE){
+            cpu->segment_max_size = *(int*)list_get(respuesta, 1);
+            log_info(cpu->logger, "Tamaño máximo de segmento recibido de Kernel Memory: %d bytes", cpu->segment_max_size);
+        } else {
+            log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory después del Handshake: %d", cod_op);
+        }
+        list_destroy_and_destroy_elements(respuesta, free);
+
         log_info(cpu->logger, "## CPU conectada a Kernel Memory en %s:%s", cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
         return 1;
     }
@@ -161,9 +178,12 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     
     //armo paquete
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
-
+    
+    int id_cpu_int = atoi(cpu->id); 
+    
     agregar_a_paquete(paquete, &pid, sizeof(int));
-    agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
+    agregar_a_paquete(paquete, &id_cpu_int, sizeof(int)); 
+
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
@@ -212,11 +232,15 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         char* cadena_leida = fetch_instruccion(cpu, contexto);
 
-        //sumo uno al PC
-        if(cadena_leida != NULL){
-            contexto ->registros.PC +=1;
+        if (cadena_leida == NULL) {
+            log_error(cpu->logger, "Abortando ciclo de instrucción para PID %d debido a error en Fetch.", contexto->pid);
+            ejecutando = 0; 
+            break;         
         }
-        
+
+        //sumo uno al PC
+        contexto->registros.PC += 1;
+
         //DECODE
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
         
@@ -275,8 +299,6 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
     
-    log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
-
     t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
     agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
     agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); // es necesario pasarle lo registros?

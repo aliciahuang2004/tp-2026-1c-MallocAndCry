@@ -125,13 +125,91 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
 
     // se guarda el contexto en memoria
     enviar_contexto_a_memoria(cpu, ctx);
-    
-    // avisamos al Scheduler que el proceso fue desalojado por una syscall
+
+    t_paquete* paquete= NULL;
+
+    if (instruccion.identificador_operacion == INST_SLEEP) {
+        paquete = crear_paquete(SLEEP, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        
+        int tiempo = atoi(instruccion.argumento_operando_destino); // Convertimos el string a int
+        agregar_a_paquete(paquete, &tiempo, sizeof(int));
+    }
+    else if (instruccion.identificador_operacion == INST_MUTEX_CREATE) {
+        paquete = crear_paquete(MUTEX_CREATE, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
+    }
+    else if (instruccion.identificador_operacion == INST_MUTEX_LOCK) {
+        paquete = crear_paquete(MUTEX_LOCK, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
+    }
+    else if (instruccion.identificador_operacion == INST_MUTEX_UNLOCK) {
+        paquete = crear_paquete(MUTEX_UNLOCK, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
+    }
+    else if (instruccion.identificador_operacion == INST_INIT_PROC) {
+        paquete = crear_paquete(INIT_PROC, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1); // Path
+        
+        int prioridad = atoi(instruccion.argumento_operando_origen); // Convertimos la prioridad a int
+        agregar_a_paquete(paquete, &prioridad, sizeof(int));
+    }
+    else if (instruccion.identificador_operacion == INST_EXIT) {
+        paquete = crear_paquete(EXIT_PROC, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+    }
+    else if (instruccion.identificador_operacion == INST_MEM_ALLOC) {
+        paquete = crear_paquete(MEM_ALLOC, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+       
+        int id_segmento = atoi(instruccion.argumento_operando_destino);
+        int tamanio = atoi(instruccion.argumento_operando_origen);
+        
+        agregar_a_paquete(paquete, &id_segmento, sizeof(int));
+        agregar_a_paquete(paquete, &tamanio, sizeof(int));
+    }
+    else if (instruccion.identificador_operacion == INST_MEM_FREE) {
+        paquete = crear_paquete(MEM_FREE, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        
+        // Un solo argumento numérico directo
+        int id_segmento = atoi(instruccion.argumento_operando_destino);
+        
+        agregar_a_paquete(paquete, &id_segmento, sizeof(int));
+    }
+    else if (instruccion.identificador_operacion == INST_STDOUT) {
+        paquete = crear_paquete(STDOUT, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        
+        // nos manda los nombres de los registros: "AX" "BX"
+        // tenemos que leer qué valor numerico tienen adentro antes de mandar el paquete
+        uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
+        uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
+        
+        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
+        agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
+    }
+    else if (instruccion.identificador_operacion == INST_STDIN) {
+        paquete = crear_paquete(STDIN, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        
+        uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
+        uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
+        
+        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
+        agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
+    }
+    /*// avisamos al Scheduler que el proceso fue desalojado por una syscall
     // Usamos el codigo PROCESO_DESALOJADO y enviamos la Syscall y sus parametros para que el Kernel la procese
     t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO, crear_buffer());
     agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
     agregar_a_paquete(paquete, instruccion.nombre_operacion, strlen(instruccion.nombre_operacion) + 1);
     
+
     // enviamos argumentos
     if (instruccion.argumento_operando_destino) {
         agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
@@ -145,6 +223,52 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
         agregar_a_paquete(paquete, "", 1);
     }
 
-    enviar_paquete(paquete, cpu->socket_kernel_scheduler, cpu->logger);
-    eliminar_paquete(paquete);
+*/
+    if(paquete != NULL) {
+        log_debug(cpu->logger, "Enviando paquete de SYSCALL %s al Kernel Scheduler", instruccion.nombre_operacion);
+        enviar_paquete(paquete, cpu->socket_kernel_scheduler, cpu->logger);
+        eliminar_paquete(paquete);
+    }
+    
+}
+
+bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, uint32_t tamano_a_operar, uint32_t* dir_fisica_out, int* ms_id_out) {
+    
+    uint32_t tamanio_segmento = (uint32_t)cpu->segment_max_size; 
+
+    int num_segmento = dir_logica / tamanio_segmento;
+    int desplazamiento = dir_logica % tamanio_segmento;
+
+
+    //busco el segmento en la tabla del proceso
+    t_segmento* segmento_encontrado = NULL;
+    for (int i = 0; i < list_size(ctx->tabla_segmentos); i++) {
+        t_segmento* seg = list_get(ctx->tabla_segmentos, i);
+        if (seg->id_segmento == num_segmento) {
+            segmento_encontrado = seg;
+            break;
+        }
+    }
+
+    //1era validacion: el segmento no existe
+    if (segmento_encontrado == NULL) {
+        log_error(cpu->logger, "SEG_FAULT: El segmento %d no existe para la dirección lógica %u", num_segmento, dir_logica);
+        return false;
+    }
+
+    //2da validacion: el acceso excede el límite del segmento
+    if (desplazamiento + tamano_a_operar > segmento_encontrado->limite) {
+        log_error(cpu->logger, "SEG_FAULT: Desplazamiento (%d) + Tamaño (%u) excede el límite (%u) del Segmento %d", 
+                  desplazamiento, tamano_a_operar, segmento_encontrado->limite, num_segmento);
+        return false;
+    }
+
+    // Paso las validaciones, se traduce la dirección lógica a física
+    *dir_fisica_out = segmento_encontrado->base + desplazamiento;
+    *ms_id_out = segmento_encontrado->memory_stick_id;
+
+    log_debug(cpu->logger, "Traducción exitosa: Dir. Lógica %u -> Dir. Física %u (Segmento %d, Desplazamiento %d)", 
+              dir_logica, *dir_fisica_out, num_segmento, desplazamiento);
+
+    return true;
 }

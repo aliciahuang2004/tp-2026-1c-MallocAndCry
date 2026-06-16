@@ -1,5 +1,6 @@
 #include "io.h"
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -20,7 +21,8 @@ t_io* inicializar_io(char* archivo_config, char* tipo_io) {
 
     io-> ip_kernel_scheduler= config_get_string_value(io->config, "IP_KERNEL_SCHEDULER");
     io-> puerto_kernel_scheduler= config_get_int_value(io->config, "PUERTO_KERNEL_SCHEDULER");
-    io-> tipo_IO= strdup(tipo_io);
+    io->tipo_IO= strdup(tipo_io);
+    io->nombre = NULL;
     io-> socket_kernel_scheduler= -1;
     
     return io;
@@ -39,6 +41,7 @@ void liberar_io(t_io* io){
     if(io->logger) log_destroy(io->logger);
     if(io->config) config_destroy(io->config);
     if(io->tipo_IO) free(io->tipo_IO);
+    if(io->nombre) free(io->nombre);
     if(io->log_level) free(io->log_level);
     free(io);
 }
@@ -61,11 +64,18 @@ int conectar_a_kernel_scheduler(t_io* io){
 }
 
 void enviar_handshake(t_io* io){
-    t_paquete* paquete = crear_paquete(IO_HANDSHAKE,crear_buffer());
-    
+    t_paquete* paquete = crear_paquete(IO_HANDSHAKE, crear_buffer());
+
+    // Guardamos un nombre lógico para esta interfaz de IO.
+    io->nombre = strdup(io->tipo_IO);
+    agregar_a_paquete(paquete, (void*)io->nombre, strlen(io->nombre) + 1);
+
+    int tipo_interfaz = obtener_tipo_operacion(io->tipo_IO);
+    agregar_a_paquete(paquete, &tipo_interfaz, sizeof(int));
+
     enviar_paquete(paquete, io->socket_kernel_scheduler, io->logger);
     eliminar_paquete(paquete);
-    log_info(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
+    log_info(io->logger, "HANDSHAKE A KERNEL Scheduler ENVIADO: %s tipo=%d", io->nombre, tipo_interfaz);
 }
 
 

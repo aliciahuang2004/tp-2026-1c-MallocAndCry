@@ -6,7 +6,10 @@
 #include <stdbool.h>
 #include "estructuras.h"
 #include "kernel_memory.h"
+
 t_registros* crear_registros();
 t_contexto* crear_contexto();
 t_registros* solicitud_contexto(int pid);
+void actualizar_contexto(int pid, t_registros* registros_nuevos);
+
 #endif
