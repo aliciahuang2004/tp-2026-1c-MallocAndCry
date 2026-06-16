@@ -53,7 +53,7 @@ void agregar_cpu_conectada(int cpu_id, int socket_cliente)
     pthread_mutex_unlock(&mutex_cpus_conectadas);
 }
 
-void avisar_cpus_conectadas(int ms_id, char* ms_puerto, int ms_ip,t_log* logger)
+void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logger)
 {
     pthread_mutex_lock(&mutex_cpus_conectadas);
 
@@ -66,7 +66,7 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, int ms_ip,t_log* logger)
         t_paquete* paquete = crear_paquete(MS_NUEVO_CPU, crear_buffer());
         agregar_a_paquete(paquete, &ms_id,sizeof(int));
         agregar_a_paquete(paquete, ms_puerto,strlen(ms_puerto) + 1);
-        agregar_a_paquete(paquete, &ms_ip,sizeof(int));
+        agregar_a_paquete(paquete, &ms_ip,strlen(ms_ip) + 1);
         enviar_paquete(paquete, cpu->socket, logger);
         eliminar_paquete(paquete);
 
@@ -115,18 +115,18 @@ void* atender_conexion(void* arg) {
             //ALMACENO EL CPU CON ID Y SOCKET EN "cpus_conectadas"
                agregar_cpu_conectada(cpu_id, socket_cliente);
             //*********ENVIA SEGMENT MAX SIZE APENAS SE CONECTA CPU*************************DESCOMENTAR CUANDO CPU ESPERE SEG_MAX_SIZE
-               /* t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
+                t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
                 agregar_a_paquete(respuesta, &km->segment_max_size, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
                 eliminar_paquete(respuesta);
-                */
+                
                 break;
 
             case MEMORY_STICK_HANDSHAKE: {
                 int ms_id = *(int *)list_get(paquete, 1);
                 uint32_t ms_tamano = *(int *)list_get(paquete, 2);
                 char* ms_puerto = (char*) list_get(paquete, 3);
-                //int ms_ip = *(int *)list_get(paquete, 4);
+                char* ms_ip = (char*)list_get(paquete, 4);
 
                 log_info(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
 
@@ -149,7 +149,7 @@ void* atender_conexion(void* arg) {
                     enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
                     eliminar_paquete(respuesta);
                     //AVISO A TODAS LAS CPUS:
-                    int ms_ip = 127001;
+                    //int ms_ip = 127001;
                     avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger);              
                 } else {
                     log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
@@ -222,76 +222,91 @@ void* atender_conexion(void* arg) {
                 break;
             }
 
-            case REQUEST_CONTEXTO:
+            case REQUEST_CONTEXTO://descomentar cuando cpu espere tabla
             {
-
                 int pid_solicitado = *(int *)list_get(paquete, 1);
-                int cpu_id = *(int *)list_get(paquete, 2);
-
+                int cpu_id         = *(int *)list_get(paquete, 2);
                 log_debug(logger, "CPU ID:%d solicitó contexto para PID:%d", cpu_id, pid_solicitado);
 
-                t_registros* regs =solicitud_contexto(pid_solicitado);
+                //t_list* tabla_segmentos = NULL;
+                //t_registros* regs = solicitud_contexto(pid_solicitado, &tabla_segmentos);
+                t_registros* regs = solicitud_contexto(pid_solicitado);
 
-                if(regs != NULL)
-                {
-                    t_paquete* respuesta = crear_paquete(CONTEXT_RESPONSE,crear_buffer());
+                if (regs != NULL) {
+                    t_paquete* respuesta = crear_paquete(CONTEXT_RESPONSE, crear_buffer());
+
                     agregar_a_paquete(respuesta, &pid_solicitado, sizeof(int));
-                    agregar_a_paquete(respuesta,&regs->PC,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->AX,sizeof(uint8_t));
-                    agregar_a_paquete(respuesta,&regs->BX,sizeof(uint8_t));
-                    agregar_a_paquete(respuesta,&regs->CX,sizeof(uint8_t));
-                    agregar_a_paquete(respuesta,&regs->DX,sizeof(uint8_t));
-                    agregar_a_paquete(respuesta,&regs->EAX,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->EBX,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->ECX,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->EDX,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->SI,sizeof(uint32_t));
-                    agregar_a_paquete(respuesta,&regs->DI,sizeof(uint32_t));
 
-                    enviar_paquete(respuesta,socket_cliente,logger);
+                    agregar_a_paquete(respuesta, &regs->PC,  sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->AX,  sizeof(uint8_t));
+                    agregar_a_paquete(respuesta, &regs->BX,  sizeof(uint8_t));
+                    agregar_a_paquete(respuesta, &regs->CX,  sizeof(uint8_t));
+                    agregar_a_paquete(respuesta, &regs->DX,  sizeof(uint8_t));
+                    agregar_a_paquete(respuesta, &regs->EAX, sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->EBX, sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->ECX, sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->EDX, sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->SI,  sizeof(uint32_t));
+                    agregar_a_paquete(respuesta, &regs->DI,  sizeof(uint32_t));
 
+                    /*
+                    // Cantidad de segmentos (para que la CPU sepa cuántos leer)
+                    int cant_segmentos = list_size(tabla_segmentos);
+                    agregar_a_paquete(respuesta, &cant_segmentos, sizeof(int));
+
+                    // Cada segmento campo por campo
+                    for (int i = 0; i < cant_segmentos; i++) {
+                        t_segmento* seg = list_get(tabla_segmentos, i);
+                        agregar_a_paquete(respuesta, &seg->id_segmento,    sizeof(int));
+                        agregar_a_paquete(respuesta, &seg->base_global,    sizeof(uint32_t));
+                        agregar_a_paquete(respuesta, &seg->limite_global,  sizeof(uint32_t));
+                        agregar_a_paquete(respuesta, &seg->memory_stick_id,sizeof(int));//sirve a cpu cuando ejecuta mov out ,mov in?
+                       // agregar_a_paquete(respuesta, &seg->en_swap,        sizeof(bool));
+                       //agregar_a_paquete(respuesta, &seg->bloque_swap,    sizeof(int));
+                    }
+                    */
+                    enviar_paquete(respuesta, socket_cliente, logger);
                     eliminar_paquete(respuesta);
 
+                    // Liberar copia local
                     free(regs);
-                    
-                    log_info(logger,"Contexto enviado - PID:%d",pid_solicitado);
-                }
-                else
-                {
-                    log_error(logger,"No se encontró contexto para PID %d",pid_solicitado);
+                    //list_destroy_and_destroy_elements(tabla_segmentos, free);
 
-                    t_paquete* error =crear_paquete(CONTEXT_ERROR,crear_buffer());
-
-                    enviar_paquete(error,socket_cliente,logger);
-
+                    //log_info(logger, "Contexto enviado - PID:%d | Segmentos:%d", pid_solicitado, cant_segmentos);
+                } else {
+                    log_error(logger, "No se encontró contexto para PID %d", pid_solicitado);
+                    t_paquete* error = crear_paquete(CONTEXT_ERROR, crear_buffer());
+                    enviar_paquete(error, socket_cliente, logger);
                     eliminar_paquete(error);
                 }
+            }  
             break;
-            }
-            case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
+        
+           case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
             {
-                int direccion_fisica_global = *(int*) list_get(paquete, 1);
-                //VER SI ES NECESARIO MAS DATOS----int pc_recibido  = *(int*) list_get(paquete, 2);
+                uint32_t direccion_fisica_global = *(int*) list_get(paquete, 1);
+                int pid_recibido  = *(int*) list_get(paquete, 2);
                 char* contenido_a_escribir = (char*) list_get(paquete, 3);
 
-                /*
-                llamo a escribir_en_memoria(direccion_fisica,contenido_a_escribir,?)
-                
-                1-caso solo debo escribir en un ms
-                ms recibe una direccion y un contenido y automaticamente escribe donde le piden? o como hace ms?
+                // Calculamos el tamaño del contenido que nos mandó la CPU
+                int tamano_contenido = strlen(contenido_a_escribir) + 1; 
 
-                TOMO direccion_fisica_global Y LO PASO COMO PARAMETRO A UNA FUNCION "buscar_direccion_local" VA A RECORRER
-                "lista_ms" o alguna otra lista que contenga la base y el limite global de los ms conectados
-                HARÁ LA CUENTA direccion_fisica_global - base global del ms = direccion local dentro del ms desde donde escribir o leer,retorna este dato
-                direccion_local=buscar_direccion_local(direccion_fisica_global,?)
-                LLAMO A OTRA FUNCION "avisar_a_ms(direccion_local,contenido_a_escribir,?) QUE VA A ENVIAR PAQUETE PARA QUE ESCRIBA 
-                necesita acceder a una lista de ms con sus sockets como dato y buscar ms por id
+                // 1. LLAMADA: La función crea internamente la lista y nos la devuelve llena
+                t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano_contenido,logger);
 
-                2-caso debo escribir en dos ms LO VEO DESPUES DE LOGRAR caso 1
-                 aca km deberia calcular si el tamaño y la direccion fisica entra en un ms o mas de uno
-                 si entra en mas de uno CREAR ESTRATEGIA :enviar tantas peticiones de escritura como cantidad de ms en los que haya que escribir
-                */
+                if (lista_fragmentos_temp != NULL) {
+                    // Paso 2: Enviar cada fragmento a su respectivo Memory Stick
+                    enviar_fragmentos_escritura(lista_fragmentos_temp, contenido_a_escribir, logger);
 
+                    // Paso 3: Esperar las respuestas de confirmación de los MS y responder a CPU...
+                    // (Aquí agregarías la lógica para recibir los "IO_OK" de los MS antes de responderle a la CPU)
+
+                    // Paso 4: Limpieza absoluta de la memoria temporal del hilo
+                    list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
+                } else {
+                    log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
+                    // Enviar código de error a la CPU si corresponde...
+                }   
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
@@ -301,7 +316,20 @@ void* atender_conexion(void* arg) {
             case FINALIZAR_PROCESO: ///***ESPERO EXIT DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
-                eliminar_proceso(pid_recibido,km,logger);
+                int respuesta = eliminar_proceso(pid_recibido,km,logger);
+            
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {//******************************NO ES OBLIGATORIO PODRIA SIMPLEMENTE AGREGAR UN LOG PARA QUE EN KS NO TENGA QUE ESPERAR ESTE MSJ**********
+                    t_paquete* resp = crear_paquete(FIN_PROC_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
             }
             break;
             case SUSPENSION_DE_PROCESO:
@@ -317,20 +345,44 @@ void* atender_conexion(void* arg) {
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
-                eliminar_segmento(pid_recibido,id_seg_recibido,logger);
+                int respuesta = eliminar_segmento(pid_recibido,id_seg_recibido,logger);
+
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
             }
             break;
-            case CREACION_DE_SEGMENTO: ///***ESPERO MEM_ALLOC DE KS
-            
-            {   //RECIBO PAQUETE DE PARTE DE KERNEL SCHEDULER CON LOS SIG DATOS
+            case CREACION_DE_SEGMENTO: 
+            {   
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
                 uint32_t tamano_recibido = *(int *)list_get(paquete, 3);
-                crear_segmento(pid_recibido, id_seg_recibido,tamano_recibido,logger,km); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
-             //deberia enviar confirmacion a ks de que se creó correctamente el segmento???si
-             //tengo que contemplar posible compactacion
+
+                int respuesta =  crear_segmento(pid_recibido, id_seg_recibido,tamano_recibido,logger,km); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
+
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {
+                    t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
              }
-            break;
+             break;
             case ACTUALIZAR_CONTEXTO:
             {
         

@@ -48,3 +48,18 @@ CPUS_DESALOJADAS:km espera este mensaje de parte de ks,luego de q ks haya finali
 AUMENTO_DE_MEMORIA:km envia nuevo tamaño total de memoria a ks
 SEG_MAX_SIZE:km envia a cpu,cuando cpu hace handshake
 MS_NUEVO_CPU:km envia a todas las conectadas 
+
+SET AX 9
+SET BX 3
+SET CX 1
+SET DX 22
+SET EAX 234
+SET EBX 444
+MEM_ALLOC 1 32
+MEM_ALLOC 2 32
+MEM_ALLOC 3 32
+SET ECX 124
+SET EDX 90
+SET SI 100
+SET DI 12
+EXIT

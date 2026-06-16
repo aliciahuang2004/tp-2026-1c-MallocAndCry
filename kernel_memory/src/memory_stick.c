@@ -66,3 +66,131 @@ void agregar_posicion_ms(t_resultado_hueco r,int ms_id,t_log*logger){
     pthread_mutex_unlock(&mutex_lista_dir_global_ms);
 }
 
+
+int buscar_socket_ms_por_id(int ms_id)
+{
+    pthread_mutex_lock(&mutex_lista_ms);
+
+    for (int i = 0; i < list_size(lista_ms); i++)
+    {
+        t_ms_info *ms = list_get(lista_ms, i);
+
+        if (ms->id == ms_id)
+        {
+            int socket_encontrado = ms->socket;
+        
+            pthread_mutex_unlock(&mutex_lista_ms);
+            return socket_encontrado;
+        }
+    }
+
+    pthread_mutex_unlock(&mutex_lista_ms);
+    return -1;
+}
+
+t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, int tamano_contenido, t_log* logger) {
+    
+    t_list* lista_fragmentos_temp = list_create();
+
+    t_ms_pos* ms_encontrado = NULL;
+    int bytes_restantes = tamano_contenido;
+    uint32_t dir_actual_global = dir_fisica_global;
+
+    pthread_mutex_lock(&mutex_lista_dir_global_ms);
+
+    for (int i = 0; i < list_size(lista_dir_global_ms); i++) {
+        t_ms_pos* ms = list_get(lista_dir_global_ms, i);
+
+        if (dir_actual_global >= ms->base_global && dir_actual_global <= ms->limite_global) {
+            ms_encontrado = ms;
+            break; 
+        }
+    }
+
+    if (ms_encontrado == NULL) {
+        log_error(logger, "ERROR: Dirección global %u fuera de rango de cualquier MS", dir_actual_global);
+        list_destroy(lista_fragmentos_temp); 
+        pthread_mutex_unlock(&mutex_lista_dir_global_ms);
+        return NULL;
+    }
+
+    uint32_t dir_local_primer_ms = dir_actual_global - ms_encontrado->base_global;
+    uint32_t espacio_disponible_ms = (ms_encontrado->limite_global - ms_encontrado->base_global + 1) - dir_local_primer_ms;
+
+    if (bytes_restantes <= espacio_disponible_ms) {
+        log_info(logger, "El contenido entra por completo en el MS ID: %d", ms_encontrado->id);
+
+        t_fragmento_escritura* frag = malloc(sizeof(t_fragmento_escritura));
+        frag->ms_id = ms_encontrado->id;
+        frag->dir_local = dir_local_primer_ms;
+        frag->tamano_a_copiar = bytes_restantes;
+        frag->datos_bloque = NULL; 
+
+        list_add(lista_fragmentos_temp, frag);
+
+    } else {
+        log_warning(logger, "¡Desborde detectado! Se fragmentará la escritura.");
+
+        t_fragmento_escritura* frag1 = malloc(sizeof(t_fragmento_escritura));
+        frag1->ms_id = ms_encontrado->id;
+        frag1->dir_local = dir_local_primer_ms;
+        frag1->tamano_a_copiar = espacio_disponible_ms; 
+        frag1->datos_bloque = NULL;
+        list_add(lista_fragmentos_temp, frag1);
+
+        bytes_restantes -= espacio_disponible_ms;
+        uint32_t nueva_dir_global = ms_encontrado->limite_global + 1; 
+
+        t_ms_pos* siguiente_ms = NULL;
+        for (int i = 0; i < list_size(lista_dir_global_ms); i++) {
+            t_ms_pos* ms = list_get(lista_dir_global_ms, i);
+            if (nueva_dir_global >= ms->base_global && nueva_dir_global <= ms->limite_global) {
+                siguiente_ms = ms;
+                break;
+            }
+        }
+
+        if (siguiente_ms != NULL) {
+            t_fragmento_escritura* frag2 = malloc(sizeof(t_fragmento_escritura));
+            frag2->ms_id = siguiente_ms->id;
+            frag2->dir_local = 0; 
+            frag2->tamano_a_copiar = bytes_restantes; 
+            frag2->datos_bloque = NULL;
+            list_add(lista_fragmentos_temp, frag2);
+        } else {
+            log_error(logger, "ERROR: Desborde hacia un espacio de memoria global inexistente");
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_dir_global_ms);
+
+    return lista_fragmentos_temp;
+}
+
+void enviar_fragmentos_escritura(t_list* lista_fragmentos, char* contenido_a_escribir, t_log* logger) {
+    int offset_contenido = 0; 
+
+    for (int i = 0; i < list_size(lista_fragmentos); i++) {
+        t_fragmento_escritura* frag = list_get(lista_fragmentos, i);
+
+        int socket_ms = buscar_socket_ms_por_id(frag->ms_id); 
+        
+        if (socket_ms == -1) {
+            log_error(logger, "No se encontró el socket para el Memory Stick ID:%d", frag->ms_id);
+            continue; 
+        }
+
+        char* datos_fragmentados = contenido_a_escribir + offset_contenido;
+
+        t_paquete* paquete_ms = crear_paquete(ESCRITURA_EN_MS, crear_buffer());
+        agregar_a_paquete(paquete_ms, &(frag->dir_local), sizeof(uint32_t));
+        agregar_a_paquete(paquete_ms, &(frag->tamano_a_copiar), sizeof(int));
+        agregar_a_paquete(paquete_ms, datos_fragmentados, frag->tamano_a_copiar);
+        enviar_paquete(paquete_ms, socket_ms, logger);
+        eliminar_paquete(paquete_ms);
+
+        log_info(logger, "Enviado fragmento %d al MS ID:%d | Tam: %d bytes en Dir Local: %u", 
+                 i, frag->ms_id, frag->tamano_a_copiar, frag->dir_local);
+
+        offset_contenido += frag->tamano_a_copiar;
+    }
+}

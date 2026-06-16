@@ -11,5 +11,6 @@ t_registros* crear_registros();
 t_contexto* crear_contexto();
 t_registros* solicitud_contexto(int pid);
 void actualizar_contexto(int pid, t_registros* registros_nuevos);
+//t_registros* solicitud_contexto(int pid, t_list** tabla_out);---descomentar cuando cpu espere tabla de seg
 
 #endif

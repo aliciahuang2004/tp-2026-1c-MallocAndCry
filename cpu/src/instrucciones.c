@@ -99,24 +99,154 @@ void ejecutar_JNZ(t_cpu* cpu,t_registros* reg, char* registro_evaluado, uint32_t
     log_debug(cpu->logger, "Ejecutando JNZ: Evaluando registro %s para saltar a instrucción %u", registro_evaluado, nueva_instruccion);
 }
 
+int obtener_socket_ms(t_cpu* cpu, int ms_id) {
+    for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
+        t_ms_conectado* ms = list_get(cpu->sockets_memory_sticks, i);
+        if(ms->id == ms_id) return ms->socket;
+    }
+    log_error(cpu->logger, "No se encontró un Memory Stick conectado con el ID %d", ms_id);
+    return -1;
+}
+
 // MOV_IN:
 int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
+    uint32_t dir_logica = ctx->registros.SI;
+    uint32_t tamanio;
+
+    if (es_registro_8bits(registro_datos) == true) {
+        tamanio = 1;
+    } else {
+        tamanio = 4;
+    }
+
+    uint32_t dir_fisica = 0;
+    int ms_id = 0;
+
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0; 
     
-    log_debug(cpu->logger, "Ejecutando MOV_IN con destino en registro: %s", registro_datos);
-    return 1; // 1 si fue exitoso, 0 si hubo SEG_FAULT para romper el ciclo
+    int socket_ms = obtener_socket_ms(cpu, ms_id);
+    if (socket_ms == -1) return 0;
+
+    t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &tamanio, sizeof(int));
+    enviar_paquete(paquete, socket_ms, cpu->logger);
+    eliminar_paquete(paquete);
+
+    t_list* respuesta = recibir_paquete(socket_ms);
+    int cod_op = *(int*)list_get(respuesta, 0);
+    
+    if (cod_op == DATOS_LEIDOS) {
+        void* datos = list_get(respuesta, 1);
+        
+        void* reg_ptr = obtener_registro(&(ctx->registros), registro_datos);
+        uint32_t valor_leido = 0;
+
+        if (tamanio == 1) {
+            *(uint8_t*)reg_ptr = *(uint8_t*)datos;
+            valor_leido = *(uint8_t*)datos;
+        } else {
+            *(uint32_t*)reg_ptr = *(uint32_t*)datos;
+            valor_leido = *(uint32_t*)datos;
+        }
+        
+        log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %u", 
+                 ctx->pid, dir_fisica, valor_leido);
+    }
+    
+    list_destroy_and_destroy_elements(respuesta, free);
+    return 1;
 }
 
 // MOV_OUT
 int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
-   
-   log_debug(cpu->logger, "Ejecutando MOV_OUT con datos en registro: %s", registro_datos); 
+    uint32_t dir_logica = ctx->registros.DI;
+    uint32_t tamanio;
+
+    if (es_registro_8bits(registro_datos) == true) {
+        tamanio = 1;
+    } else {
+        tamanio = 4;
+    }
+
+    uint32_t dir_fisica = 0;
+    int ms_id = 0;
+
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0;
+
+    int socket_ms = obtener_socket_ms(cpu, ms_id);
+    if (socket_ms == -1) return 0;
+
+    uint32_t valor_a_escribir = leer_valor_registro(&(ctx->registros), registro_datos);
+
+    t_paquete* paquete = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &tamanio, sizeof(int));
+    
+    if (tamanio == 1) {
+        uint8_t val8 = (uint8_t)valor_a_escribir;
+        agregar_a_paquete(paquete, &val8, 1);
+    } else {
+        agregar_a_paquete(paquete, &valor_a_escribir, 4);
+    }
+    
+    enviar_paquete(paquete, socket_ms, cpu->logger);
+    eliminar_paquete(paquete);
+
+    t_list* respuesta = recibir_paquete(socket_ms);
+    int cod_op = *(int*)list_get(respuesta, 0);
+    
+    if (cod_op == IO_OK) {
+         log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", 
+                 ctx->pid, dir_fisica, valor_a_escribir);
+    }
+    
+    list_destroy_and_destroy_elements(respuesta, free);
     return 1;
 }
 
 // COPY_MEM
 int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
+    uint32_t dir_logica_origen = ctx->registros.SI;
+    uint32_t dir_logica_destino = ctx->registros.DI;
+    uint32_t tamanio = leer_valor_registro(&(ctx->registros), registro_tamano);
+    
+    uint32_t dir_fisica_origen = 0, dir_fisica_destino = 0;
+    int ms_id_origen = 0, ms_id_destino = 0;
 
-    log_debug(cpu->logger, "Ejecutando COPY_MEM con tamaño: %s", registro_tamano);
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) return 0;
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) return 0;
+
+    int socket_ms_origen = obtener_socket_ms(cpu, ms_id_origen);
+    int socket_ms_destino = obtener_socket_ms(cpu, ms_id_destino);
+
+    if (socket_ms_origen == -1 || socket_ms_destino == -1) return 0;
+
+    t_paquete* paquete_leer = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete_leer, &dir_fisica_origen, sizeof(uint32_t));
+    agregar_a_paquete(paquete_leer, &tamanio, sizeof(int));
+    enviar_paquete(paquete_leer, socket_ms_origen, cpu->logger);
+    eliminar_paquete(paquete_leer);
+
+    t_list* respuesta_lectura = recibir_paquete(socket_ms_origen);
+    void* datos_leidos = list_get(respuesta_lectura, 1);
+    
+    log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_origen);
+
+    t_paquete* paquete_escribir = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete_escribir, &dir_fisica_destino, sizeof(uint32_t));
+    agregar_a_paquete(paquete_escribir, &tamanio, sizeof(int));
+    agregar_a_paquete(paquete_escribir, datos_leidos, tamanio);
+    enviar_paquete(paquete_escribir, socket_ms_destino, cpu->logger);
+    eliminar_paquete(paquete_escribir);
+
+    t_list* respuesta_escritura = recibir_paquete(socket_ms_destino);
+    
+    log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_destino);
+
+    list_destroy_and_destroy_elements(respuesta_lectura, free);
+    list_destroy_and_destroy_elements(respuesta_escritura, free);
+
     return 1;
 }
 

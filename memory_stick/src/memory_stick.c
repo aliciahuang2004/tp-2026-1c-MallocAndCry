@@ -27,6 +27,7 @@ t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     ms ->puerto_escucha = config_get_string_value(ms->config,"PUERTO_ESCUCHA");
     ms ->ip_kernel_memory = config_get_string_value(ms->config,"IP_KERNEL_MEMORY");
     ms ->puerto_kernel_memory = config_get_string_value(ms->config,"PUERTO_KERNEL_MEMORY");
+    ms ->ip_escucha = config_get_string_value(ms->config,"IP_ESCUCHA");
 
    //loggeo que todo se cargò correctamente
    log_debug(ms->logger, "El mòdulo Memory Stick se inicializò correctamente");
@@ -42,6 +43,7 @@ void verificar_memory_stick(t_memory_stick* ms) {
     log_debug(ms->logger, "Puerto de escucha: %s", ms->puerto_escucha);
     log_debug(ms->logger, "IP Kernel Memory: %s", ms->ip_kernel_memory);
     log_debug(ms->logger, "Puerto Kernel Memory: %s", ms->puerto_kernel_memory);
+    log_debug(ms->logger, "Ip de escucha: %s", ms->ip_escucha);
 }
 
 int conectar_al_kernelmem(t_memory_stick* ms){
@@ -88,12 +90,13 @@ void enviar_handshake(t_memory_stick* ms){
   agregar_a_paquete(paquete,&ms->id, sizeof(int));
   agregar_a_paquete(paquete,&ms->tamano,  sizeof(int));
   agregar_a_paquete(paquete,ms->puerto_escucha,strlen(ms->puerto_escucha) + 1);
+  agregar_a_paquete(paquete,ms->ip_escucha,strlen(ms->ip_escucha) + 1);
   enviar_paquete(paquete,ms->kernel_mem_socket,ms->logger);
   eliminar_paquete(paquete);
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);
 }
 
-void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
+ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
 
     if (servidor_fd < 0) {
         log_error(ms->logger, "Servidor inválido en rutina_recepcion: %d", servidor_fd);
@@ -103,7 +106,6 @@ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
     pthread_t hilo_exec;
     int temp_socket_cpu;
 
-    
     log_debug(ms->logger,"Hilo servidor listo");
 
     while(1){
@@ -121,28 +123,100 @@ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
       }
 
       int cpu_id = *(int*) list_get(paquete_ID_CPU,1);
-
       log_debug(ms->logger,"CLIENTE CONECTADO");
 
       t_cpu_context* ctx = malloc(sizeof(t_cpu_context));
       ctx->cpu_id = cpu_id;
       ctx->socket_cliente = temp_socket_cpu;
-
+      ctx->ms = ms; 
 
       if (pthread_create(&hilo_exec,NULL,rutina_operaciones,ctx) != 0){
         log_error(ms->logger , "ERROR AL CREAR HILO SERVIDOR");
         free(ctx);
         close(temp_socket_cpu);
-      }else{
-      pthread_detach(hilo_exec);
-      log_debug(ms->logger , "HILO SERVIDOR CREADO");
+      } else {
+        pthread_detach(hilo_exec);
+        log_debug(ms->logger , "HILO SERVIDOR CREADO");
       }
-      
+    }
+}
+
+void* rutina_operaciones (void* argumentos){
+    t_cpu_context* contexto = (t_cpu_context*) argumentos;
+    int socket_cpu = contexto->socket_cliente;
+    int cpu_id = contexto->cpu_id;
+    t_memory_stick* ms = contexto->ms;
+    
+    log_info(ms->logger, "[CPU %d] Inicia hilo de operaciones en socket %d", cpu_id, socket_cpu);
+
+    while (1) {
+        t_list* paquete = recibir_paquete(socket_cpu);
+        
+        if (paquete == NULL) {
+            log_error(ms->logger, "[CPU %d] Se ha desconectado o hubo un error en la conexión.", cpu_id);
+            break; 
+        }
+
+        int cod_op = *(int*) list_get(paquete, 0);
+
+        switch (cod_op) {
+            case LECTURA_DE_DATOS: {
+                log_info(ms->logger, "[CPU %d] Petición de LECTURA recibida", cpu_id);
+                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+                
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+                int tamanio = *(int*) list_get(paquete, 2);
+              
+                log_info(ms->logger, "## Lectura de %d bytes", tamanio);
+
+                if (dir_fisica + tamanio > ms->tamano) {
+                    log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+                    break;
+                }
+
+                void* datos_leidos = malloc(tamanio);
+                memcpy(datos_leidos, ms->memoria + dir_fisica, tamanio);
+
+                t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
+                agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
+                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
+                
+                eliminar_paquete(paquete_respuesta);
+                free(datos_leidos);
+                break;
+            }
+            case ESCRITURA_DE_DATOS: {
+                log_info(ms->logger, "[CPU %d] Petición de ESCRITURA recibida", cpu_id);
+                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+                
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+                int tamanio = *(int*) list_get(paquete, 2);
+                void* datos_a_escribir = list_get(paquete, 3);
+                
+                log_info(ms->logger, "## Escritura de %d bytes", tamanio);
+
+                if (dir_fisica + tamanio > ms->tamano) {
+                    log_error(ms->logger, "Error: Intento de escritura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+                    break;
+                }
+
+                memcpy(ms->memoria + dir_fisica, datos_a_escribir, tamanio);
+
+                t_paquete* paquete_respuesta = crear_paquete(IO_OK, crear_buffer()); 
+                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
+                eliminar_paquete(paquete_respuesta);
+                break;
+            }
+            default:
+                log_warning(ms->logger, "[CPU %d] Código de operación desconocido: %d", cpu_id, cod_op);
+                break;
+        }
+        
+        list_destroy_and_destroy_elements(paquete, free);
     }
 
- }
-
-void* rutina_operaciones (void* args){
-  printf("hola!");
-  return NULL;
+    close(socket_cpu);
+    free(contexto);
+    return NULL;
 }
+

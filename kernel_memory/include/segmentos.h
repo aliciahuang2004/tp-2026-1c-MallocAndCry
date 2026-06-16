@@ -8,10 +8,8 @@
 #include "estructuras.h"
 
 /*
-crear_segmento(); en proceso,pruebas
-eliminar_segmento();
 buscar_segmento();
-actualizar_segmento();
+actualizar_segmento();--esto creo que no puede ocurrir
 */
 
 int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_kernel_memory* km);

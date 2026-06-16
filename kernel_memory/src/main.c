@@ -24,9 +24,7 @@ int main(int argc, char* argv[]) {
     lista_huecos_libres = list_create();
     cpus_conectadas = list_create();
     esperarConexiones(kernel_memory,kernel_memory_fd);
-
     void* atender_conexion(void* arg);
 
-    // terminar_programa()
     return 0;
 }
