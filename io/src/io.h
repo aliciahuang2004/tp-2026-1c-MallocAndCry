@@ -11,7 +11,6 @@ typedef struct {
     t_log* logger;
     t_config* config;
     char* log_level;
-    char* nombre;
     char* tipo_IO;
     char* ip_kernel_scheduler;
     int puerto_kernel_scheduler;

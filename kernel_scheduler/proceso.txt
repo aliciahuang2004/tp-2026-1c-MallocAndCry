@@ -1,6 +1,0 @@
-NOOP
-NOOP
-LOCK_MUTEX unmtx
-MUTEX_CREATE segundomtx
-UNLOCK_MUTEX unmtx
-EXIT

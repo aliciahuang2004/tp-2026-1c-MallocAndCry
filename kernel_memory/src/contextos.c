@@ -2,7 +2,9 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 #include <commons/collections/dictionary.h>
-
+/*
+FALTA: CREAR_CTX,OBTENER_CTX,ACTUALIZAR_CTX,ENVIAR_CTX
+*/
 t_dictionary* tabla_contextos;
 pthread_mutex_t mutex_tabla_contextos = PTHREAD_MUTEX_INITIALIZER;
 
@@ -40,6 +42,7 @@ t_contexto* crear_contexto ()
     return contexto;
 }
 
+#include "contextos.h"
 
 t_registros* solicitud_contexto(int pid)
 {
@@ -60,17 +63,5 @@ t_registros* solicitud_contexto(int pid)
 
     pthread_mutex_unlock(&mutex_procesos);
 
-      return copia; 
-}
-
-void actualizar_contexto(int pid, t_registros* registros_nuevos) {
-    char pid_str[20];
-    sprintf(pid_str, "%d", pid);
-
-    pthread_mutex_lock(&mutex_procesos);
-    t_proceso* proceso = dictionary_get(procesos, pid_str);
-    if (proceso != NULL) {
-        memcpy(proceso->contexto->registros, registros_nuevos, sizeof(t_registros));
-    }
-    pthread_mutex_unlock(&mutex_procesos);
+      return copia;  // el llamador debe hacer free()
 }
