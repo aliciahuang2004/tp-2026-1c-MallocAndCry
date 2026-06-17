@@ -1,3 +1,6 @@
+#ifndef MEMORY_STICK_H_
+#define MEMORY_STICK_H_
+
 #include "../../utils/include/utils.h"
 #include <netdb.h>		
 
@@ -35,6 +38,5 @@ void rutina_recepcion(t_memory_stick* ms,int servidor_fd);
 void procesar_lectura(t_memory_stick* ms, int socket_cliente, t_list* paquete);
 void procesar_escritura(t_memory_stick* ms, int socket_cliente, t_list* paquete);
 void* escuchar_kernel_memory(void* arg);
-#ifndef MEMORY_STICK_H_
-#define MEMORY_STICK_H_
+
 #endif /* MEMORY_STICK_H_ */
