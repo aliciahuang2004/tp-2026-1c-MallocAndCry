@@ -96,8 +96,95 @@ void enviar_handshake(t_memory_stick* ms){
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);
 }
 
- void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
+void procesar_lectura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete) {
+    log_info(ms->logger, "[ID %d] Petición de LECTURA recibida", origen_id);
+    usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+    
+    uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+    int tamanio = *(int*) list_get(paquete, 2);
+  
+    log_info(ms->logger, "## Lectura de %d bytes", tamanio);
 
+    if (dir_fisica + tamanio > ms->tamano) {
+        log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+        
+        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); // O el op_code de error que tengas
+        enviar_paquete(paquete_error, socket_cliente, ms->logger);
+        eliminar_paquete(paquete_error);
+        return;
+    }
+
+    void* datos_leidos = malloc(tamanio);
+    memcpy(datos_leidos, ms->memoria + dir_fisica, tamanio);
+
+    t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
+    agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
+    enviar_paquete(paquete_respuesta, socket_cliente, ms->logger);
+    
+    eliminar_paquete(paquete_respuesta);
+    free(datos_leidos);
+}
+
+void procesar_escritura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete) {
+    log_info(ms->logger, "[ID %d] Petición de ESCRITURA recibida", origen_id);
+    usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
+    
+    uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
+    int tamanio = *(int*) list_get(paquete, 2);
+    void* datos_a_escribir = list_get(paquete, 3);
+    
+    log_info(ms->logger, "## Escritura de %d bytes", tamanio);
+
+    if (dir_fisica + tamanio > ms->tamano) {
+        log_error(ms->logger, "Error: Intento de escritura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+        
+        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); // O el op_code de error que tengas
+        enviar_paquete(paquete_error, socket_cliente, ms->logger);
+        eliminar_paquete(paquete_error);
+        return;
+    }
+
+    memcpy(ms->memoria + dir_fisica, datos_a_escribir, tamanio);
+
+    t_paquete* paquete_respuesta = crear_paquete(IO_OK, crear_buffer()); 
+    enviar_paquete(paquete_respuesta, socket_cliente, ms->logger);
+    eliminar_paquete(paquete_respuesta);
+}
+
+void* escuchar_kernel_memory(void* arg) {
+    t_memory_stick* ms = (t_memory_stick*) arg;
+    int socket_km = ms->kernel_mem_socket;
+
+    log_info(ms->logger, "Hilo de escucha de Kernel Memory iniciado en socket %d", socket_km);
+
+    while (1) {
+        t_list* paquete = recibir_paquete(socket_km);
+        
+        if (paquete == NULL) {
+            log_error(ms->logger, "Se perdió la conexión con el Kernel Memory.");
+            break;
+        }
+
+        int cod_op = *(int*) list_get(paquete, 0);
+
+        switch (cod_op) {
+            case LECTURA_DE_DATOS:
+                procesar_lectura(ms, socket_km, 999, paquete); 
+                break;
+            case ESCRITURA_DE_DATOS:
+                procesar_escritura(ms, socket_km, 999, paquete);
+                break;
+            default:
+                log_warning(ms->logger, "Operación desconocida desde Kernel Memory: %d", cod_op);
+                break;
+        }
+        
+        list_destroy_and_destroy_elements(paquete, free);
+    }
+    return NULL;
+}
+
+ void rutina_recepcion(t_memory_stick* ms ,int servidor_fd){
     if (servidor_fd < 0) {
         log_error(ms->logger, "Servidor inválido en rutina_recepcion: %d", servidor_fd);
         return;
@@ -106,7 +193,7 @@ void enviar_handshake(t_memory_stick* ms){
     pthread_t hilo_exec;
     int temp_socket_cpu;
 
-    log_debug(ms->logger,"Hilo servidor listo");
+    log_debug(ms->logger,"Hilo servidor listo. Esperando CPUs...");
 
     while(1){
       temp_socket_cpu = esperar_cliente(servidor_fd);
@@ -117,27 +204,27 @@ void enviar_handshake(t_memory_stick* ms){
 
       t_list* paquete_ID_CPU = recibir_paquete(temp_socket_cpu);
       if(!paquete_ID_CPU){
-        log_error(ms->logger,"ERROR AL RECIBIR PAQUETE ID CPU [CPU %d]", temp_socket_cpu);
+        log_error(ms->logger,"ERROR AL RECIBIR PAQUETE ID CPU [Socket %d]", temp_socket_cpu);
         close(temp_socket_cpu);
         continue;
       }
 
       int cpu_id = *(int*) list_get(paquete_ID_CPU,1);
-      log_debug(ms->logger,"CLIENTE CONECTADO");
-
+      
       t_cpu_context* ctx = malloc(sizeof(t_cpu_context));
       ctx->cpu_id = cpu_id;
       ctx->socket_cliente = temp_socket_cpu;
       ctx->ms = ms; 
 
       if (pthread_create(&hilo_exec,NULL,rutina_operaciones,ctx) != 0){
-        log_error(ms->logger , "ERROR AL CREAR HILO SERVIDOR");
+        log_error(ms->logger , "ERROR AL CREAR HILO SERVIDOR PARA CPU");
         free(ctx);
         close(temp_socket_cpu);
       } else {
         pthread_detach(hilo_exec);
-        log_debug(ms->logger , "HILO SERVIDOR CREADO");
       }
+      
+      list_destroy_and_destroy_elements(paquete_ID_CPU, free); // Faltaba liberar este paquete
     }
 }
 
@@ -147,7 +234,8 @@ void* rutina_operaciones (void* argumentos){
     int cpu_id = contexto->cpu_id;
     t_memory_stick* ms = contexto->ms;
     
-    log_info(ms->logger, "[CPU %d] Inicia hilo de operaciones en socket %d", cpu_id, socket_cpu);
+  
+    log_info(ms->logger, "## CPU %d Conectada", cpu_id);
 
     while (1) {
         t_list* paquete = recibir_paquete(socket_cpu);
@@ -160,53 +248,12 @@ void* rutina_operaciones (void* argumentos){
         int cod_op = *(int*) list_get(paquete, 0);
 
         switch (cod_op) {
-            case LECTURA_DE_DATOS: {
-                log_info(ms->logger, "[CPU %d] Petición de LECTURA recibida", cpu_id);
-                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
-                
-                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
-                int tamanio = *(int*) list_get(paquete, 2);
-              
-                log_info(ms->logger, "## Lectura de %d bytes", tamanio);
-
-                if (dir_fisica + tamanio > ms->tamano) {
-                    log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
-                    break;
-                }
-
-                void* datos_leidos = malloc(tamanio);
-                memcpy(datos_leidos, ms->memoria + dir_fisica, tamanio);
-
-                t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
-                agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
-                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
-                
-                eliminar_paquete(paquete_respuesta);
-                free(datos_leidos);
+            case LECTURA_DE_DATOS:
+                procesar_lectura(ms, socket_cpu, cpu_id, paquete);
                 break;
-            }
-            case ESCRITURA_DE_DATOS: {
-                log_info(ms->logger, "[CPU %d] Petición de ESCRITURA recibida", cpu_id);
-                usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
-                
-                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
-                int tamanio = *(int*) list_get(paquete, 2);
-                void* datos_a_escribir = list_get(paquete, 3);
-                
-                log_info(ms->logger, "## Escritura de %d bytes", tamanio);
-
-                if (dir_fisica + tamanio > ms->tamano) {
-                    log_error(ms->logger, "Error: Intento de escritura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
-                    break;
-                }
-
-                memcpy(ms->memoria + dir_fisica, datos_a_escribir, tamanio);
-
-                t_paquete* paquete_respuesta = crear_paquete(IO_OK, crear_buffer()); 
-                enviar_paquete(paquete_respuesta, socket_cpu, ms->logger);
-                eliminar_paquete(paquete_respuesta);
+            case ESCRITURA_DE_DATOS:
+                procesar_escritura(ms, socket_cpu, cpu_id, paquete);
                 break;
-            }
             default:
                 log_warning(ms->logger, "[CPU %d] Código de operación desconocido: %d", cpu_id, cod_op);
                 break;
@@ -219,4 +266,3 @@ void* rutina_operaciones (void* argumentos){
     free(contexto);
     return NULL;
 }
-
