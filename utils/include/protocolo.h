@@ -24,6 +24,7 @@ typedef enum{
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
     KERNEL_MEMORY_HANDSHAKE,
+    ERROR_OPERACION,
 
     //SYSCALL
     MUTEX_CREATE,

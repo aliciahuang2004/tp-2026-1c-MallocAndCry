@@ -96,8 +96,7 @@ void enviar_handshake(t_memory_stick* ms){
   log_info(ms->logger,"**HANDSHAKE ENVIADO A KERNEL MEMORY - ID:%d TAMAÑO:%d",ms->id,ms->tamano);
 }
 
-void procesar_lectura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete) {
-    log_info(ms->logger, "[ID %d] Petición de LECTURA recibida", origen_id);
+void procesar_lectura(t_memory_stick* ms, int socket_cliente, t_list* paquete) {
     usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
     
     uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
@@ -125,8 +124,7 @@ void procesar_lectura(t_memory_stick* ms, int socket_cliente, int origen_id, t_l
     free(datos_leidos);
 }
 
-void procesar_escritura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete) {
-    log_info(ms->logger, "[ID %d] Petición de ESCRITURA recibida", origen_id);
+void procesar_escritura(t_memory_stick* ms, int socket_cliente, t_list* paquete) {
     usleep(1000 * config_get_int_value(ms->config, "MEMORY_DELAY"));
     
     uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 1);
@@ -169,11 +167,15 @@ void* escuchar_kernel_memory(void* arg) {
 
         switch (cod_op) {
             case LECTURA_DE_DATOS:
-                procesar_lectura(ms, socket_km, 999, paquete); 
+                log_info(ms->logger, "[Kernel Memory] Petición de LECTURA recibida");
+                procesar_lectura(ms, socket_km, paquete); 
                 break;
+
             case ESCRITURA_DE_DATOS:
-                procesar_escritura(ms, socket_km, 999, paquete);
+                log_info(ms->logger, "[Kernel Memory] Petición de ESCRITURA recibida");
+                procesar_escritura(ms, socket_km, paquete);
                 break;
+
             default:
                 log_warning(ms->logger, "Operación desconocida desde Kernel Memory: %d", cod_op);
                 break;
@@ -248,13 +250,15 @@ void* rutina_operaciones (void* argumentos){
         int cod_op = *(int*) list_get(paquete, 0);
 
         switch (cod_op) {
-            case LECTURA_DE_DATOS:
-                procesar_lectura(ms, socket_cpu, cpu_id, paquete);
-                break;
-            case ESCRITURA_DE_DATOS:
-                procesar_escritura(ms, socket_cpu, cpu_id, paquete);
-                break;
-            default:
+              case LECTURA_DE_DATOS:
+                  log_info(ms->logger, "[CPU %d] Petición de LECTURA recibida", cpu_id);
+                  procesar_lectura(ms, socket_cpu, paquete);
+                  break;
+              case ESCRITURA_DE_DATOS:
+                  log_info(ms->logger, "[CPU %d] Petición de ESCRITURA recibida", cpu_id);
+                  procesar_escritura(ms, socket_cpu, paquete);
+                  break;
+              default:
                 log_warning(ms->logger, "[CPU %d] Código de operación desconocido: %d", cpu_id, cod_op);
                 break;
         }
