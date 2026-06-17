@@ -18,7 +18,10 @@ int main(int argc, char* argv[]) {
     }   
 
     enviar_handshake(swap);
-    //enviar_tamanio_bloque(swap);
+    
+    enviar_tamanio_bloque(swap);
+
+    atender_kernel_memory(swap);
 
     liberar_swap(swap);
 
