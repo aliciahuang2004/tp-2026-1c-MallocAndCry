@@ -3,7 +3,7 @@
 
 #include "../../utils/include/utils.h"
 #include <netdb.h>	
-	
+#include <pthread.h>
 
 #define COLOR_VERDE "\033[32m"
 
@@ -14,6 +14,8 @@ typedef struct {
     int        id;     // 
     char*      memoria;
     int        tamano;
+    int             memory_delay;  
+    pthread_mutex_t mutex_mem;
     char* puerto_escucha;       //memory_stick recibe peticiones de las cpus  
     char* ip_kernel_memory;   //memory_stick conexion cliente a kernel_memory
     char* puerto_kernel_memory; //=
