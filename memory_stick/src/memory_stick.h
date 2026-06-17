@@ -32,9 +32,9 @@ void verificar_memory_stick(t_memory_stick* ms);
 void destruir_memory_stick(t_memory_stick* ms);
 void *rutina_operaciones(void *argumentos);
 void rutina_recepcion(t_memory_stick* ms,int servidor_fd);
+void procesar_lectura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete);
+void procesar_escritura(t_memory_stick* ms, int socket_cliente, int origen_id, t_list* paquete);
+void* escuchar_kernel_memory(void* arg);
 #ifndef MEMORY_STICK_H_
 #define MEMORY_STICK_H_
-
-
-
 #endif /* MEMORY_STICK_H_ */

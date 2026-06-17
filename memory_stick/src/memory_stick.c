@@ -108,7 +108,7 @@ void procesar_lectura(t_memory_stick* ms, int socket_cliente, int origen_id, t_l
     if (dir_fisica + tamanio > ms->tamano) {
         log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
         
-        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); // O el op_code de error que tengas
+        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); 
         enviar_paquete(paquete_error, socket_cliente, ms->logger);
         eliminar_paquete(paquete_error);
         return;
@@ -224,7 +224,7 @@ void* escuchar_kernel_memory(void* arg) {
         pthread_detach(hilo_exec);
       }
       
-      list_destroy_and_destroy_elements(paquete_ID_CPU, free); // Faltaba liberar este paquete
+      list_destroy_and_destroy_elements(paquete_ID_CPU, free); 
     }
 }
 

@@ -22,7 +22,11 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
         }
         //***MS ENVIA HANDSHAKE,ID,TAMAÑO A KM
-        enviar_handshake(ms);     
+        enviar_handshake(ms);
+
+        pthread_t hilo_km;
+        pthread_create(&hilo_km, NULL, escuchar_kernel_memory, ms);
+        pthread_detach(hilo_km);   
 
         //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
        
