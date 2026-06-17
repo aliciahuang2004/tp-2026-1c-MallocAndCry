@@ -1,5 +1,6 @@
 #include "memory_stick.h"
 #include <unistd.h>
+#include <stdlib.h>
 
 t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     t_memory_stick* ms = malloc(sizeof(t_memory_stick));
@@ -29,6 +30,9 @@ t_memory_stick* iniciar_memory_stick(char* ms_config,int tamano_ms,int id){
     ms ->puerto_kernel_memory = config_get_string_value(ms->config,"PUERTO_KERNEL_MEMORY");
     ms ->ip_escucha = config_get_string_value(ms->config,"IP_ESCUCHA");
 
+    ms->memory_delay = config_get_int_value(ms->config, "MEMORY_DELAY");
+    pthread_mutex_init(&(ms->mutex_mem), NULL);
+
    //loggeo que todo se cargò correctamente
    log_debug(ms->logger, "El mòdulo Memory Stick se inicializò correctamente");
 
@@ -55,18 +59,9 @@ int conectar_al_kernelmem(t_memory_stick* ms){
   if(ms->kernel_mem_socket != -1){
     log_info(ms->logger,COLOR_VERDE "## Conexiòn al Kernel Memory exitosa. IP:%s, Puerto: %s\033[0m" 
                         ,ms->ip_kernel_memory,ms->puerto_kernel_memory);
-
-    free(ms->puerto_kernel_memory);      // ← después del log
-    ms->puerto_kernel_memory = NULL;
-
     return 0;
-
   }else{
     log_error(ms->logger,"**Error al conectar a kernel memory**");
-
-    free(ms->puerto_kernel_memory);      // ← después del log
-    ms->puerto_kernel_memory = NULL;
-
     return -1;  
   }
   
@@ -79,8 +74,10 @@ void destruir_memory_stick(t_memory_stick* ms){
     if(ms->ip_kernel_memory) free(ms->ip_kernel_memory);
     if(ms->log_level) free(ms->log_level);
     if(ms->config) config_destroy(ms->config);
+    pthread_mutex_destroy(&(ms->mutex_mem));
     if(ms->kernel_mem_socket != -1) close(ms->kernel_mem_socket);
     if(ms->puerto_kernel_memory) free(ms->puerto_kernel_memory);
+    if(ms->memoria) free(ms->memoria);
     free(ms);
 }
 
@@ -104,8 +101,8 @@ void procesar_lectura(t_memory_stick* ms, int socket_cliente, t_list* paquete) {
   
     log_info(ms->logger, "## Lectura de %d bytes", tamanio);
 
-    if (dir_fisica + tamanio > ms->tamano) {
-        log_error(ms->logger, "Error: Intento de lectura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+    if (dir_fisica + (uint32_t)tamanio > (uint32_t)ms->tamano) {
+        log_error(ms->logger, "Error: Intento de acceso fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
         
         t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); 
         enviar_paquete(paquete_error, socket_cliente, ms->logger);
@@ -114,7 +111,10 @@ void procesar_lectura(t_memory_stick* ms, int socket_cliente, t_list* paquete) {
     }
 
     void* datos_leidos = malloc(tamanio);
+
+    pthread_mutex_lock(&(ms->mutex_mem));
     memcpy(datos_leidos, ms->memoria + dir_fisica, tamanio);
+    pthread_mutex_unlock(&(ms->mutex_mem));
 
     t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
     agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
@@ -133,16 +133,18 @@ void procesar_escritura(t_memory_stick* ms, int socket_cliente, t_list* paquete)
     
     log_info(ms->logger, "## Escritura de %d bytes", tamanio);
 
-    if (dir_fisica + tamanio > ms->tamano) {
-        log_error(ms->logger, "Error: Intento de escritura fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
+    if (dir_fisica + (uint32_t)tamanio > (uint32_t)ms->tamano) {
+        log_error(ms->logger, "Error: Intento de acceso fuera de los límites (Dir: %u, Tam: %d, Max: %d)", dir_fisica, tamanio, ms->tamano);
         
-        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); // O el op_code de error que tengas
+        t_paquete* paquete_error = crear_paquete(ERROR_OPERACION, crear_buffer()); 
         enviar_paquete(paquete_error, socket_cliente, ms->logger);
         eliminar_paquete(paquete_error);
         return;
     }
 
+    pthread_mutex_lock(&(ms->mutex_mem));
     memcpy(ms->memoria + dir_fisica, datos_a_escribir, tamanio);
+    pthread_mutex_unlock(&(ms->mutex_mem));
 
     t_paquete* paquete_respuesta = crear_paquete(IO_OK, crear_buffer()); 
     enviar_paquete(paquete_respuesta, socket_cliente, ms->logger);
@@ -159,8 +161,8 @@ void* escuchar_kernel_memory(void* arg) {
         t_list* paquete = recibir_paquete(socket_km);
         
         if (paquete == NULL) {
-            log_error(ms->logger, "Se perdió la conexión con el Kernel Memory.");
-            break;
+            log_error(ms->logger, "Se perdió la conexión con el Kernel Memory. Apagando Memory Stick");
+            exit(EXIT_FAILURE); 
         }
 
         int cod_op = *(int*) list_get(paquete, 0);

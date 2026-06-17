@@ -2,7 +2,8 @@
 #define MEMORY_STICK_H_
 
 #include "../../utils/include/utils.h"
-#include <netdb.h>		
+#include <netdb.h>	
+	
 
 #define COLOR_VERDE "\033[32m"
 
