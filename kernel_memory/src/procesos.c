@@ -46,7 +46,6 @@ void iniciar_tabla_procesos(void)
     procesos = dictionary_create();
 }
 
-
 t_proceso* buscar_proceso(int pid) {
     char pid_str[20];
     sprintf(pid_str, "%d", pid);
@@ -54,10 +53,7 @@ t_proceso* buscar_proceso(int pid) {
     return dictionary_get(procesos, pid_str);
 }
 
-
-//FALTA PROBAR 
-// guarda la info de los segmentos,borra los registros,destruye la tabla de seg del proc,
-//borra el contexto de la lista,elimina el proceso del dictionary,elimina su path de instrucciones y agrega huecos libres
+// nueva version de eliminar_proceso:
 int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
 
     pthread_mutex_lock(&mutex_procesos);
@@ -78,10 +74,8 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
         limites[i] = seg->limite_global;
     }
 
-    free(proceso->contexto);
-
     list_destroy_and_destroy_elements(proceso->contexto->tabla_segmentos, free);
-
+    
     free(proceso->contexto);
 
     char pid_str[20];
@@ -95,13 +89,29 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
     dictionary_remove_and_destroy(km->paths_por_pid, pid_str_path, free);
     log_info(logger, "Path eliminado para PID:%d", pid);
 
-
-    pthread_mutex_lock(&mutex_huecos);
     for (int i = 0; i < cant_segmentos; i++) {
-        agregar_hueco_libre(bases[i], limites[i]);
+        uint32_t tamano_real = (limites[i] - bases[i]) + 1;
+        agregar_hueco_libre(bases[i],tamano_real);
     }
-    pthread_mutex_unlock(&mutex_huecos);
+    //***************************logs temporales*********************************
+    log_info(logger, "## [VERIFICACIÓN] Iniciando auditoría de liberación para PID: %d", pid);
+        pthread_mutex_lock(&mutex_procesos);
+        t_proceso* proceso_fantasma = buscar_proceso(pid); 
+        pthread_mutex_unlock(&mutex_procesos);
 
-    log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
+        if (proceso_fantasma == NULL) {
+            log_info(logger, "   [OK] Diccionario 'procesos': El PID %d fue removido exitosamente.", pid);
+        } else {
+            log_error(logger, "   [ALERTA] El PID %d sigue figurando en el diccionario de procesos. Puntero: %p", pid, (void*)proceso_fantasma);
+        }
+        if (!dictionary_has_key(km->paths_por_pid, pid_str_path)) {
+            log_info(logger, "   [OK] Diccionario 'paths_por_pid': Removido correctamente.");
+        } else {
+            log_error(logger, "   [ALERTA] El path para el PID %d sigue existiendo en km->paths_por_pid.", pid);
+        }
+        loguear_huecos(logger); 
+        log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
+        //***************************+logs temporales*****************************
+        //log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
     return 1;
 }

@@ -81,7 +81,10 @@ typedef enum{
     ELIMINACION_DE_SEG_ERROR,
     FIN_PROC_OK,
     FIN_PROC_ERROR,
-    ESCRITURA_EN_MS             
+    ESCRITURA_EN_MS,
+    RTA_LECTURA,
+    COMPACTACION_OK,
+    COMPACTACION_ERROR            
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

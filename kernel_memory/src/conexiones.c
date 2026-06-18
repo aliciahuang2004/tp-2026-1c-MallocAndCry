@@ -66,7 +66,7 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logge
         t_paquete* paquete = crear_paquete(MS_NUEVO_CPU, crear_buffer());
         agregar_a_paquete(paquete, &ms_id,sizeof(int));
         agregar_a_paquete(paquete, ms_puerto,strlen(ms_puerto) + 1);
-        agregar_a_paquete(paquete, &ms_ip,strlen(ms_ip) + 1);
+        agregar_a_paquete(paquete, ms_ip,strlen(ms_ip) + 1);
         enviar_paquete(paquete, cpu->socket, logger);
         eliminar_paquete(paquete);
 
@@ -112,9 +112,9 @@ void* atender_conexion(void* arg) {
             case CPU_HANDSHAKE:
                 int cpu_id = *(int *)list_get(paquete, 1);
                 log_info(logger, "CPU ID:%d conectada en socket %d", cpu_id, socket_cliente);
-            //ALMACENO EL CPU CON ID Y SOCKET EN "cpus_conectadas"
-               agregar_cpu_conectada(cpu_id, socket_cliente);
-            //*********ENVIA SEGMENT MAX SIZE APENAS SE CONECTA CPU*************************DESCOMENTAR CUANDO CPU ESPERE SEG_MAX_SIZE
+            
+                agregar_cpu_conectada(cpu_id, socket_cliente);
+
                 t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
                 agregar_a_paquete(respuesta, &km->segment_max_size, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
@@ -141,15 +141,15 @@ void* atender_conexion(void* arg) {
 
                     pthread_mutex_lock(&mutex_memoria_total);
                     log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
+                    uint32_t copia_memoria_total = memoria_total;
                     pthread_mutex_unlock(&mutex_memoria_total);
                    
                    //AVISO A KS QUE HAY MAS MEMORIA DISPONIBLE:
                     t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
-                    agregar_a_paquete(respuesta,&memoria_total,sizeof(int));
+                    agregar_a_paquete(respuesta,&copia_memoria_total,sizeof(uint32_t));
                     enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
                     eliminar_paquete(respuesta);
-                    //AVISO A TODAS LAS CPUS:
-                    //int ms_ip = 127001;
+                    
                     avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger);              
                 } else {
                     log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
@@ -158,7 +158,7 @@ void* atender_conexion(void* arg) {
             }
 
             case KERNEL_SCHEDULER_HANDSHAKE:
-                log_info(logger, "[Socket %d] Operación KERNEL SCHEDULER recibida", socket_cliente);
+                log_info(logger, "[Socket %d] Conexión con KERNEL SCHEDULER exitosa", socket_cliente);
                 km->socket_kernel_scheduler = socket_cliente;
                 // CODIGO KERNEL SCHEDULER
                  break; 
@@ -168,20 +168,17 @@ void* atender_conexion(void* arg) {
                 // CODIGO SWAP
                 break;
 
-            case CREACION_DE_PROCESO: // Asegurate de que este en protocolo.h
+            case CREACION_DE_PROCESO:
             {
-                // 1. Extraemos los datos que mandó el Scheduler en el orden acordado
-                // Índice 1: PID (int)
-                // Índice 2: Path (string)
                 int pid_nuevo = *(int*) list_get(paquete, 1);
                 char* path_relativo = (char*) list_get(paquete, 2);
 
                 inicializar_proceso_memoria(pid_nuevo, path_relativo, km);
             
-                int resultado = crear_proceso(pid_nuevo);//************AGREGA PROCESO AL DICTIONARY**********
+                int resultado = crear_proceso(pid_nuevo);
                 
                  if (resultado == 0)
-                { //************************ENVIO CONFIRMACION O ERROR DE CREACION DE PROCESO A KS********************
+                { 
                 t_paquete *respuesta = crear_paquete(CREACION_DE_PROCESO_OK, crear_buffer());   
                 agregar_a_paquete(respuesta, &pid_nuevo, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
@@ -283,53 +280,72 @@ void* atender_conexion(void* arg) {
             break;
         
            case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
-            {
-                uint32_t direccion_fisica_global = *(int*) list_get(paquete, 1);
-                int pid_recibido  = *(int*) list_get(paquete, 2);
-                char* contenido_a_escribir = (char*) list_get(paquete, 3);
+            { 
+                int pid_recibido  = *(int*) list_get(paquete, 1);
+                uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 2);
+                uint32_t tamano_contenido = *(uint32_t*) list_get(paquete,3); 
+                char* contenido_a_escribir = (char*) list_get(paquete, 4);
+               
 
-                // Calculamos el tamaño del contenido que nos mandó la CPU
-                int tamano_contenido = strlen(contenido_a_escribir) + 1; 
-
-                // 1. LLAMADA: La función crea internamente la lista y nos la devuelve llena
                 t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano_contenido,logger);
 
                 if (lista_fragmentos_temp != NULL) {
-                    // Paso 2: Enviar cada fragmento a su respectivo Memory Stick
+            
                     enviar_fragmentos_escritura(lista_fragmentos_temp, contenido_a_escribir, logger);
-
-                    // Paso 3: Esperar las respuestas de confirmación de los MS y responder a CPU...
-                    // (Aquí agregarías la lógica para recibir los "IO_OK" de los MS antes de responderle a la CPU)
-
-                    // Paso 4: Limpieza absoluta de la memoria temporal del hilo
                     list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
                 } else {
                     log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
-                    // Enviar código de error a la CPU si corresponde...
                 }   
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
-            {
+            {                
+                uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 1);
+                uint32_t tamano = *(uint32_t*) list_get(paquete,2); 
+
+                t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano,logger);
+  
+                if (lista_fragmentos_temp != NULL) {
+                
+                void* contenido_leido_completo = enviar_fragmentos_lectura(lista_fragmentos_temp, tamano, logger);
+
+                /*********descomentar cuando ks espere contenido leido desde ms***
+                if (contenido_leido_completo != NULL) {
+                    
+                    t_paquete* respuesta_final = crear_paquete(RTA_LECTURA, crear_buffer());
+                    agregar_a_paquete(respuesta_final,contenido_leido_completo,tamano);
+                    enviar_paquete(respuesta_final,km->socket_kernel_scheduler,logger);
+                    eliminar_paquete(respuesta_final);
+
+                    free(contenido_leido_completo);
+                } else {
+                    log_error(logger, "Error al leer los fragmentos de los Memory Sticks");
+                }
+                */
+                list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
+                } else {
+                    log_error(logger, "Error de segmentación en dirección global: %u", direccion_fisica_global);
+                }
             }
             break;
             case FINALIZAR_PROCESO: ///***ESPERO EXIT DE KS
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int respuesta = eliminar_proceso(pid_recibido,km,logger);
-            
+            /*DESCOMENTAR CUANDO KS ESPERE ESTE PROTOCOLO*******
                 if(respuesta == 1) {
-                    t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
+                   t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
                     agregar_a_paquete(resp,&pid_recibido, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
 
-                } else {//******************************NO ES OBLIGATORIO PODRIA SIMPLEMENTE AGREGAR UN LOG PARA QUE EN KS NO TENGA QUE ESPERAR ESTE MSJ**********
+                } else {
                     t_paquete* resp = crear_paquete(FIN_PROC_ERROR, crear_buffer());
                     agregar_a_paquete(resp,&pid_recibido, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
                 }
+             */
             }
             break;
             case SUSPENSION_DE_PROCESO:
@@ -341,7 +357,7 @@ void* atender_conexion(void* arg) {
             {/// SWAP + MS
             }
             break;
-            case ELIMINACION_DE_SEGMENTO: ///***ESPERO MEM_FREE DE KS
+            case ELIMINACION_DE_SEGMENTO: 
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
@@ -350,6 +366,7 @@ void* atender_conexion(void* arg) {
                 if(respuesta == 1) {
                     t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_OK, crear_buffer());
                     agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    agregar_a_paquete(resp,&id_seg_recibido, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
 
@@ -414,10 +431,23 @@ void* atender_conexion(void* arg) {
                 log_info(logger, "Contexto actualizado - PID: %d", pid);
             }
             break;
-            case CPUS_DESALOJADAS://ANTES DEBERIA DESARROLLAR LAS ESCRITURAS,LECTURAS DE SEGMENTOS
-            {/// KS DEBERIA ENVIAR "CPUS_DESALOJADAS" CUANDO TERMINA DE DESALOJAR A TODAS LAS CPUS,
-            //PARA COMENZAR CON LA COMPACTACION EN KM 
-            //(CREO TEMPORALMENTE UNA TABLA GLOBAL DE SEGMENTOS EN "comenzar_compactacion")
+            case CPUS_DESALOJADAS:
+            {
+                //PARA ESTE PUNTO KS YA DEBIÓ ¡FINALIZAR? TODOS LOS PROCESOS,POR LO QUE YA DEBERIA TENER TODOS LOS CONTEXTOS ACTUALIZADOS? 
+                //tp dice desalojar los proc de las cpus pero no dice nada sobre los procesos en bloqueado por que van a tener seg en swap
+                //y esos se quedan alli? durante la compactacion?
+                int rta = iniciar_compactacion(logger);
+                 if(rta == 1) {
+                    t_paquete* resp = crear_paquete(COMPACTACION_OK, crear_buffer());
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {
+                    t_paquete* resp = crear_paquete(COMPACTACION_ERROR, crear_buffer());
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
+                
             }
             break;
         

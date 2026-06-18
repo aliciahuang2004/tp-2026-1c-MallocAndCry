@@ -15,7 +15,7 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km,t_log* logger
 t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km,t_log* logger);
 t_hueco* buscar_hueco(uint32_t tamano,t_kernel_memory* km,t_log* logger);
 
-
+void vaciar_lista_de_huecos(t_log* logger);
 void consumir_hueco(t_hueco* hueco, uint32_t tamano);
 void loguear_huecos(t_log* logger);
 
