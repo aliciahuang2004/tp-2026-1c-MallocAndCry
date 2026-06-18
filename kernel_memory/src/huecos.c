@@ -31,7 +31,8 @@ void consumir_hueco(t_hueco* hueco, uint32_t tamano) {//revisar que hace esta fu
 
     hueco->base += tamano;
     hueco->tamano -= tamano;
-
+    hueco->limite = hueco->base + hueco->tamano - 1;
+    
     if(hueco->tamano == 0) {
         list_remove_element(lista_huecos_libres, hueco);
         free(hueco);
@@ -102,6 +103,14 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
         }
     }
     return peor;
+}
+
+void vaciar_lista_de_huecos(t_log* logger) {
+    
+    pthread_mutex_lock(&mutex_huecos);
+    list_clean_and_destroy_elements(lista_huecos_libres, free);
+    pthread_mutex_unlock(&mutex_huecos);
+    log_info(logger, "[COMPACTACIÓN] Lista de huecos liberada y vaciada por completo.");
 }
 
 void loguear_huecos(t_log* logger)

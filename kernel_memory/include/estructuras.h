@@ -105,9 +105,9 @@ typedef struct {
 typedef struct {
     int ms_id;
     uint32_t dir_local;
-    uint32_t tamano_a_copiar;
+    uint32_t tamano;
     void* datos_bloque;
-} t_fragmento_escritura;
+} t_fragmento_memoria;
 
 
 /*

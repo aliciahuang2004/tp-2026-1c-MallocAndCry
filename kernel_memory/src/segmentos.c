@@ -96,14 +96,12 @@ int eliminar_segmento(int pid, int id_segmento, t_log* logger) {
 
     uint32_t base = segmento_encontrado->base_global;
     uint32_t limite = segmento_encontrado->limite_global;
-
+    uint32_t tamano_real = (limite - base) + 1;
     list_remove_and_destroy_element(proceso->contexto->tabla_segmentos, indice, free);
 
     pthread_mutex_unlock(&mutex_procesos);
 
-    pthread_mutex_lock(&mutex_huecos);
-    agregar_hueco_libre(base, limite);
-    pthread_mutex_unlock(&mutex_huecos);
+    agregar_hueco_libre(base,tamano_real);
 
     log_info(logger, "Segmento eliminado PID:%d SEG:%d BASE:%u LIMITE:%u", pid, id_segmento, base, limite);
 

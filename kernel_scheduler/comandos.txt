@@ -1,4 +1,5 @@
 ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+valgrind --leak-check=full ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 
 gdb --args ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 run
@@ -13,13 +14,19 @@ gdb --args ./bin/memory_stick ms3.config 150 3
 gdb --args ./bin/memory_stick ms4.config 400 4
 ./bin/memory_stick ms4.config 400 4
 
+valgrind --leak-check=full ./bin/cpu cpu.config 1
+
 gdb --args ./bin/cpu cpu.config 1 
 ./bin/cpu cpu.config 1
+
+valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
 
 ./bin/kernel_memory kernel_memory.config 
 gdb --args ./bin/kernel_memory kernel_memory.config 
 run
 bt
+
+
 ./bin/io io.config STDIN
 ./bin/io io.config STDOUT
 ./bin/io io.config SLEEP

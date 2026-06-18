@@ -1,20 +1,48 @@
 para las pruebas de memoria:
+luego de cambios,antes de probar
 
+make clean && make
+
+killall -9 kernel_memory cpu kernel_scheduler memory_stick 2>/dev/null
+
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
 SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_memory
------------------------------------------------------------------------------
+-----------------------------------------------------------------------------ks
 ./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc
+./bin/kernel_scheduler kernel_scheduler.config hola.txt
+valgrind --leak-check=full ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 
-./bin/memory_stick ms1.config 1024 1
-./bin/memory_stick ms2.config 2048 2
-./bin/memory_stick ms3.config 1024 3
-./bin/memory_stick ms4.config 4096 4
-
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+run
+bt
+-----------------------------------------------------------------------------ms
+valgrind --leak-check=full ./bin/memory_stick ms1.config 100 1
+gdb --args ./bin/memory_stick ms1.config 100 1
+./bin/memory_stick ms1.config 100 1
+gdb --args ./bin/memory_stick ms2.config 200 2
+./bin/memory_stick ms2.config 200 2
+gdb --args ./bin/memory_stick ms3.config 150 3
+./bin/memory_stick ms3.config 150 3
+gdb --args ./bin/memory_stick ms4.config 400 4
+./bin/memory_stick ms4.config 400 4
+------------------------------------------------------------------------------cpu
+valgrind --leak-check=full ./bin/cpu cpu.config 1
+gdb --args ./bin/cpu cpu.config 1 
 ./bin/cpu cpu.config 1
+------------------------------------------------------------------------------km
+valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
 
 ./bin/kernel_memory kernel_memory.config 
-
+gdb --args ./bin/kernel_memory kernel_memory.config 
+run
+bt
+./bin/kernel_memory kernel_memory.config 
+------------------------------------------------------------------------------
+valgrind --leak-check=full ./bin/io io.config STDIN 
 ./bin/io io.config STDIN
+valgrind --leak-check=full ./bin/io io.config STDOUT
 ./bin/io io.config STDOUT
+valgrind --leak-check=full ./bin/io io.config SLEEP
 ./bin/io io.config SLEEP
 ------------------------------------------------------------------------------
 cuando levanto km dos veces seguidas a veces tira mensaje "socket -1" :
@@ -62,4 +90,27 @@ SET ECX 124
 SET EDX 90
 SET SI 100
 SET DI 12
+EXIT
+---
+PASO LA PRUEBA :D
+SET AX 9
+SET BX 3
+SET CX 1
+SET DX 22
+SET EAX 234
+MEM_ALLOC 5 32
+SET EBX 444
+SET ECX 124
+MEM_ALLOC 4 32
+SET EDX 90
+SET SI 100
+SET DI 12
+MEM_ALLOC 1 32
+MEM_FREE 4
+MEM_FREE 5
+MEM_ALLOC 2 32
+MEM_ALLOC 3 32
+MEM_FREE 2
+MEM_ALLOC 8 10
+MEM_FREE 1
 EXIT
