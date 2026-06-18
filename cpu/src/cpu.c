@@ -217,6 +217,10 @@ void esperar_proceso(t_cpu* cpu) {
 
                     //inicia el ciclo de instruccion
                     ciclo_de_instruccion(cpu,contexto_actual);
+
+                    if (contexto_actual->tabla_segmentos) {
+                        list_destroy_and_destroy_elements(contexto_actual->tabla_segmentos, free);
+                    }
                     free(contexto_actual);
 
                 } else {
@@ -249,6 +253,46 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_error(cpu->logger, "Error: El buffer_contexto llegó nulo");
+    if(cod_op == CONTEXT_RESPONSE) {
+        contexto_recibido = malloc(sizeof(t_contexto));
+        
+        //pid
+        contexto_recibido->pid = *(int*)list_get(respuesta, 1);
+
+        //registros
+        contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 2); 
+        contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 3);
+        contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 4);
+        contexto_recibido->registros.CX = *(uint8_t*)list_get(respuesta, 5);
+        contexto_recibido->registros.DX = *(uint8_t*)list_get(respuesta, 6);
+        contexto_recibido->registros.EAX = *(uint32_t*)list_get(respuesta, 7);
+        contexto_recibido->registros.EBX = *(uint32_t*)list_get(respuesta, 8);
+        contexto_recibido->registros.ECX = *(uint32_t*)list_get(respuesta, 9);
+        contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 10);
+        contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 11);
+        contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 12);
+
+        //inicio tabla de segmentos
+        contexto_recibido->tabla_segmentos = list_create();
+
+        int cantidad_segmentos = *(int*)list_get(respuesta, 13);
+
+        int offset = 14; 
+
+        for(int i = 0; i < cantidad_segmentos; i++) {
+            t_segmento* nuevo_segmento = malloc(sizeof(t_segmento));
+            
+            nuevo_segmento->id_segmento = *(int*)list_get(respuesta, offset);
+            nuevo_segmento->base = *(uint32_t*)list_get(respuesta, offset + 1);
+            nuevo_segmento->limite = *(uint32_t*)list_get(respuesta, offset + 2);
+            nuevo_segmento->memory_stick_id = *(int*)list_get(respuesta, offset + 3);
+
+            list_add(contexto_recibido->tabla_segmentos, nuevo_segmento);
+            offset += 4; // Avanzamos 4 índices para el próximo segmento
+        }
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u, Segmentos=%d", contexto_recibido->pid, contexto_recibido->registros.PC, cantidad_segmentos);
+        } else {
+        log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
 
     return contexto_recibido;
