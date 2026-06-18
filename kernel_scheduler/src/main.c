@@ -2,6 +2,7 @@
 
 // char* pathInicial;
 t_kernel_scheduler* kernel = NULL;
+
 int main(int argc, char* argv[]) {
     
     if (argc != 3){
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
 
     inicializarColas();
     inicializarSemaforos();
-
+    inicializar_interfaces();
     /*iniciarPlanificadorLargoPlazo(kernel_scheduler);
     iniciarPlanificadorLCortoPlazo(kernel_scheduler);
     iniciarCPU();*/
@@ -39,7 +40,10 @@ int main(int argc, char* argv[]) {
     crearProceso(argv[2], 0);
 
     pthread_t hiloMonitorPrioridades;
-    pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL);
+    if (pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL) != 0) {
+        log_error(kernel_scheduler->logger, "No se pudo crear el hilo de monitorización de prioridades");
+        return EXIT_FAILURE;
+    }
     pthread_detach(hiloMonitorPrioridades);
 
     //Crear el planificador de corto plazo

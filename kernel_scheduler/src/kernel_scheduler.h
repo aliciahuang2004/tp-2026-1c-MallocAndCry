@@ -86,14 +86,24 @@ typedef struct {
     char* nombre;               // Nombre único de la interfaz (ej: "GENERICA", "TECLADO")
     t_tipo_io tipo;             // Tipo (SLEEP, STDIN, STDOUT)
     int socket_interfaz;        // Socket de red para enviarle las operaciones
-    bool ocupada;               // Si la interfaz está ejecutando una tarea actualmente
+    bool ocupada;   
+    int pidAsignado;
+    t_queue* solicitudes;
 } t_interfaz_conectada;
 
+typedef struct {
+    int pidSolicitaSyscall;
+    t_tipo_io tipo;
+    uint32_t tamanio;
+    uint32_t direccion;
+    int tiempoSleep;
+} t_solicitud_io;
 
 // extern char* pathInicial;
 extern int pidParaAsignar;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
+extern t_interfaz_conectada interfaces[3];
 
 extern t_queue* colaNEW;
 extern t_queue** colasREADY;
@@ -133,6 +143,8 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
 void conectar_con_kernel_memory();
 void esperar_conexiones();
 void* atender_cliente_scheduler(void* arg);
+void inicializar_interfaces();
+void registrar_interfaz(t_tipo_io tipo, int socket_cliente);
 // void imprimir_lista_interfaces_io(t_log* logger);
 
 // atencionKM
@@ -143,6 +155,8 @@ void* atender_cpu(void* arg);
 
 // atencionIO
 void* atender_io(void* arg);
+void liberarIO(t_tipo_io tipo);
+void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo);
 
 // planificador
 void inicializarColas();
@@ -174,10 +188,12 @@ void pasarProcesoReadySuspAReady(int pid);
 
 void pasarProcesoExecAExit();
 void pasarProcesoReadyAExit();
-void pasarProcesoBlockAExit(); 
+void pasarProcesoBlockAExit();
+
 t_cpu_conectada* buscarCPUSegunPID(int pid);
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
 void* loop_corto_plazo(void* args);
+t_tipo_io buscarTipoIOPorSocket(int socket_io);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);
@@ -188,7 +204,13 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
 void liberarMutex(int pidLiberaMutex, char* nombreMutex);
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
 void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
+void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
+// void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+// void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void finalizarProceso(int pid, op_code motivo);
 void eliminarProceso(int pid, op_code motivo);
+void enviarAIO(int socket_io, t_solicitud_io* solicitud);
+void enviarAKM(t_solicitud_io* solicitud);
+
 
 #endif /* KERNEL_SCHEDULER_H*/

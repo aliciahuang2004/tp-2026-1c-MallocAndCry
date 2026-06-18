@@ -43,6 +43,8 @@ void conectar_con_kernel_memory(){
         exit(EXIT_FAILURE); 
     }
 
+    log_info(kernel_scheduler->logger, "## Conectado a Kernel Memory");
+
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
 
@@ -143,39 +145,68 @@ void* atender_cliente_scheduler(void* arg) {
                 break;
             case IO_HANDSHAKE:
                 log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
-                char* nombre_interfaz = (char*) list_get(paquete, 1);
-                int* tipo_interfaz_ptr = (int*) list_get(paquete, 2);
+                int* tipo_interfaz_ptr = (int*) list_get(paquete, 1);
 
-                if (nombre_interfaz == NULL || tipo_interfaz_ptr == NULL) {
+                if (tipo_interfaz_ptr == NULL) {
                     log_error(logger, "Handshake de IO inválido en socket %d", socket_cliente);
                     break;
                 }
 
-                // Crear y rellenar la estructura de control de la interfaz
-                t_interfaz_conectada* nueva_io = malloc(sizeof(t_interfaz_conectada));
-                nueva_io->nombre = strdup(nombre_interfaz);
-                nueva_io->tipo = (t_tipo_io)(*tipo_interfaz_ptr);
-                nueva_io->socket_interfaz = socket_cliente;
-                nueva_io->ocupada = false;
+                t_tipo_io tipo_interfaz = *tipo_interfaz_ptr;
+                registrar_interfaz(tipo_interfaz, socket_cliente);
 
-                // Agregar la interfaz a la lista global de forma segura
-                pthread_mutex_lock(&mutex_lista_interfaces);
-                list_add(lista_interfaces_io, nueva_io);
-                int total_interfaces = list_size(lista_interfaces_io); // para prueba
-                pthread_mutex_unlock(&mutex_lista_interfaces);
+                pthread_create(&hilo_io, NULL, atender_cpu, interfaces[tipo].socket_interfaz);
+                pthread_detach(hilo_io);
 
-                const char* tipo_str = "DESCONOCIDO";
-                if (nueva_io->tipo == IO_SLEEP) tipo_str = "SLEEP";
-                else if (nueva_io->tipo == IO_STDIN) tipo_str = "STDIN";
-                else if (nueva_io->tipo == IO_STDOUT) tipo_str = "STDOUT";
-
-                log_info(logger, "## Interfaz registrada exitosamente. Nombre: %s. Tipo: %s (%d). Socket: %d. Total interfaces: %d", nueva_io->nombre, tipo_str, nueva_io->tipo, nueva_io->socket_interfaz, total_interfaces);
-                // imprimir_lista_interfaces_io(logger);
+                list_destroy_and_destroy_elements(paquete,free);
+                return NULL; 
                 break;
         }
     list_destroy_and_destroy_elements(paquete,free);
     }
 }
+
+void inicializar_interfaces() {
+    interfaces[IO_SLEEP].nombre = "SLEEP";
+    interfaces[IO_SLEEP].tipo = IO_SLEEP;
+    interfaces[IO_SLEEP].socket_interfaz = -1;
+    interfaces[IO_SLEEP].ocupada = false;
+    interfaces[IO_SLEEP].pidAsignado = -1;
+    interfaces[IO_SLEEP].pidBloqueados = queue_create();
+
+    interfaces[IO_STDIN].nombre = "STDIN";
+    interfaces[IO_STDIN].tipo = IO_STDIN;
+    interfaces[IO_STDIN].socket_interfaz = -1;
+    interfaces[IO_STDIN].ocupada = false;
+    interfaces[IO_STDIN].pidAsignado = -1;
+    interfaces[IO_STDIN].pidBloqueados = queue_create();
+
+    interfaces[IO_STDOUT].nombre = "STDOUT";
+    interfaces[IO_STDOUT].tipo = IO_STDOUT;
+    interfaces[IO_STDOUT].socket_interfaz = -1;
+    interfaces[IO_STDOUT].ocupada = false;
+    interfaces[IO_STDOUT].pidAsignado = -1;
+    interfaces[IO_STDOUT].pidBloqueados = queue_create();
+
+    for (int i = 0; i < 3; i++) {
+        pthread_mutex_init(&mutex_interfaces[i], NULL);
+    }
+}
+
+void registrar_interfaz(t_tipo_io tipo, int socket_cliente) {
+    if (tipo < 0 || tipo > 2) {
+        log_error(logger, "Tipo de IO inválido (%d)", tipo);
+        return;
+    }
+    
+    pthread_mutex_lock(&mutex_interfaces[tipo]);
+    interfaces[tipo].socket_interfaz = socket_cliente;
+    interfaces[tipo].ocupada = false;
+
+    log_info(logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo].nombre, interfaces[tipo].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[tipo]);
+}
+
 /*
 void imprimir_lista_interfaces_io(t_log* logger) {
     pthread_mutex_lock(&mutex_lista_interfaces);

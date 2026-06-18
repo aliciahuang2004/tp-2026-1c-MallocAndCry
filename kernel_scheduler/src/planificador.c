@@ -30,8 +30,9 @@ sem_t sem_hayMemoria;
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
 
-t_list* lista_interfaces_io;
-pthread_mutex_t mutex_lista_interfaces;
+// t_list* lista_interfaces_io;
+t_interfaz_conectada interfaces[3];
+pthread_mutex_t mutex_interfaces[3];
 
 void inicializarColas(){
     colaNEW = queue_create();
@@ -742,4 +743,16 @@ void* loop_corto_plazo(void* args) {
             pasarProcesoReadyAExec();
     }
     return NULL;
+}
+
+t_tipo_io buscarTipoIOPorSocket(int socket_io) {
+    pthread_mutex_lock(&mutex_interfaces[0]);
+    for (int i = 0; i < 3; i++) {
+        pthread_mutex_lock(&mutex_interfaces[0]);
+        if (interfaces[i].socket_cliente == socket_io) {
+            return interfaces[i].tipo;
+        }
+        pthread_mutex_unlock(&mutex_interfaces[0]);
+    }
+    return -1; // No se encontró el tipo de IO para el socket dado
 }
