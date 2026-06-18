@@ -97,13 +97,16 @@ typedef struct {
     uint32_t tamanio;
     uint32_t direccion;
     int tiempoSleep;
+    char* leido;
 } t_solicitud_io;
 
 // extern char* pathInicial;
 extern int pidParaAsignar;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
+
 extern t_interfaz_conectada interfaces[3];
+extern pthread_mutex_t mutex_interfaces[3];
 
 extern t_queue* colaNEW;
 extern t_queue** colasREADY;
@@ -135,8 +138,8 @@ extern sem_t sem_hayMemoria;
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;
 
-extern t_list* lista_interfaces_io;
-extern pthread_mutex_t mutex_lista_interfaces;
+// extern t_list* lista_interfaces_io;
+// extern pthread_mutex_t mutex_lista_interfaces;
 
 // kernel_scheduler
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);

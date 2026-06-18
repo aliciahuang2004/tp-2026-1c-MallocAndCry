@@ -43,7 +43,7 @@ void conectar_con_kernel_memory(){
         exit(EXIT_FAILURE); 
     }
 
-    log_info(kernel_scheduler->logger, "## Conectado a Kernel Memory");
+    log_info(kernel->logger, "## Conectado a Kernel Memory");
 
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
@@ -101,7 +101,7 @@ void* atender_cliente_scheduler(void* arg) {
         log_info(logger, "Código de operación recibido: %d", cod_op);
 
         switch (cod_op) {
-            case CPU_HANDSHAKE:
+            case CPU_HANDSHAKE:{
                //Lee el ID de la CPU (si lo envió, si no se asigna uno por defecto)
                 int* id_cpu_ptr = (int*) list_get(paquete, 1);
                 int id_cpu;
@@ -143,7 +143,8 @@ void* atender_cliente_scheduler(void* arg) {
                 list_destroy_and_destroy_elements(paquete, free);
                 return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 break;
-            case IO_HANDSHAKE:
+            }
+            case IO_HANDSHAKE:{
                 log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
                 int* tipo_interfaz_ptr = (int*) list_get(paquete, 1);
 
@@ -154,15 +155,18 @@ void* atender_cliente_scheduler(void* arg) {
 
                 t_tipo_io tipo_interfaz = *tipo_interfaz_ptr;
                 registrar_interfaz(tipo_interfaz, socket_cliente);
-
-                pthread_create(&hilo_io, NULL, atender_cpu, interfaces[tipo].socket_interfaz);
+                pthread_t hilo_io;
+                int* socket_io_ptr = malloc(sizeof(int));
+                *socket_io_ptr = interfaces->socket_interfaz;
+                pthread_create(&hilo_io, NULL, atender_io, socket_io_ptr);
                 pthread_detach(hilo_io);
 
                 list_destroy_and_destroy_elements(paquete,free);
                 return NULL; 
                 break;
+            }
         }
-    list_destroy_and_destroy_elements(paquete,free);
+        list_destroy_and_destroy_elements(paquete,free);
     }
 }
 
@@ -172,21 +176,21 @@ void inicializar_interfaces() {
     interfaces[IO_SLEEP].socket_interfaz = -1;
     interfaces[IO_SLEEP].ocupada = false;
     interfaces[IO_SLEEP].pidAsignado = -1;
-    interfaces[IO_SLEEP].pidBloqueados = queue_create();
+    interfaces[IO_SLEEP].solicitudes = queue_create();
 
     interfaces[IO_STDIN].nombre = "STDIN";
     interfaces[IO_STDIN].tipo = IO_STDIN;
     interfaces[IO_STDIN].socket_interfaz = -1;
     interfaces[IO_STDIN].ocupada = false;
     interfaces[IO_STDIN].pidAsignado = -1;
-    interfaces[IO_STDIN].pidBloqueados = queue_create();
+    interfaces[IO_STDIN].solicitudes = queue_create();
 
     interfaces[IO_STDOUT].nombre = "STDOUT";
     interfaces[IO_STDOUT].tipo = IO_STDOUT;
     interfaces[IO_STDOUT].socket_interfaz = -1;
     interfaces[IO_STDOUT].ocupada = false;
     interfaces[IO_STDOUT].pidAsignado = -1;
-    interfaces[IO_STDOUT].pidBloqueados = queue_create();
+    interfaces[IO_STDOUT].solicitudes = queue_create();
 
     for (int i = 0; i < 3; i++) {
         pthread_mutex_init(&mutex_interfaces[i], NULL);
@@ -195,7 +199,7 @@ void inicializar_interfaces() {
 
 void registrar_interfaz(t_tipo_io tipo, int socket_cliente) {
     if (tipo < 0 || tipo > 2) {
-        log_error(logger, "Tipo de IO inválido (%d)", tipo);
+        log_error(kernel->logger, "Tipo de IO inválido (%d)", tipo);
         return;
     }
     
@@ -203,7 +207,7 @@ void registrar_interfaz(t_tipo_io tipo, int socket_cliente) {
     interfaces[tipo].socket_interfaz = socket_cliente;
     interfaces[tipo].ocupada = false;
 
-    log_info(logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo].nombre, interfaces[tipo].socket_interfaz);
+    log_info(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo].nombre, interfaces[tipo].socket_interfaz);
     pthread_mutex_unlock(&mutex_interfaces[tipo]);
 }
 

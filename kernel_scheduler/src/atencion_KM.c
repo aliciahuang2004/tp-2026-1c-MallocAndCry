@@ -26,7 +26,7 @@ void* atender_kernel_memory(void* arg) {
                 finalizarProceso(pid,CREACION_DE_PROCESO_ERROR);
                 break;
             }
-            case ELIMINACION_DE_SEGMENTO_OK:{
+            /*case ELIMINACION_DE_SEGMENTO_OK:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM confirmó eliminación de proceso - PID: %d", pid);
                 enviarPIDAcpu(pid,buscarCPUSegunPID(pid));
@@ -37,7 +37,7 @@ void* atender_kernel_memory(void* arg) {
                 log_error(kernel->logger, "## KM reportó error en eliminación de proceso - PID: %d", pid);
                 //SE VUELVE A MANDAR O FINALIZA?
                 break;
-            }
+            }*/
             case CREACION_DE_SEGMENTO_OK:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM confirmó creación de segmento - PID: %d", pid);

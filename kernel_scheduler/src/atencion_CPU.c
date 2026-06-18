@@ -85,7 +85,7 @@ void* atender_cpu(void* arg){
             case INIT_PROC: {// NO BLOQUEA
                 char* path_script = (char*) list_get(paquete, 2);
                 int prioridad = *(int*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)", path_script, prioridad);
+                log_info(kernel->logger, "## PID: %d - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)",pidSolicitaSyscall, path_script, prioridad);
                 crearProceso(path_script, prioridad);
                 enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;

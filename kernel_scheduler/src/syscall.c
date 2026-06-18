@@ -175,12 +175,13 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->pidSolicitaSyscall = pid;
     solicitud->tipo = IO_SLEEP;
     solicitud->tiempoSleep = tiempo_ms;
-    solicitud->tamanio = NULL;
-    solicitud->direccion = NULL;
+    solicitud->tamanio = 0;
+    solicitud->direccion = 0;
+    solicitud->leido = NULL;
 
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
-        interfaz_libre->ocupada = true;
+        interfaces->ocupada = true;
         enviarAIO(interfaces[IO_SLEEP].socket_interfaz, solicitud);
         pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
     } else {
@@ -364,9 +365,9 @@ void eliminarProceso(int pid, op_code motivo){
 
 void enviarAIO(int socket_io, t_solicitud_io* solicitud){
     t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(tipo, buffer);
+    t_paquete* paquete = crear_paquete(solicitud->tipo, buffer);
 
-    agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, &(solicitud->pidSolicitaSyscall), sizeof(int));
     if(solicitud->tipo == IO_SLEEP){
         agregar_a_paquete(paquete, &(solicitud->tiempoSleep), sizeof(int));
     } else if (solicitud->tipo == IO_STDIN){

@@ -749,7 +749,7 @@ t_tipo_io buscarTipoIOPorSocket(int socket_io) {
     pthread_mutex_lock(&mutex_interfaces[0]);
     for (int i = 0; i < 3; i++) {
         pthread_mutex_lock(&mutex_interfaces[0]);
-        if (interfaces[i].socket_cliente == socket_io) {
+        if (interfaces[i].socket_interfaz == socket_io) {
             return interfaces[i].tipo;
         }
         pthread_mutex_unlock(&mutex_interfaces[0]);
