@@ -11,6 +11,8 @@ void* atender_io(void* arg) {
         t_list* paquete = recibir_paquete(socket_io);
         if (!paquete) {
             log_error(kernel->logger, "Error al recibir paquete de datos de IO");
+            t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
+            finalizoConexionIO(tipoIO);
             return NULL;
         }
 
@@ -51,10 +53,18 @@ void* atender_io(void* arg) {
 
     }
 }
+void finalizoConexionIO(t_tipo_io tipo){
+    pthread_mutex_lock(&mutex_interfaces[tipo]);
+    interfaces[tipo].ocupada = false;
+    interfaces[tipo].pidAsignado = -1;
+    interfaces[tipo].socket_interfaz = -1;
+    pthread_mutex_unlock(&mutex_interfaces[tipo]);
+}
 
 void liberarIO(t_tipo_io tipo){
     pthread_mutex_lock(&mutex_interfaces[tipo]);
     interfaces[tipo].ocupada = false;
+    interfaces[tipo].pidAsignado = -1;
     log_info(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
     pthread_mutex_unlock(&mutex_interfaces[tipo]);
 }

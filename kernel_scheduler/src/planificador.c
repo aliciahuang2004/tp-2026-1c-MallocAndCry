@@ -26,6 +26,7 @@ sem_t sem_readyPrioridad;
 sem_t sem_hayCPUdisponible;
 sem_t sem_finSyscall;
 sem_t sem_hayMemoria;
+sem_t sem_hayIO;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;

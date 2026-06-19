@@ -11,6 +11,8 @@ void* atender_cpu(void* arg){
         t_list* paquete = recibir_paquete(socket_cpu);
         if (!paquete) {
             log_error(kernel->logger, "Error al recibir pedido de syscall");
+            // t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
+            // finalizarProceso(pid,DESCONEXION_CPU);
             return NULL;
         }
 

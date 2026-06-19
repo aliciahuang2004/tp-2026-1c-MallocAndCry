@@ -39,13 +39,15 @@ int main(int argc, char* argv[]) {
 
     crearProceso(argv[2], 0);
 
-    pthread_t hiloMonitorPrioridades;
-    if (pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL) != 0) {
-        log_error(kernel_scheduler->logger, "No se pudo crear el hilo de monitorización de prioridades");
-        return EXIT_FAILURE;
+    if(kernel->queues_preemption){
+        pthread_t hiloMonitorPrioridades;
+        if (pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL) != 0) {
+            log_error(kernel_scheduler->logger, "No se pudo crear el hilo de monitorización de prioridades");
+            return EXIT_FAILURE;
+        }
+        pthread_detach(hiloMonitorPrioridades);
     }
-    pthread_detach(hiloMonitorPrioridades);
-
+    
     //Crear el planificador de corto plazo
     pthread_t hilo_corto_plazo;
     if (pthread_create(&hilo_corto_plazo, NULL, loop_corto_plazo, NULL) != 0) {
@@ -67,5 +69,6 @@ int main(int argc, char* argv[]) {
     // despues esperar CPUs
     esperar_conexiones();
     // destruir_kernel_scheduler(kernel_scheduler);
+    // liberarks(kernel_scheduler);
     return 0;
 }

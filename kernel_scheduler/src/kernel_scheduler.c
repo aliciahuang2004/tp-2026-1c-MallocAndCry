@@ -20,7 +20,12 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
     kernel_scheduler->queues_algorithms = config_get_array_value(kernel_scheduler->config, "QUEUES_ALGORITHMS");
     kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
-    kernel_scheduler->queues_preemption = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
+    char* colas_desalojan = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
+    if(strcmp(colas_desalojan, "TRUE") == 0){
+        kernel_scheduler->queues_preemption = true;
+    }else{
+        kernel_scheduler->queues_preemption = false;
+    }
     kernel_scheduler->suspension_time = config_get_int_value(kernel_scheduler->config,"SUSPENSION_TIMEOUT");
     
     //kernel_scheduler->procesoInicialCreado = false; 
@@ -154,7 +159,24 @@ void* atender_cliente_scheduler(void* arg) {
                 }
 
                 t_tipo_io tipo_interfaz = *tipo_interfaz_ptr;
-                registrar_interfaz(tipo_interfaz, socket_cliente);
+
+                if (tipo_interfaz < 0 || tipo_interfaz > 2) {
+                    log_error(kernel->logger, "Tipo de IO inválido (%d)", tipo_interfaz);
+                    return NULL;
+                }
+
+                pthread_mutex_lock(&mutex_interfaces[tipo_interfaz]);
+                if(interfaces[tipo_interfaz].socket_interfaz == -1){
+                    interfaces[tipo_interfaz].socket_interfaz = socket_cliente;
+                    interfaces[tipo_interfaz].ocupada = false;
+                    log_info(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
+                    pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
+                }else{
+                    log_error(kernel->logger, "ERROR: Tipo %s, ya conectado en socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
+                    close(socket_cliente);
+                    return NULL ;
+                }
+                
                 pthread_t hilo_io;
                 int* socket_io_ptr = malloc(sizeof(int));
                 *socket_io_ptr = interfaces->socket_interfaz;
@@ -168,6 +190,7 @@ void* atender_cliente_scheduler(void* arg) {
         }
         list_destroy_and_destroy_elements(paquete,free);
     }
+    return NULL;
 }
 
 void inicializar_interfaces() {
@@ -195,20 +218,8 @@ void inicializar_interfaces() {
     for (int i = 0; i < 3; i++) {
         pthread_mutex_init(&mutex_interfaces[i], NULL);
     }
-}
+    sem_init(&sem_hayIO,0,0);
 
-void registrar_interfaz(t_tipo_io tipo, int socket_cliente) {
-    if (tipo < 0 || tipo > 2) {
-        log_error(kernel->logger, "Tipo de IO inválido (%d)", tipo);
-        return;
-    }
-    
-    pthread_mutex_lock(&mutex_interfaces[tipo]);
-    interfaces[tipo].socket_interfaz = socket_cliente;
-    interfaces[tipo].ocupada = false;
-
-    log_info(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo].nombre, interfaces[tipo].socket_interfaz);
-    pthread_mutex_unlock(&mutex_interfaces[tipo]);
 }
 
 /*

@@ -47,7 +47,7 @@ typedef struct {
     char* planification_algorithm;
     char** queues_algorithms;
     int rr_quantum;
-    char* queues_preemption;
+    bool queues_preemption;
     int suspension_time;
     // bool procesoInicialCreado;
     int cantidadColasMultinivel;
@@ -133,6 +133,7 @@ extern sem_t sem_readyPrioridad;
 extern sem_t sem_hayCPUdisponible;
 extern sem_t sem_finSyscall;
 extern sem_t sem_hayMemoria;
+extern sem_t sem_hayIO;
 // extern sem_procesoCreado;
 
 extern t_dictionary* diccionario_mutex;
@@ -147,7 +148,6 @@ void conectar_con_kernel_memory();
 void esperar_conexiones();
 void* atender_cliente_scheduler(void* arg);
 void inicializar_interfaces();
-void registrar_interfaz(t_tipo_io tipo, int socket_cliente);
 // void imprimir_lista_interfaces_io(t_log* logger);
 
 // atencionKM
@@ -158,6 +158,7 @@ void* atender_cpu(void* arg);
 
 // atencionIO
 void* atender_io(void* arg);
+void finalizoConexionIO(t_tipo_io tipo);
 void liberarIO(t_tipo_io tipo);
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo);
 
