@@ -253,6 +253,8 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_error(cpu->logger, "Error: El buffer_contexto llegó nulo");
+    }
+    /*
     if(cod_op == CONTEXT_RESPONSE) {
         contexto_recibido = malloc(sizeof(t_contexto));
         
@@ -294,7 +296,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
-
+*/
     return contexto_recibido;
 }
 
