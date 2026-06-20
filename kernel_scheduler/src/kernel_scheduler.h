@@ -134,6 +134,8 @@ extern sem_t sem_hayCPUdisponible;
 extern sem_t sem_finSyscall;
 extern sem_t sem_hayMemoria;
 extern sem_t sem_hayIO;
+extern sem_t sem_recibiLecuraDeIO;
+extern sem_t sem_recibiLecuraDeKM;
 // extern sem_procesoCreado;
 
 extern t_dictionary* diccionario_mutex;
@@ -209,12 +211,12 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex);
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
 void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
-// void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
-// void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
+void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void finalizarProceso(int pid, op_code motivo);
 void eliminarProceso(int pid, op_code motivo);
 void enviarAIO(int socket_io, t_solicitud_io* solicitud);
-void enviarAKM(t_solicitud_io* solicitud);
+void enviarAKMSolicitudIO(t_solicitud_io* solicitud);
 
 
 #endif /* KERNEL_SCHEDULER_H*/

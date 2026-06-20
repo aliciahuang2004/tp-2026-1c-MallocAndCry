@@ -13,9 +13,12 @@ void* atender_io(void* arg) {
             log_error(kernel->logger, "Error al recibir paquete de datos de IO");
             t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
             finalizoConexionIO(tipoIO);
+            if(tipoIO != NULL){
+                finalizoConexionIO(tipoIO);
+                //finalizarProceso(io->pidEjecutando,DESCONEXION_CPU);
             return NULL;
+            }
         }
-
         int cod_op = *(int*) list_get(paquete, 0);
         int pid = *(int*) list_get(paquete, 1);
         t_tipo_io tipo = buscarTipoIOPorSocket(socket_io);
@@ -53,6 +56,7 @@ void* atender_io(void* arg) {
 
     }
 }
+
 void finalizoConexionIO(t_tipo_io tipo){
     pthread_mutex_lock(&mutex_interfaces[tipo]);
     interfaces[tipo].ocupada = false;

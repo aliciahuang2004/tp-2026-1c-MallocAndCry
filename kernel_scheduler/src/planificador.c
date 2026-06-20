@@ -27,6 +27,8 @@ sem_t sem_hayCPUdisponible;
 sem_t sem_finSyscall;
 sem_t sem_hayMemoria;
 sem_t sem_hayIO;
+sem_t sem_recibiLecuraDeIO;
+sem_t sem_recibiLecuraDeKM;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -79,6 +81,8 @@ void inicializarSemaforos(){
     sem_init(&sem_hayProcesosEnReady, 0, 0);
     sem_init(&sem_readyPrioridad,0,0);
     sem_init(&sem_finSyscall,0,0);  // 
+    sem_init(&sem_recibiLecuraDeIO,0,0);
+    sem_init(&sem_recibiLecuraDeKM,0,0);
 }
 
 void pasarProcesoNewAReady(){
@@ -251,6 +255,7 @@ t_cpu_conectada* buscarCPULibre(){
         t_cpu_conectada* cpu = queue_pop(colaCPUs);
         if (cpu_elegida == NULL && cpu->libre){
             cpu_elegida = cpu;
+            queue_push(colaCPUs, cpu_elegida);
         } else {
             queue_push(colaAux, cpu);
         }
@@ -319,24 +324,23 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 void* monitorPrioridades(void* arg){
     while(1) {
         sem_wait(&sem_readyPrioridad);
-
-        pthread_mutex_lock(&mutex_CPU);
-
-        int cantidad = queue_size(colaCPUs);
-        for(int i = 0; i < cantidad; i++) {
-            t_cpu_conectada* cpu = queue_pop(colaCPUs);
-            if(!cpu->libre ) {
-                int prioridadActual = cpu->pidEjecutando;
-                int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
-                if(nuevaPrioridad != -1) {
-                    t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
-                    notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
+        while(buscarCPULibre == NULL){
+            pthread_mutex_lock(&mutex_CPU);
+            int cantidad = queue_size(colaCPUs);    
+            for(int i = 0; i < cantidad; i++) {
+                t_cpu_conectada* cpu = queue_pop(colaCPUs);
+                if(!cpu->libre ) {
+                    int prioridadActual = cpu->pidEjecutando;
+                    int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
+                    if(nuevaPrioridad != -1) {
+                        t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
+                        notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
+                    }
                 }
+                queue_push(colaCPUs,cpu);
             }
-            queue_push(colaCPUs,cpu);
+            pthread_mutex_unlock(&mutex_CPU);
         }
-
-        pthread_mutex_unlock(&mutex_CPU);
     }
     return NULL;
 }
@@ -454,7 +458,8 @@ void pasarProcesoExecABlock(int pid){
     pcb->estado = BLOCK;
     int socket_cpu = pcb->socketCPUEjecuta;
     pcb->socketCPUEjecuta = -1;
-
+    /*
+    LIBERO AL RECIBIR SYSCALL
     t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
     if(cpu != NULL){
         //LIBERO CPU
@@ -462,7 +467,7 @@ void pasarProcesoExecABlock(int pid){
     }else{
         log_error(kernel->logger, "ERROR al liberar CPU");
     }
-    
+    */
     //AGREGO A BLOCK
     pthread_mutex_lock(&mutex_BLOCK);
     queue_push(colaBLOCK,pcb);

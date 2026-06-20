@@ -11,8 +11,9 @@ void* atender_cpu(void* arg){
         t_list* paquete = recibir_paquete(socket_cpu);
         if (!paquete) {
             log_error(kernel->logger, "Error al recibir pedido de syscall");
-            // t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
-            // finalizarProceso(pid,DESCONEXION_CPU);
+            t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
+            if(cpu != NULL){
+                finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
             return NULL;
         }
 
@@ -67,21 +68,24 @@ void* atender_cpu(void* arg){
             case SLEEP:{
                 int tiempo_ms = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <SLEEP>", pidSolicitaSyscall);
+                liberarCPU(socket_cpu);
                 manejar_sleep(pidSolicitaSyscall, tiempo_ms, cpu_emisora);
                 break;
             }
             case STDIN:{
-                uint32_t dir_logica = *(uint32_t*) list_get(paquete, 2);
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall STDIN (dir=%u, tam=%u)", pidSolicitaSyscall, dir_logica, tamano);
-                //manejar_stdin(pidSolicitaSyscall, dir_logica, tamano, cpu_emisora);
+                log_info(kernel->logger, "## PID: %d - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
+                liberarCPU(socket_cpu);
+                manejar_stdin(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
             }
             case STDOUT:{
-                uint32_t dir_logica = *(uint32_t*) list_get(paquete, 2);
+                uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <STDOUT>", pidSolicitaSyscall);
-                //manejar_stdout(pidSolicitaSyscall, dir_logica, tamano, cpu_emisora);
+                liberarCPU(socket_cpu);
+                //manejar_stdout(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
             }
             case INIT_PROC: {// NO BLOQUEA

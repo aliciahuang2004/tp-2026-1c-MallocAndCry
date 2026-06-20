@@ -178,7 +178,7 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->tamanio = 0;
     solicitud->direccion = 0;
     solicitud->leido = NULL;
-    pasarProcesoExecABlock(pid);  // mueve a BLOCK y libera CPU internamente
+    pasarProcesoExecABlock(pid);  // mueve a BLOCK
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;
@@ -193,84 +193,58 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     
    // liberarCPU(cpu);
 }
-/*
-void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu) {
-    t_pcb* pcb = pasarProcesoExecABlockSinLiberar(pid);
-    if (pcb == NULL) {
-        log_error(kernel->logger, "Error: No se encontró el proceso %d en colaEXEC", pid);
-        liberar_cpu_y_notificar(cpu);
-        return;
-    }
 
-    // Crear solicitud de IO
-    uint32_t datos_size = sizeof(uint32_t) * 2;
-    uint32_t* params = malloc(datos_size);
-    params[0] = dir_logica;
-    params[1] = tamano;
-    // t_solicitud_io* solicitud = crear_solicitud_io(pid, pcb, OP_STDIN, datos_size, params);
-    // solicitud->dir_logica = dir_logica;
+void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectada* cpu) {
+    t_solicitud_io* solicitud = malloc(sizeof(t_solicitud_io));
+    solicitud->pidSolicitaSyscall = pid;
+    solicitud->tipo = IO_STDIN;
+    solicitud->tiempoSleep = 0;
+    solicitud->tamanio = tamano;
+    solicitud->direccion = dir_fisica;
+    solicitud->leido = NULL;
 
-    // Encolar en cola de IO STDIN
-    t_queue* cola_tipo = obtener_cola_bloqueados_por_tipo(IO_STDIN);
-    pthread_mutex_t* mutex_tipo = obtener_mutex_cola_por_tipo(IO_STDIN);
+    pasarProcesoExecABlock(pid);  // mueve a BLOCK
 
-    pthread_mutex_lock(mutex_tipo);
-    // queue_push(cola_tipo, solicitud);
-    pthread_mutex_unlock(mutex_tipo);
-
-    // Buscar interfaz libre y enviar
-    t_interfaz_conectada* interfaz_libre = buscar_interfaz_libre_por_tipo(IO_STDIN);
-    if (interfaz_libre != NULL) {
-        interfaz_libre->ocupada = true;
-        log_info(kernel->logger, "Administración: Interfaz [%s] libre. Enviando solicitud de PID %d por red.",
-                 interfaz_libre->nombre, pid);
-        // enviar_operacion_a_io(interfaz_libre, solicitud);
+    pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
+    if (!interfaces[IO_STDIN].ocupada) {
+        interfaces[IO_STDIN].ocupada = true;
+        interfaces[IO_STDIN].pidAsignado = pid;
+        pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
+        enviarAIO(interfaces[IO_STDIN].socket_interfaz, solicitud);
+        sem_wait(&sem_recibiLecuraDeIO);
+        enviarAKMSolicitudIO(solicitud);
     } else {
-        log_info(kernel->logger, "## Interfaz STDIN ocupada. PID %d queda en cola de espera.", pid);
+        queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
+        pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
     }
 
-    liberar_cpu_y_notificar(cpu);
 }
 
-void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu) {
-    t_pcb* pcb = pasarProcesoExecABlockSinLiberar(pid);
-    if (pcb == NULL) {
-        log_error(kernel->logger, "Error: No se encontró el proceso %d en colaEXEC", pid);
-        liberar_cpu_y_notificar(cpu);
-        return;
-    }
+void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectada* cpu) {
+    t_solicitud_io* solicitud = malloc(sizeof(t_solicitud_io));
+    solicitud->pidSolicitaSyscall = pid;
+    solicitud->tipo = IO_STDOUT;
+    solicitud->tiempoSleep = 0;
+    solicitud->tamanio = tamano;
+    solicitud->direccion = dir_fisica;
+    solicitud->leido = NULL;
 
-    // Pedir datos a Kernel Memory
-    void* datos = obtenerDatosDeKM(dir_logica, tamano);
-    if (datos == NULL) {
-        log_error(kernel->logger, "Error: No se pudieron obtener datos de KM para STDOUT. PID: %d", pid);
-    }
+    pasarProcesoExecABlock(pid);  // mueve a BLOCK
 
-    // Crear solicitud de IO con los datos obtenidos de KM
-    // t_solicitud_io* solicitud = crear_solicitud_io(pid, pcb, OP_STDOUT, tamano, datos);
-
-    // Encolar en cola de IO STDOUT
-    t_queue* cola_tipo = obtener_cola_bloqueados_por_tipo(IO_STDOUT);
-    pthread_mutex_t* mutex_tipo = obtener_mutex_cola_por_tipo(IO_STDOUT);
-
-    pthread_mutex_lock(mutex_tipo);
-    // queue_push(cola_tipo, solicitud);
-    pthread_mutex_unlock(mutex_tipo);
-
-    // Buscar interfaz libre y enviar
-    t_interfaz_conectada* interfaz_libre = buscar_interfaz_libre_por_tipo(IO_STDOUT);
-    if (interfaz_libre != NULL) {
-        interfaz_libre->ocupada = true;
-        log_info(kernel->logger, "Administración: Interfaz [%s] libre. Enviando solicitud de PID %d por red.",
-                 interfaz_libre->nombre, pid);
-        // enviar_operacion_a_io(interfaz_libre, solicitud);
+    pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
+    if (!interfaces[IO_STDOUT].ocupada) {
+        interfaces[IO_STDOUT].ocupada = true;
+        interfaces[IO_STDOUT].pidAsignado = pid;
+        pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
+        enviarAKMSolicitudIO(solicitud);
+        sem_wait(&sem_recibiLecuraDeKM);
+        enviarAIO(interfaces[IO_STDOUT].socket_interfaz, solicitud);
     } else {
-        log_info(kernel->logger, "## Interfaz STDOUT ocupada. PID %d queda en cola de espera.", pid);
+        queue_push(interfaces[IO_STDOUT].solicitudes, solicitud);
+        pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
     }
-
-    liberar_cpu_y_notificar(cpu);
 }
-*/
+
 void finalizarProceso(int pid, op_code motivo){
     t_pcb* pcb = NULL;
     switch (motivo){
@@ -402,7 +376,7 @@ void enviarAIO(int socket_io, t_solicitud_io* solicitud){
     } else if (solicitud->tipo == IO_STDIN){
         agregar_a_paquete(paquete, &(solicitud->tamanio), sizeof(uint32_t));
     } else if (solicitud->tipo == IO_STDOUT){
-        agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
+        agregar_a_paquete(paquete, &solicitud->leido, sizeof(char*));
     }
 
     enviar_paquete(paquete, socket_io, kernel->logger);
@@ -410,12 +384,19 @@ void enviarAIO(int socket_io, t_solicitud_io* solicitud){
     eliminar_paquete(paquete);
 }
 
-void enviarAKM(t_solicitud_io* solicitud){
+void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(solicitud->tipo, buffer);
+    
     agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
-    agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
-    agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
+    if (solicitud->tipo == IO_STDIN){
+        agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
+        agregar_a_paquete(paquete, &solicitud->leido, sizeof(char*));
+    }
+    if(solicitud->tipo == IO_STDOUT){
+        agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
+        agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
+    }
 
     enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
 
