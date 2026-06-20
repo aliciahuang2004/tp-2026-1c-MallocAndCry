@@ -144,6 +144,7 @@ void* escuchar_kernel_memory(void* arg) {
             }
             case CONTEXT_RESPONSE: {
                 buffer_contexto = malloc(sizeof(t_contexto));
+                buffer_contexto->tabla_segmentos = NULL;
                 buffer_contexto->pid = *(int*)list_get(paquete, 1);
                 buffer_contexto->registros.PC = *(uint32_t*)list_get(paquete, 2);
                 buffer_contexto->registros.AX = *(uint8_t*)list_get(paquete, 3);
@@ -156,6 +157,25 @@ void* escuchar_kernel_memory(void* arg) {
                 buffer_contexto->registros.EDX = *(uint32_t*)list_get(paquete, 10);
                 buffer_contexto->registros.SI = *(uint32_t*)list_get(paquete, 11);
                 buffer_contexto->registros.DI = *(uint32_t*)list_get(paquete, 12);
+
+                buffer_contexto->tabla_segmentos = list_create();
+
+                if(list_size(paquete) > 13) {
+                    int cantidad_segmentos = *(int*)list_get(paquete, 13);
+                    int offset = 14; 
+
+                    for(int i = 0; i < cantidad_segmentos; i++) {
+                        t_segmento* nuevo_segmento = malloc(sizeof(t_segmento));
+                        
+                        nuevo_segmento->id_segmento = *(int*)list_get(paquete, offset);
+                        nuevo_segmento->base = *(uint32_t*)list_get(paquete, offset + 1);
+                        nuevo_segmento->limite = *(uint32_t*)list_get(paquete, offset + 2);
+                        nuevo_segmento->memory_stick_id = *(int*)list_get(paquete, offset + 3);
+
+                        list_add(buffer_contexto->tabla_segmentos, nuevo_segmento);
+                        offset += 4;
+                    }
+                }
                 
                 sem_post(&sem_contexto_recibido);
                 break;
