@@ -19,6 +19,7 @@ typedef enum{
     MEMORY_STICK_HANDSHAKE,
     CPU_HANDSHAKE,
     DESCONEXION_CPU,
+    DESCONEXION_IO,
     
     IO_HANDSHAKE,
     

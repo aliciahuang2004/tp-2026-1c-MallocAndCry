@@ -50,7 +50,7 @@ void* atender_kernel_memory(void* arg) {
                 //SE VUELVE A MANDAR O FINALIZA?
                 break;
             }
-            case DATOS_LEIDOS:{
+            case RTA_LECTURA:{
                 // KM envia: [DATOS_LEIDOS, tamaño (uint32_t), bytes...]
                 uint32_t tamanio = *(uint32_t*) list_get(paquete, 1);
                 void* datos_paquete = list_get(paquete, 2);

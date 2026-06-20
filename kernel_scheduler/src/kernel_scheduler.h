@@ -160,7 +160,7 @@ void* atender_cpu(void* arg);
 
 // atencionIO
 void* atender_io(void* arg);
-void finalizoConexionIO(t_tipo_io tipo);
+int finalizoConexionIO(t_tipo_io tipo);
 void liberarIO(t_tipo_io tipo);
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo);
 

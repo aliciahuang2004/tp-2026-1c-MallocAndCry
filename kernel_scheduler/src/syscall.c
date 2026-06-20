@@ -261,9 +261,6 @@ void finalizarProceso(int pid, op_code motivo){
             pthread_mutex_unlock(&mutex_NEW);
             break;
         }
-        /*case ELIMINACION_DE_SEGMENTO_ERROR:
-            pcb = buscarPCBPorPID(pid, colaEXEC,mutex_EXEC);
-            break;*/
 
         case EXIT_PROC: { 
             pthread_mutex_lock(&mutex_EXEC);
@@ -386,14 +383,17 @@ void enviarAIO(int socket_io, t_solicitud_io* solicitud){
 
 void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
     t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(solicitud->tipo, buffer);
+    t_paquete* paquete = NULL;
     
-    agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
     if (solicitud->tipo == IO_STDIN){
+        paquete = crear_paquete(ESCRITURA_DE_DATOS, buffer);
+        agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
         agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
         agregar_a_paquete(paquete, &solicitud->leido, sizeof(char*));
     }
     if(solicitud->tipo == IO_STDOUT){
+        paquete = crear_paquete(LECTURA_DE_DATOS, buffer);
+        agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
         agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
         agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
     }
