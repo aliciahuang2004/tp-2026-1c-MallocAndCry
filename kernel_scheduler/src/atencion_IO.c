@@ -71,10 +71,14 @@ void liberarIO(t_tipo_io tipo){
 
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
     pthread_mutex_lock(&mutex_interfaces[tipo]);
-    if(!queue_is_empty(interfaces[tipo].solicitudes)){
+    if (!queue_is_empty(interfaces[tipo].solicitudes)) {
         t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
-        log_info(kernel->logger, "## PID %d - Asignado a Interfaz [%s] desde cola de bloqueados por tipo IO.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
+        interfaces[tipo].ocupada = true;
+        interfaces[tipo].pidAsignado = solicitud->pidSolicitaSyscall;
+        log_info(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
+        enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
+        free(solicitud);
     } else {
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
     }

@@ -179,7 +179,7 @@ void* atender_cliente_scheduler(void* arg) {
                 
                 pthread_t hilo_io;
                 int* socket_io_ptr = malloc(sizeof(int));
-                *socket_io_ptr = interfaces->socket_interfaz;
+                *socket_io_ptr = interfaces[tipo_interfaz].socket_interfaz;
                 pthread_create(&hilo_io, NULL, atender_io, socket_io_ptr);
                 pthread_detach(hilo_io);
 

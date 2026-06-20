@@ -633,7 +633,7 @@ void pasarProcesoReadySuspAReady(int pid){
             break;
     }
        
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <READY>",pcb->pid);
+    log_info(kernel->logger,"## (<%d>) Pasa del estado <READY_SUSP> al estado <READY>",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
 
 }
@@ -744,13 +744,14 @@ void* loop_corto_plazo(void* args) {
 }
 
 t_tipo_io buscarTipoIOPorSocket(int socket_io) {
-    pthread_mutex_lock(&mutex_interfaces[0]);
+   // pthread_mutex_lock(&mutex_interfaces[0]);
     for (int i = 0; i < 3; i++) {
-        pthread_mutex_lock(&mutex_interfaces[0]);
+        pthread_mutex_lock(&mutex_interfaces[i]);
         if (interfaces[i].socket_interfaz == socket_io) {
+            pthread_mutex_unlock(&mutex_interfaces[i]);
             return interfaces[i].tipo;
         }
-        pthread_mutex_unlock(&mutex_interfaces[0]);
+        pthread_mutex_unlock(&mutex_interfaces[i]);
     }
     return -1; // No se encontró el tipo de IO para el socket dado
 }
