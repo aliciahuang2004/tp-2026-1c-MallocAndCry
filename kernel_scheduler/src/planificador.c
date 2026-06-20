@@ -179,25 +179,22 @@ void pasarProcesoReadyAExec(){
 }
 
 t_pcb* elegirPorFIFO(){
+    t_pcb* pcb = NULL; 
     pthread_mutex_lock(&mutex_READY[0]);
     if (!queue_is_empty(colasREADY[0])){
-        return queue_pop(colasREADY[0]);
-        pthread_mutex_unlock(&mutex_READY[0]);
-    }else{
-        pthread_mutex_unlock(&mutex_READY[0]);
-        return NULL;
-    }
+        pcb = queue_pop(colasREADY[0]);
+        }
+    pthread_mutex_unlock(&mutex_READY[0]);
+    return pcb;
 }
-
 t_pcb* elegirPorRR(){
+    t_pcb* pcb = NULL; 
     pthread_mutex_lock(&mutex_READY[0]);
     if (!queue_is_empty(colasREADY[0])){
-        return queue_pop(colasREADY[0]);
-        pthread_mutex_unlock(&mutex_READY[0]);
-    }else{
-        pthread_mutex_unlock(&mutex_READY[0]);
-        return NULL;
-    }
+        pcb = queue_pop(colasREADY[0]);// primero guardo en una variable
+    }    
+    pthread_mutex_unlock(&mutex_READY[0]); //soltar el mutex antes de retornar
+    return pcb;
 }
 
 t_pcb* elegirPorCMN(){

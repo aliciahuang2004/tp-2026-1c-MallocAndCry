@@ -4,7 +4,7 @@ t_pcb* crear_PCB(char* path, int prioridad){
     t_pcb* pcbCreado = malloc(sizeof(t_pcb));
     pcbCreado->pid = pidParaAsignar;
     pcbCreado->prioridad = prioridad;
-    pcbCreado->path = path;
+    pcbCreado->path = strdup(path);
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
     pcbCreado->socketCPUEjecuta = -1;
     pidParaAsignar ++;
@@ -272,15 +272,36 @@ void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conecta
 void finalizarProceso(int pid, op_code motivo){
     t_pcb* pcb = NULL;
     switch (motivo){
-        case CREACION_DE_PROCESO_ERROR:
-            pcb = buscarPCBPorPID(pid, colaNEW,mutex_NEW);
+        case CREACION_DE_PROCESO_ERROR:{
+            pthread_mutex_lock(&mutex_NEW);
+            t_queue* aux = queue_create();
+            while (!queue_is_empty(colaNEW)) {
+                t_pcb* p = queue_pop(colaNEW);
+                if (pcb == NULL && p->pid == pid) pcb = p;
+                else queue_push(aux, p);
+            }
+            while (!queue_is_empty(aux)) queue_push(colaNEW, queue_pop(aux));
+            queue_destroy(aux);
+            pthread_mutex_unlock(&mutex_NEW);
             break;
+        }
         /*case ELIMINACION_DE_SEGMENTO_ERROR:
             pcb = buscarPCBPorPID(pid, colaEXEC,mutex_EXEC);
             break;*/
-        case EXIT_PROC:
-            pcb = buscarPCBPorPID(pid, colaEXEC,mutex_EXEC);
+
+        case EXIT_PROC: { 
+            pthread_mutex_lock(&mutex_EXEC);
+            t_queue* aux = queue_create();
+            while (!queue_is_empty(colaEXEC)) {
+                t_pcb* p = queue_pop(colaEXEC);
+                if (pcb == NULL && p->pid == pid) pcb = p;
+                else queue_push(aux, p);
+            }
+            while (!queue_is_empty(aux)) queue_push(colaEXEC, queue_pop(aux));
+            queue_destroy(aux);
+            pthread_mutex_unlock(&mutex_EXEC);
             break;
+        }
         default:
             log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
             break;
@@ -301,7 +322,7 @@ void finalizarProceso(int pid, op_code motivo){
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
 
     t_buffer* buffer = crear_buffer();
-    t_paquete* paquete = crear_paquete(motivo, buffer); 
+    t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO, buffer); //Km espera este codigo
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
 
@@ -311,6 +332,7 @@ void finalizarProceso(int pid, op_code motivo){
         log_error(kernel->logger, "Error al notificar a Kernel Memory para la finalizacion del proceso PID: %d", pid);
         exit(EXIT_FAILURE);
     }
+    eliminar_paquete(paquete);
 
     eliminarProceso(pid,motivo);
         

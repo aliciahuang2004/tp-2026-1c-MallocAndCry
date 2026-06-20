@@ -156,7 +156,7 @@ void* escuchar_kernel_memory(void* arg) {
                 buffer_contexto->registros.EDX = *(uint32_t*)list_get(paquete, 10);
                 buffer_contexto->registros.SI = *(uint32_t*)list_get(paquete, 11);
                 buffer_contexto->registros.DI = *(uint32_t*)list_get(paquete, 12);
-                
+                buffer_contexto->tabla_segmentos  = NULL;  // Agrego esta linea para corregir error, KM no manda la tabla de segmentos a CPU, por ahora
                 sem_post(&sem_contexto_recibido);
                 break;
             }

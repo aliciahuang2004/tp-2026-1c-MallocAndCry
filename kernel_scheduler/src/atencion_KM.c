@@ -127,6 +127,7 @@ void* atender_kernel_memory(void* arg) {
                 break;
             }
             }*/
+                break;
             }
             default:
                 log_warning(kernel->logger, "KM Listener: código de operación inesperado: %d", cod_op);

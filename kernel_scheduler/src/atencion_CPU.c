@@ -94,8 +94,8 @@ void* atender_cpu(void* arg){
             }
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
-                liberarCPU(cpu_emisora);
                 finalizarProceso(pidSolicitaSyscall,EXIT_PROC);
+                liberarCPU(cpu_emisora);                
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
