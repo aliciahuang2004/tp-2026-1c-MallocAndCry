@@ -133,7 +133,7 @@ extern sem_t sem_readyPrioridad;
 extern sem_t sem_hayCPUdisponible;
 extern sem_t sem_finSyscall;
 extern sem_t sem_hayMemoria;
-extern sem_t sem_hayIO;
+extern sem_t* sem_hayIO;
 extern sem_t sem_recibiLecuraDeIO;
 extern sem_t sem_recibiLecuraDeKM;
 // extern sem_procesoCreado;

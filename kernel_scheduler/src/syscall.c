@@ -170,7 +170,6 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
 }
 
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
-    
     t_solicitud_io* solicitud = malloc(sizeof(t_solicitud_io));
     solicitud->pidSolicitaSyscall = pid;
     solicitud->tipo = IO_SLEEP;
@@ -178,7 +177,11 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->tamanio = 0;
     solicitud->direccion = 0;
     solicitud->leido = NULL;
+
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
+
+    sem_wait(&sem_hayIO[IO_SLEEP]);
+
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;
@@ -205,6 +208,8 @@ void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectad
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
 
+    sem_wait(&sem_hayIO[IO_STDIN]);
+
     pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
     if (!interfaces[IO_STDIN].ocupada) {
         interfaces[IO_STDIN].ocupada = true;
@@ -230,6 +235,8 @@ void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conecta
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
+
+    sem_wait(&sem_hayIO[IO_STDOUT]);
 
     pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
     if (!interfaces[IO_STDOUT].ocupada) {

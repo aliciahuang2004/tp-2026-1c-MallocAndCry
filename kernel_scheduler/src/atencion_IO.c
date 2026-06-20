@@ -5,6 +5,7 @@ void* atender_io(void* arg) {
     free(arg);
 
     log_info(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
+    sem_post(&sem_hayIO[buscarTipoIOPorSocket(socket_io)]);
 
     while(1) {
         t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
@@ -72,6 +73,7 @@ void liberarIO(t_tipo_io tipo){
     interfaces[tipo].pidAsignado = -1;
     log_info(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
     pthread_mutex_unlock(&mutex_interfaces[tipo]);
+    sem_post(&sem_hayIO[tipo]);
 }
 
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
