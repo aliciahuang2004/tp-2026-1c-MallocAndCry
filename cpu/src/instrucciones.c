@@ -364,10 +364,10 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
 
 bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, uint32_t tamano_a_operar, uint32_t* dir_fisica_out, int* ms_id_out) {
     
-    uint32_t tamanio_segmento = (uint32_t)cpu->segment_max_size; 
+    uint32_t tamanio_max_segmento = (uint32_t)cpu->segment_max_size; 
 
-    int num_segmento = dir_logica / tamanio_segmento;
-    int desplazamiento = dir_logica % tamanio_segmento;
+    int num_segmento = dir_logica / tamanio_max_segmento;
+    int desplazamiento = dir_logica % tamanio_max_segmento;
 
 
     //busco el segmento en la tabla del proceso
@@ -386,10 +386,12 @@ bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, ui
         return false;
     }
 
+    uint32_t tamanio_real_segmento= (segmento_encontrado->limite - segmento_encontrado->base)+1;
+
     //2da validacion: el acceso excede el límite del segmento
-    if (desplazamiento + tamano_a_operar > segmento_encontrado->limite) {
+    if (desplazamiento + tamano_a_operar > tamanio_real_segmento) {
         log_error(cpu->logger, "SEG_FAULT: Desplazamiento (%d) + Tamaño (%u) excede el límite (%u) del Segmento %d", 
-                  desplazamiento, tamano_a_operar, segmento_encontrado->limite, num_segmento);
+                  desplazamiento, tamano_a_operar, tamanio_real_segmento, num_segmento);
         return false;
     }
 
