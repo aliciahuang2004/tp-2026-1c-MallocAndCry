@@ -7,22 +7,21 @@ void* atender_io(void* arg) {
     log_info(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
 
     while(1) {
-
+        t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
         t_list* paquete = recibir_paquete(socket_io);
         if (!paquete) {
             log_error(kernel->logger, "Error al recibir paquete de datos de IO");
-            t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
-            int pid = finalizoConexionIO(tipoIO);
-            if(tipoIO != NULL){
-                finalizoConexionIO(tipoIO);
+            pthread_mutex_lock(&mutex_interfaces[tipoIO]);
+            if(interfaces[tipoIO].socket_interfaz == socket_io){
+                pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
+                int pid = finalizoConexionIO(tipoIO);
                 finalizarProceso(pid,DESCONEXION_IO);
             return NULL;
             }
+            pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }
         int cod_op = *(int*) list_get(paquete, 0);
         int pid = *(int*) list_get(paquete, 1);
-        t_tipo_io tipo = buscarTipoIOPorSocket(socket_io);
-        // t_pcb* pcb = NULL;
 
         switch (cod_op) {
             case IO_OK://termino syscall
@@ -42,8 +41,8 @@ void* atender_io(void* arg) {
                     pasarProcesoBlockaReady(pid);
                     log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
                 }
-                liberarIO(tipo);
-                revisarProcesosBloqueadosParaTipoIO(tipo);
+                liberarIO(tipoIO);
+                revisarProcesosBloqueadosParaTipoIO(tipoIO);
                 break;
             /*case IO_REQUEST:
                 break;*/

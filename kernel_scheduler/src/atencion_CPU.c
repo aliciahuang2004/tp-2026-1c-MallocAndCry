@@ -10,11 +10,12 @@ void* atender_cpu(void* arg){
     while(1) {
         t_list* paquete = recibir_paquete(socket_cpu);
         if (!paquete) {
-            log_error(kernel->logger, "Error al recibir pedido de syscall");
             t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
             if(cpu != NULL){
                 finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
-            return NULL;
+                return NULL;
+            }
+            log_error(kernel->logger, "Error al recibir pedido de syscall");
         }
 
         int cod_op = *(int*) list_get(paquete, 0);
@@ -68,7 +69,7 @@ void* atender_cpu(void* arg){
             case SLEEP:{
                 int tiempo_ms = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <SLEEP>", pidSolicitaSyscall);
-                liberarCPU(socket_cpu);
+                liberarCPU(cpu_emisora);;
                 manejar_sleep(pidSolicitaSyscall, tiempo_ms, cpu_emisora);
                 break;
             }
@@ -76,7 +77,7 @@ void* atender_cpu(void* arg){
                 uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## PID: %d - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
-                liberarCPU(socket_cpu);
+                liberarCPU(cpu_emisora);
                 manejar_stdin(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
             }
@@ -84,8 +85,8 @@ void* atender_cpu(void* arg){
                 uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <STDOUT>", pidSolicitaSyscall);
-                liberarCPU(socket_cpu);
-                //manejar_stdout(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
+                liberarCPU(cpu_emisora);
+                manejar_stdout(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
             }
             case INIT_PROC: {// NO BLOQUEA
@@ -99,17 +100,19 @@ void* atender_cpu(void* arg){
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
                 finalizarProceso(pidSolicitaSyscall,EXIT_PROC);
-                liberarCPU(cpu_emisora);                
+                liberarCPU(cpu_emisora);;                
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
                 log_info(kernel->logger, "## (<%d>) - Proceso desalojado por quantum", pidSolicitaSyscall);
-                // reencolar
+                pasarProcesoExecAReady(pidSolicitaSyscall);
+                liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_PRIORIDAD:{
                 log_info(kernel->logger, "## (<%d>) - Proceso desalojado por prioridad", pidSolicitaSyscall);
-                // reencolar en cola correspondiente
+                pasarProcesoExecAReady(pidSolicitaSyscall);
+                liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_COMPACTACION:{

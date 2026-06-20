@@ -51,15 +51,19 @@ void* atender_kernel_memory(void* arg) {
                 break;
             }
             case RTA_LECTURA:{
-                // KM envia: [DATOS_LEIDOS, tamaño (uint32_t), bytes...]
-                uint32_t tamanio = *(uint32_t*) list_get(paquete, 1);
-                void* datos_paquete = list_get(paquete, 2);
+                int pid = *(int*) list_get(paquete, 1);
+                char* leido = (char*) list_get(paquete, 2);
+                log_debug(kernel->logger, "## KM confirmó lectura : %s", leido);
+                pthread_mutex_lock(&mutex_interfaces[STDIN]);
+                t_solicitud_io* solicitud = queue_peek(interfaces[STDIN].solicitudes);
 
-                /*km_datos_buffer = malloc(tamanio);
-                memcpy(km_datos_buffer, datos_paquete, tamanio);
-                km_datos_size = tamanio;
-                sem_post(&sem_datos_listos);
-                */
+                // *** chequeo por las dudas pero no deberia de haber error
+
+                if(solicitud->pidSolicitaSyscall == pid){
+                    solicitud->leido = leido;
+                }
+                pthread_mutex_unlock(&mutex_interfaces[STDIN]);
+                sem_post(&sem_recibiLecuraDeKM);
                 break;
             }
             case CORRUPCION_MEMORIA:{

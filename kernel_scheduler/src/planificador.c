@@ -324,7 +324,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 void* monitorPrioridades(void* arg){
     while(1) {
         sem_wait(&sem_readyPrioridad);
-        while(buscarCPULibre == NULL){
+        while(buscarCPULibre() == NULL){
             pthread_mutex_lock(&mutex_CPU);
             int cantidad = queue_size(colaCPUs);    
             for(int i = 0; i < cantidad; i++) {
@@ -456,7 +456,7 @@ void pasarProcesoExecABlock(int pid){
     pthread_mutex_unlock(&mutex_EXEC);
 
     pcb->estado = BLOCK;
-    int socket_cpu = pcb->socketCPUEjecuta;
+    // int socket_cpu = pcb->socketCPUEjecuta;
     pcb->socketCPUEjecuta = -1;
     /*
     LIBERO AL RECIBIR SYSCALL
