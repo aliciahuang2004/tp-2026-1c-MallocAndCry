@@ -346,7 +346,19 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         //EXECUTE
 
-        execute(cpu, contexto, instruccion_actual);
+        //execute(cpu, contexto, instruccion_actual);
+
+        int estado_ejecucion = execute(cpu, contexto, instruccion_actual);
+
+        if (estado_ejecucion == 0) {
+            log_error(cpu->logger, "Segmentation Fault detectado en PID %d. Abortando.", contexto->pid);
+            
+            enviar_contexto_a_memoria(cpu, contexto);
+
+            devolver_proceso_interrumpido(cpu, contexto->pid, SEG_FAULT); 
+            
+            ejecutando = 0; 
+        }
 
         //  SI FUE UNA SYSCALL, EL PROCESO SE DESALOJA. CORTAMOS EL CICLO.
         if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
@@ -518,7 +530,8 @@ void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo)
     eliminar_paquete(paquete);
 }
 
-void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+int execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+    int estado_ejecucion = 1;
     
     switch (instruccion.identificador_operacion) {
         case INST_NOOP:
@@ -547,15 +560,15 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
         
         // instrucciones de memoria
         case INST_MOV_IN:
-            ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_MOV_OUT:
-            ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_COPY_MEM:
-            ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         //syscalls
@@ -578,4 +591,5 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
             log_debug(cpu->logger, "Instrucción desconocida o no implementada: %s", instruccion.nombre_operacion);
             break;
     }
+    return estado_ejecucion;
 }

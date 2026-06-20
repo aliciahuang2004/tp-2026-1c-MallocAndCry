@@ -63,7 +63,8 @@ typedef enum{
     CREACION_DE_SEGMENTO,       //ks envia este protocolo a km para que km pueda crear el segmento
     CREACION_DE_SEGMENTO_OK,    // KM responde esto a KS para confirmar que el segmento se creó correctamente
     CREACION_DE_SEGMENTO_ERROR, // KM responde esto a KS para indicar que hubo un error al crear el segmento
-    DATOS_LEIDOS,        
+    DATOS_LEIDOS,  
+    SEG_FAULT,    
 
     ACTUALIZAR_CONTEXTO,            
     PROCESO_DESALOJADO, //SYSCALL 
