@@ -144,6 +144,7 @@ void* escuchar_kernel_memory(void* arg) {
             }
             case CONTEXT_RESPONSE: {
                 buffer_contexto = malloc(sizeof(t_contexto));
+                buffer_contexto->tabla_segmentos = NULL;
                 buffer_contexto->pid = *(int*)list_get(paquete, 1);
                 buffer_contexto->registros.PC = *(uint32_t*)list_get(paquete, 2);
                 buffer_contexto->registros.AX = *(uint8_t*)list_get(paquete, 3);
@@ -156,6 +157,25 @@ void* escuchar_kernel_memory(void* arg) {
                 buffer_contexto->registros.EDX = *(uint32_t*)list_get(paquete, 10);
                 buffer_contexto->registros.SI = *(uint32_t*)list_get(paquete, 11);
                 buffer_contexto->registros.DI = *(uint32_t*)list_get(paquete, 12);
+
+                buffer_contexto->tabla_segmentos = list_create();
+
+                if(list_size(paquete) > 13) {
+                    int cantidad_segmentos = *(int*)list_get(paquete, 13);
+                    int offset = 14; 
+
+                    for(int i = 0; i < cantidad_segmentos; i++) {
+                        t_segmento* nuevo_segmento = malloc(sizeof(t_segmento));
+                        
+                        nuevo_segmento->id_segmento = *(int*)list_get(paquete, offset);
+                        nuevo_segmento->base = *(uint32_t*)list_get(paquete, offset + 1);
+                        nuevo_segmento->limite = *(uint32_t*)list_get(paquete, offset + 2);
+                        nuevo_segmento->memory_stick_id = *(int*)list_get(paquete, offset + 3);
+
+                        list_add(buffer_contexto->tabla_segmentos, nuevo_segmento);
+                        offset += 4;
+                    }
+                }
                 
                 sem_post(&sem_contexto_recibido);
                 break;
@@ -253,6 +273,8 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
     } else {
         log_error(cpu->logger, "Error: El buffer_contexto llegó nulo");
+    }
+    /*
     if(cod_op == CONTEXT_RESPONSE) {
         contexto_recibido = malloc(sizeof(t_contexto));
         
@@ -294,7 +316,7 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
-
+*/
     return contexto_recibido;
 }
 
@@ -324,7 +346,19 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         //EXECUTE
 
-        execute(cpu, contexto, instruccion_actual);
+        //execute(cpu, contexto, instruccion_actual);
+
+        int estado_ejecucion = execute(cpu, contexto, instruccion_actual);
+
+        if (estado_ejecucion == 0) {
+            log_error(cpu->logger, "Segmentation Fault detectado en PID %d. Abortando.", contexto->pid);
+            
+            enviar_contexto_a_memoria(cpu, contexto);
+
+            devolver_proceso_interrumpido(cpu, contexto->pid, SEG_FAULT); 
+            
+            ejecutando = 0; 
+        }
 
         //  SI FUE UNA SYSCALL, EL PROCESO SE DESALOJA. CORTAMOS EL CICLO.
         if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
@@ -496,7 +530,8 @@ void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo)
     eliminar_paquete(paquete);
 }
 
-void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+int execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+    int estado_ejecucion = 1;
     
     switch (instruccion.identificador_operacion) {
         case INST_NOOP:
@@ -525,15 +560,15 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
         
         // instrucciones de memoria
         case INST_MOV_IN:
-            ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_MOV_OUT:
-            ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_COPY_MEM:
-            ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         //syscalls
@@ -556,4 +591,5 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
             log_debug(cpu->logger, "Instrucción desconocida o no implementada: %s", instruccion.nombre_operacion);
             break;
     }
+    return estado_ejecucion;
 }

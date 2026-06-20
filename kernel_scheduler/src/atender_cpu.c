@@ -91,6 +91,14 @@ void* atender_cpu(void* socket_cpu_ptr){
                 pasarProcesoExecAReady(pidSolicitaSyscall, cpu_emisora);
                 break;
             }
+
+            case SEG_FAULT: { 
+                log_error(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
+                finalizarProceso(pidSolicitaSyscall);
+                liberar_cpu_y_notificar(cpu_emisora);
+                break;
+            }
+
             default:
                 log_warning(kernel->logger, "Operación desconocida de CPU: %d", cod_op);
                 break;
