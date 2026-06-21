@@ -23,7 +23,7 @@ typedef struct {
 
 typedef struct {
     int pid;
-    t_registros* registros;
+    t_registros registros;
     t_list*      tabla_segmentos;  // lista de t_segmento*
 } t_contexto;
 
@@ -31,9 +31,9 @@ typedef struct {
 
     int id_segmento;
 
-    uint32_t base;
+    uint32_t base_global;
 
-    uint32_t limite;
+    uint32_t limite_global;
 
     int memory_stick_id;
 
@@ -65,6 +65,25 @@ typedef struct {
 
 typedef struct {
 
+    uint32_t base;
+
+    uint32_t limite;
+
+} t_resultado_hueco;
+typedef struct {
+
+    int id;
+
+    //uint32_t base_global;//REVISAR SI LO BORRO
+
+    uint32_t tamano;
+
+    int socket;
+
+} t_ms_info;  //t_memory_stick
+
+typedef struct {
+
     int id;
 
     uint32_t base_global;
@@ -74,6 +93,14 @@ typedef struct {
     int socket;
 
 } t_ms_info;  //t_memory_stick
+
+typedef struct {
+    int ms_id;
+    uint32_t dir_local;
+    uint32_t tamano;
+    void* datos_bloque;
+} t_fragmento_memoria;
+
 
 /*
 typedef struct {

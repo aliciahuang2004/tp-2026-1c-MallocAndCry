@@ -5,12 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 /*
-crear_segmento();
-eliminar_segmento();
 buscar_segmento();
-actualizar_segmento();
-
-
-
+actualizar_segmento();--esto creo que no puede ocurrir
 */
 #endif 

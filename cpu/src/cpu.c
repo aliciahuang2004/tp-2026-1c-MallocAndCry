@@ -2,6 +2,11 @@
 #include "instrucciones.h"
 #include <sys/select.h>
 
+sem_t sem_contexto_recibido;
+sem_t sem_instruccion_recibida;
+t_contexto* buffer_contexto = NULL;
+char* buffer_instruccion = NULL;
+
 t_cpu* iniciar_cpu(char* path_config, char* id_cpu) {
     t_cpu* cpu = malloc(sizeof(t_cpu));
     cpu->id = strdup(id_cpu); 
@@ -82,17 +87,15 @@ int conectar_kernel_scheduler(t_cpu* cpu) {
     return -1;
 }
 
-int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto) {
-    if (ip == NULL || puerto == NULL) return -1; // cuando no hay stick configurado
+int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto, int ms_id) {
+    if (ip == NULL || puerto == NULL) return -1;
 
     int socket_ms = crear_conexion(cpu->logger, ip, puerto);
     
     if (socket_ms != -1) {
         int id_cpu_int = atoi(cpu->id);
-
         t_buffer *buffer = crear_buffer();
         t_paquete *paquete = crear_paquete(CPU_HANDSHAKE, buffer);
-
         agregar_a_paquete(paquete, &id_cpu_int, sizeof(int));
         
         if (enviar_paquete(paquete, socket_ms, cpu->logger) == -1) {
@@ -100,18 +103,107 @@ int conectar_memory_stick(t_cpu* cpu, char* ip, char* puerto) {
              eliminar_paquete(paquete);
              return -1;
         }
-        
         eliminar_paquete(paquete);
         
-        // Guardamos el socket en nuestra lista para usarlo en el futuro
-        list_add(cpu->sockets_memory_sticks, (void*)(intptr_t)socket_ms);
-        log_info(cpu->logger, "## CPU conectada a Memory Stick en %s:%s", ip, puerto);
+        // Creamos y guardamos la estructura en la lista
+        t_ms_conectado* ms_conectado = malloc(sizeof(t_ms_conectado));
+        ms_conectado->id = ms_id;
+        ms_conectado->socket = socket_ms;
+
+        list_add(cpu->sockets_memory_sticks, ms_conectado);
+        log_info(cpu->logger, "## CPU conectada a Memory Stick (ID: %d) en %s:%s", ms_id, ip, puerto);
         
-        return 1;
+        return socket_ms;
     }
     return -1;
 }
 
+// hilo que atiende permanentemente a Kernel Memory
+void* escuchar_kernel_memory(void* arg) {
+    t_cpu* cpu = (t_cpu*) arg;
+    log_info(cpu->logger, "Hilo de escucha de Kernel Memory iniciado.");
+
+    while (1) {
+        t_list* paquete = recibir_paquete(cpu->socket_kernel_memory);
+        if (paquete == NULL) {
+            log_error(cpu->logger, "Se perdió la conexión con Kernel Memory.");
+            break;
+        }
+
+        int cod_op = *(int*)list_get(paquete, 0);
+
+        switch (cod_op) {
+            case MS_NUEVO_CPU: { //ID, Puerto, IP
+                int ms_id = *(int*)list_get(paquete, 1);
+                char* ms_puerto = (char*)list_get(paquete, 2);
+                char* ms_ip = (char*)list_get(paquete, 3); 
+
+                log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
+                conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id);
+                break;
+            }
+            case CONTEXT_RESPONSE: {
+                buffer_contexto = malloc(sizeof(t_contexto));
+                buffer_contexto->tabla_segmentos = NULL;
+                buffer_contexto->pid = *(int*)list_get(paquete, 1);
+                buffer_contexto->registros.PC = *(uint32_t*)list_get(paquete, 2);
+                buffer_contexto->registros.AX = *(uint8_t*)list_get(paquete, 3);
+                buffer_contexto->registros.BX = *(uint8_t*)list_get(paquete, 4);
+                buffer_contexto->registros.CX = *(uint8_t*)list_get(paquete, 5);
+                buffer_contexto->registros.DX = *(uint8_t*)list_get(paquete, 6);
+                buffer_contexto->registros.EAX = *(uint32_t*)list_get(paquete, 7);
+                buffer_contexto->registros.EBX = *(uint32_t*)list_get(paquete, 8);
+                buffer_contexto->registros.ECX = *(uint32_t*)list_get(paquete, 9);
+                buffer_contexto->registros.EDX = *(uint32_t*)list_get(paquete, 10);
+                buffer_contexto->registros.SI = *(uint32_t*)list_get(paquete, 11);
+                buffer_contexto->registros.DI = *(uint32_t*)list_get(paquete, 12);
+
+                buffer_contexto->tabla_segmentos = list_create();
+
+                if(list_size(paquete) > 13) {
+                    int cantidad_segmentos = *(int*)list_get(paquete, 13);
+                    int offset = 14; 
+
+                    for(int i = 0; i < cantidad_segmentos; i++) {
+                        t_segmento* nuevo_segmento = malloc(sizeof(t_segmento));
+                        
+                        nuevo_segmento->id_segmento = *(int*)list_get(paquete, offset);
+                        nuevo_segmento->base = *(uint32_t*)list_get(paquete, offset + 1);
+                        nuevo_segmento->limite = *(uint32_t*)list_get(paquete, offset + 2);
+                        nuevo_segmento->memory_stick_id = *(int*)list_get(paquete, offset + 3);
+
+                        list_add(buffer_contexto->tabla_segmentos, nuevo_segmento);
+                        offset += 4;
+                    }
+                }
+                
+                sem_post(&sem_contexto_recibido);
+                break;
+            }
+            case RESPUESTA_INSTRUCCION: {
+                char* str_recibido = (char*)list_get(paquete, 1);
+                buffer_instruccion = strdup(str_recibido);
+                sem_post(&sem_instruccion_recibida);
+                break;
+            }
+            case SEG_MAX_SIZE: {
+                cpu->segment_max_size = *(int*)list_get(paquete, 1);
+                log_info(cpu->logger, "Tamaño de segmento recibido: %d", cpu->segment_max_size);
+                break;
+            }
+            case ERROR_INSTRUCCION: {
+                log_error(cpu->logger, "Kernel Memory reportó un error al intentar leer la instrucción.");
+                buffer_instruccion = NULL; 
+                sem_post(&sem_instruccion_recibida); 
+                break;
+            }
+            default:
+                log_warning(cpu->logger, "Código de KM desconocido: %d", cod_op);
+        }
+        list_destroy_and_destroy_elements(paquete, free);
+    }
+    return NULL;
+}
 void liberar_cpu(t_cpu* cpu) {
     if (!cpu) return;
     if (cpu->config) terminar_programa(cpu->logger, cpu->config); 
@@ -145,6 +237,10 @@ void esperar_proceso(t_cpu* cpu) {
 
                     //inicia el ciclo de instruccion
                     ciclo_de_instruccion(cpu,contexto_actual);
+
+                    if (contexto_actual->tabla_segmentos) {
+                        list_destroy_and_destroy_elements(contexto_actual->tabla_segmentos, free);
+                    }
                     free(contexto_actual);
 
                 } else {
@@ -159,28 +255,35 @@ void esperar_proceso(t_cpu* cpu) {
 t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
     
-    //armo paquete
     t_paquete* paquete = crear_paquete(REQUEST_CONTEXTO, crear_buffer());
+    int id_cpu_int = atoi(cpu->id); 
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, &id_cpu_int, sizeof(int)); 
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    //espero respuesta
-    t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
-    if (!respuesta) {
-        log_error(cpu->logger, "Error al recibir contexto de Kernel Memory para PID %d", pid);
-        return NULL;
+    sem_wait(&sem_contexto_recibido);
+
+    t_contexto* contexto_recibido = buffer_contexto;
+    
+    buffer_contexto = NULL; 
+
+    if (contexto_recibido != NULL) {
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
+    } else {
+        log_error(cpu->logger, "Error: El buffer_contexto llegó nulo");
     }
-
-    int cod_op = *(int*)list_get(respuesta, 0);
-    t_contexto* contexto_recibido = NULL;
-
+    /*
     if(cod_op == CONTEXT_RESPONSE) {
         contexto_recibido = malloc(sizeof(t_contexto));
-        //TODO aca deberia recibir tmb los registros, consultar qué datos mas deberia recibir para el contexto
+        
+        //pid
         contexto_recibido->pid = *(int*)list_get(respuesta, 1);
+
+        //registros
         contexto_recibido->registros.PC = *(uint32_t*)list_get(respuesta, 2); 
         contexto_recibido->registros.AX = *(uint8_t*)list_get(respuesta, 3);
         contexto_recibido->registros.BX = *(uint8_t*)list_get(respuesta, 4);
@@ -192,14 +295,31 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
         contexto_recibido->registros.EDX = *(uint32_t*)list_get(respuesta, 10);
         contexto_recibido->registros.SI = *(uint32_t*)list_get(respuesta, 11);
         contexto_recibido->registros.DI = *(uint32_t*)list_get(respuesta, 12);
-        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u", contexto_recibido->pid, contexto_recibido->registros.PC);
-    } else {
+
+        //inicio tabla de segmentos
+        contexto_recibido->tabla_segmentos = list_create();
+
+        int cantidad_segmentos = *(int*)list_get(respuesta, 13);
+
+        int offset = 14; 
+
+        for(int i = 0; i < cantidad_segmentos; i++) {
+            t_segmento* nuevo_segmento = malloc(sizeof(t_segmento));
+            
+            nuevo_segmento->id_segmento = *(int*)list_get(respuesta, offset);
+            nuevo_segmento->base = *(uint32_t*)list_get(respuesta, offset + 1);
+            nuevo_segmento->limite = *(uint32_t*)list_get(respuesta, offset + 2);
+            nuevo_segmento->memory_stick_id = *(int*)list_get(respuesta, offset + 3);
+
+            list_add(contexto_recibido->tabla_segmentos, nuevo_segmento);
+            offset += 4; // Avanzamos 4 índices para el próximo segmento
+        }
+        log_debug(cpu->logger, "Contexto recibido: PID=%d, PC=%u, Segmentos=%d", contexto_recibido->pid, contexto_recibido->registros.PC, cantidad_segmentos);
+        } else {
         log_warning(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
     }
-
-    list_destroy_and_destroy_elements(respuesta, free);
+*/
     return contexto_recibido;
-
 }
 
 void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
@@ -224,7 +344,19 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         //EXECUTE
 
-        execute(cpu, contexto, instruccion_actual);
+        //execute(cpu, contexto, instruccion_actual);
+
+        int estado_ejecucion = execute(cpu, contexto, instruccion_actual);
+
+        if (estado_ejecucion == 0) {
+            log_error(cpu->logger, "Segmentation Fault detectado en PID %d. Abortando.", contexto->pid);
+            
+            enviar_contexto_a_memoria(cpu, contexto);
+
+            devolver_proceso_interrumpido(cpu, contexto->pid, SEG_FAULT); 
+            
+            ejecutando = 0; 
+        }
 
         //  SI FUE UNA SYSCALL, EL PROCESO SE DESALOJA. CORTAMOS EL CICLO.
         if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
@@ -274,39 +406,17 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 } 
 
 char* fetch_instruccion(t_cpu* cpu, t_contexto* contexto) {
-    
-    log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
 
     t_paquete* paquete = crear_paquete(PETICION_INSTRUCCION, crear_buffer());
     agregar_a_paquete(paquete, &contexto->pid, sizeof(int));
-    agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); // es necesario pasarle lo registros?
-
+    agregar_a_paquete(paquete, &contexto->registros.PC, sizeof(uint32_t)); 
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
-    //espero respuesta
-    t_list* respuesta = recibir_paquete(cpu->socket_kernel_memory);
-    if (!respuesta) {
-        log_error(cpu->logger, "Error al recibir instrucción de Kernel Memory para PID %d", contexto->pid);
-        return NULL;
-    }
+    sem_wait(&sem_instruccion_recibida);
 
-    int cod_op = *(int*)list_get(respuesta, 0);
-    char* instruccion_leida = NULL;
-
-    if(cod_op == RESPUESTA_INSTRUCCION){ //todavia no tengo este tipo operacion
-        char* str_recibido = (char*)list_get(respuesta, 1); // asumo que el string viene en la posicion 1 del paquete
-        instruccion_leida = strdup(str_recibido); // duplico el string para devolverlo, luego se debe liberar
-    }
-    else {
-        log_error(cpu->logger, "Código de operación inesperado en respuesta de Kernel Memory: %d", cod_op);
-    }
-
-    list_destroy_and_destroy_elements(respuesta, free);
-
-    // deberia sumar un 1 al PC pero lo deberia hacer en la otra funcion
-
-
+    char* instruccion_leida = buffer_instruccion;
+    buffer_instruccion = NULL; 
    
     return instruccion_leida;
 }
@@ -418,7 +528,8 @@ void devolver_proceso_interrumpido(t_cpu* cpu, int pid, op_code motivo_desalojo)
     eliminar_paquete(paquete);
 }
 
-void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+int execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruccion) {
+    int estado_ejecucion = 1;
     
     switch (instruccion.identificador_operacion) {
         case INST_NOOP:
@@ -447,15 +558,15 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
         
         // instrucciones de memoria
         case INST_MOV_IN:
-            ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_IN(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_MOV_OUT:
-            ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_MOV_OUT(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         case INST_COPY_MEM:
-            ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
+            estado_ejecucion = ejecutar_COPY_MEM(cpu, contexto, instruccion.argumento_operando_destino);
             break;
 
         //syscalls
@@ -478,4 +589,5 @@ void execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instru
             log_debug(cpu->logger, "Instrucción desconocida o no implementada: %s", instruccion.nombre_operacion);
             break;
     }
+    return estado_ejecucion;
 }

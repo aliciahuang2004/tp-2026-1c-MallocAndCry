@@ -61,8 +61,15 @@ int conectar_a_kernel_scheduler(t_io* io){
 }
 
 void enviar_handshake(t_io* io){
-    t_paquete* paquete = crear_paquete(IO_HANDSHAKE,crear_buffer());
-    
+    t_paquete* paquete = crear_paquete(IO_HANDSHAKE, crear_buffer());
+
+    // Guardamos un nombre lógico para esta interfaz de IO.
+    /*io->nombre = strdup(io->tipo_IO);
+    agregar_a_paquete(paquete, (void*)io->nombre, strlen(io->nombre) + 1);
+    */
+    int tipo_interfaz = obtener_tipo_operacion(io->tipo_IO);
+    agregar_a_paquete(paquete, &tipo_interfaz, sizeof(int));
+
     enviar_paquete(paquete, io->socket_kernel_scheduler, io->logger);
     eliminar_paquete(paquete);
     log_info(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");

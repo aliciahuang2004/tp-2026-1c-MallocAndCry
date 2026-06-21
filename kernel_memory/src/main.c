@@ -22,9 +22,7 @@ int main(int argc, char* argv[]) {
     tabla_contextos = dictionary_create();
 
     esperarConexiones(kernel_memory,kernel_memory_fd);
-
     void* atender_conexion(void* arg);
 
-    // terminar_programa()
     return 0;
 }

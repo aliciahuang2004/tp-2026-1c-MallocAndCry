@@ -3,6 +3,7 @@
 
 #include "../../utils/include/utils.h"
 #include <commons/config.h>
+#include <stdio.h>
 
 typedef struct {
     t_log* logger;
@@ -14,6 +15,7 @@ typedef struct {
     int socket_kernel_memory;
     int swap_file_size;
     int block_size;
+    FILE* archivo_swap;
 }t_swap;
 
 t_swap* inicializar_swap(int argc, char* argv[] );
@@ -27,5 +29,13 @@ int conectar_a_kernel_memory(t_swap* sp);
 void enviar_handshake(t_swap* sp);
 
 void enviar_tamanio_bloque(t_swap* sp);
+
+int crear_archivo_swap(t_swap* sp);
+
+void atender_kernel_memory(t_swap* sp);
+
+void escribir_bloque(t_swap* sp, int numero_bloque, void* contenido);
+
+void leer_bloque(t_swap* sp, int numero_bloque);
 
 #endif /* SWAP_H*/

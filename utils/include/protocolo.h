@@ -18,12 +18,15 @@ typedef enum{
     KERNEL_SCHEDULER_HANDSHAKE,
     MEMORY_STICK_HANDSHAKE,
     CPU_HANDSHAKE,
+    DESCONEXION_CPU,
+    DESCONEXION_IO,
     
     IO_HANDSHAKE,
     
     //handshakes para conexiones:ms-km,ms-cpu
     MS_HANDSHAKE,
     KERNEL_MEMORY_HANDSHAKE,
+    ERROR_OPERACION,
 
     //SYSCALL
     MUTEX_CREATE,
@@ -57,12 +60,32 @@ typedef enum{
     SUSPENSION_DE_PROCESO,
     DESUSPENSION_DE_PROCESO,
     ELIMINACION_DE_SEGMENTO,
-    CREACION_DE_SEGMENTO,
+    CREACION_DE_SEGMENTO,       //ks envia este protocolo a km para que km pueda crear el segmento
+    CREACION_DE_SEGMENTO_OK,    // KM responde esto a KS para confirmar que el segmento se creó correctamente
+    CREACION_DE_SEGMENTO_ERROR, // KM responde esto a KS para indicar que hubo un error al crear el segmento
+    DATOS_LEIDOS,  
+    SEG_FAULT,    
+
     ACTUALIZAR_CONTEXTO,            
     PROCESO_DESALOJADO,
     PROCESO_DESALOJADO_QUANTUM,
     PROCESO_DESALOJADO_PRIORIDAD,
-    PROCESO_DESALOJADO_COMPACTACION            
+    PROCESO_DESALOJADO_COMPACTACION,
+    CORRUPCION_MEMORIA,                  //km envia esto a ks para avisar que un ms se desconectó            
+    INICIAR_COMPACTACION,
+    COMPACTACION_TERMINADA,   // KM avisa que terminó de compactar (debe incluir el PID)
+    CPUS_DESALOJADAS,
+    AUMENTO_DE_MEMORIA,
+    SEG_MAX_SIZE,
+    MS_NUEVO_CPU,
+    ELIMINACION_DE_SEG_OK,
+    ELIMINACION_DE_SEG_ERROR,
+    FIN_PROC_OK,
+    FIN_PROC_ERROR,
+    ESCRITURA_EN_MS,
+    RTA_LECTURA,
+    COMPACTACION_OK,
+    COMPACTACION_ERROR            
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
