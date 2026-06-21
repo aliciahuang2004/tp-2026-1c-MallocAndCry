@@ -39,16 +39,14 @@ typedef enum{
     STDIN,
     INIT_PROC,
     EXIT_PROC,
-    SYSCALL_IO,
     // Operaciones de IO
     IO_REQUEST,  // Solicitud de operación de IO de KS a IO
-    EJECUTAR_TAREA,
     IO_OK,       // Confirmación de finalización de IO al KS
     PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
     REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
     CONTEXT_RESPONSE, // KM -> CPU: acá tenes el contexto 
 
-    CREACION_DE_PROCESO,   
+    CREACION_DE_PROCESO,
     PETICION_INSTRUCCION,   // CPU lo manda para pedir el codigo
     RESPUESTA_INSTRUCCION,  // KM lo manda para devolver el string
     ERROR_INSTRUCCION,
@@ -69,7 +67,7 @@ typedef enum{
     SEG_FAULT,    
 
     ACTUALIZAR_CONTEXTO,            
-    PROCESO_DESALOJADO, //SYSCALL 
+    PROCESO_DESALOJADO,
     PROCESO_DESALOJADO_QUANTUM,
     PROCESO_DESALOJADO_PRIORIDAD,
     PROCESO_DESALOJADO_COMPACTACION,

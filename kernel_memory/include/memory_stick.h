@@ -4,9 +4,6 @@
 #include <commons/collections/dictionary.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "estructuras.h"
-#include <commons/log.h>
-#include "kernel_memory.h"
 
 void manejar_desconexion_memory_stick(t_ms_info* ms, t_kernel_memory* km, t_log* logger);
 int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente);

@@ -2,7 +2,6 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 #include "contextos.h"
-#include "huecos.h"
 
 t_dictionary* procesos;
 pthread_mutex_t mutex_procesos = PTHREAD_MUTEX_INITIALIZER;
@@ -41,7 +40,7 @@ int crear_proceso(int pid)
     return 0;
 }
 
-void iniciar_tabla_procesos(void)
+void iniciar_tabla_procesos()
 {
     procesos = dictionary_create();
 }

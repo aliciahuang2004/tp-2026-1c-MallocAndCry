@@ -255,91 +255,13 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
 
     // se guarda el contexto en memoria
     enviar_contexto_a_memoria(cpu, ctx);
-
-    t_paquete* paquete= NULL;
-
-    if (instruccion.identificador_operacion == INST_SLEEP) {
-        paquete = crear_paquete(SLEEP, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
-        int tiempo = atoi(instruccion.argumento_operando_destino); // Convertimos el string a int
-        agregar_a_paquete(paquete, &tiempo, sizeof(int));
-    }
-    else if (instruccion.identificador_operacion == INST_MUTEX_CREATE) {
-        paquete = crear_paquete(MUTEX_CREATE, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
-    }
-    else if (instruccion.identificador_operacion == INST_MUTEX_LOCK) {
-        paquete = crear_paquete(MUTEX_LOCK, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
-    }
-    else if (instruccion.identificador_operacion == INST_MUTEX_UNLOCK) {
-        paquete = crear_paquete(MUTEX_UNLOCK, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
-    }
-    else if (instruccion.identificador_operacion == INST_INIT_PROC) {
-        paquete = crear_paquete(INIT_PROC, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1); // Path
-        
-        int prioridad = atoi(instruccion.argumento_operando_origen); // Convertimos la prioridad a int
-        agregar_a_paquete(paquete, &prioridad, sizeof(int));
-    }
-    else if (instruccion.identificador_operacion == INST_EXIT) {
-        paquete = crear_paquete(EXIT_PROC, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-    }
-    else if (instruccion.identificador_operacion == INST_MEM_ALLOC) {
-        paquete = crear_paquete(MEM_ALLOC, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-       
-        int id_segmento = atoi(instruccion.argumento_operando_destino);
-        int tamanio = atoi(instruccion.argumento_operando_origen);
-        
-        agregar_a_paquete(paquete, &id_segmento, sizeof(int));
-        agregar_a_paquete(paquete, &tamanio, sizeof(int));
-    }
-    else if (instruccion.identificador_operacion == INST_MEM_FREE) {
-        paquete = crear_paquete(MEM_FREE, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
-        // Un solo argumento numérico directo
-        int id_segmento = atoi(instruccion.argumento_operando_destino);
-        
-        agregar_a_paquete(paquete, &id_segmento, sizeof(int));
-    }
-    else if (instruccion.identificador_operacion == INST_STDOUT) {
-        paquete = crear_paquete(STDOUT, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
-        // nos manda los nombres de los registros: "AX" "BX"
-        // tenemos que leer qué valor numerico tienen adentro antes de mandar el paquete
-        uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
-        uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
-        
-        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
-        agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
-    }
-    else if (instruccion.identificador_operacion == INST_STDIN) {
-        paquete = crear_paquete(STDIN, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
-        uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
-        uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
-        
-        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
-        agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
-    }
-    /*// avisamos al Scheduler que el proceso fue desalojado por una syscall
+    
+    // avisamos al Scheduler que el proceso fue desalojado por una syscall
     // Usamos el codigo PROCESO_DESALOJADO y enviamos la Syscall y sus parametros para que el Kernel la procese
     t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO, crear_buffer());
     agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
     agregar_a_paquete(paquete, instruccion.nombre_operacion, strlen(instruccion.nombre_operacion) + 1);
     
-
     // enviamos argumentos
     if (instruccion.argumento_operando_destino) {
         agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);

@@ -260,6 +260,8 @@ t_contexto* solicitar_contexto(t_cpu* cpu, int pid) {
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete, &id_cpu_int, sizeof(int)); 
 
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete,&cpu->id,sizeof(int));//**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
@@ -330,15 +332,11 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         char* cadena_leida = fetch_instruccion(cpu, contexto);
 
-        if (cadena_leida == NULL) {
-            log_error(cpu->logger, "Abortando ciclo de instrucción para PID %d debido a error en Fetch.", contexto->pid);
-            ejecutando = 0; 
-            break;         
-        }
-
         //sumo uno al PC
-        contexto->registros.PC += 1;
-
+        if(cadena_leida != NULL){
+            contexto ->registros.PC +=1;
+        }
+        
         //DECODE
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
         

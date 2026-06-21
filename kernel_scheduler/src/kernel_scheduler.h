@@ -45,7 +45,6 @@ typedef struct {
     int socket_kernel_memory;
     int socket_io;  // Socket para comunicarse con IO
     char* planification_algorithm;
-    char** queues_algorithms;
     int rr_quantum;
     bool queues_preemption;
     int suspension_time;
@@ -71,7 +70,6 @@ typedef struct {
     char* nombreMutex;            
     bool bloqueado;
     int pidAsignado;
-    t_queue* cola_bloqueados;
     pthread_mutex_t mutex;
 } t_mutex;
 

@@ -25,6 +25,7 @@ void crearProceso(char* path, int prioridad){
     log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
 }
 
+
 void enviarPathYPidKM(int pid, char* path){
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(CREACION_DE_PROCESO, buffer); 
