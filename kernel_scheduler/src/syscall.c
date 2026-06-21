@@ -263,12 +263,33 @@ void finalizarProceso(int pid, op_code motivo){
                 if (pcb == NULL && p->pid == pid) pcb = p;
                 else queue_push(aux, p);
             }
-            while (!queue_is_empty(aux)) queue_push(colaNEW, queue_pop(aux));
+            while (!queue_is_empty(aux)){
+                queue_push(colaNEW, queue_pop(aux));
+            } 
             queue_destroy(aux);
             pthread_mutex_unlock(&mutex_NEW);
             break;
         }
+        /*
+        case DESCONEXION_IO:{
+            t_pcb* p = NULL;
+            //BUSCAR EN BLOQUEADO O SUSPENDIDO BLOQUEADO
 
+            pthread_mutex_lock(&mutex_BLOCK);
+            t_queue* aux = queue_create();
+            while (!queue_is_empty(colaBLOCK)) {
+                t_pcb* p = queue_pop(colaBLOCK);
+                if (pcb == NULL && p->pid == pid) pcb = p;
+                else queue_push(aux, p);
+            }
+            while (!queue_is_empty(aux)){
+                queue_push(colaEXEC, queue_pop(aux));
+            }
+            queue_destroy(aux);
+            pthread_mutex_unlock(&mutex_BLOCK);
+            break;
+        }
+        */
         case EXIT_PROC: { 
             pthread_mutex_lock(&mutex_EXEC);
             t_queue* aux = queue_create();
