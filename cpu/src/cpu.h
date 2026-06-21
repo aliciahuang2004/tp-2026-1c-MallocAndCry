@@ -67,6 +67,8 @@ typedef enum
     INST_SUB,
     INST_JNZ,
     INST_COPY_MEM,
+
+    //syscalls
     INST_MUTEX_CREATE,
     INST_MUTEX_LOCK,
     INST_MUTEX_UNLOCK,
@@ -77,6 +79,7 @@ typedef enum
     INST_STDIN,
     INST_INIT_PROC,
     INST_EXIT,
+    //fin syscalls
     INST_DESCONOCIDA
 } t_codigo_instruccion;
 

@@ -350,18 +350,18 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
 
         int estado_ejecucion = execute(cpu, contexto, instruccion_actual);
 
-        if (estado_ejecucion == 0) {
-            log_error(cpu->logger, "Segmentation Fault detectado en PID %d. Abortando.", contexto->pid);
+        if (estado_ejecucion == 0) { //SEGMENTATION FAULT
+            log_warning(cpu->logger, "Segmentation Fault detectado en PID %d. Abortando.", contexto->pid);
             
+            //aviso a KM y KS
             enviar_contexto_a_memoria(cpu, contexto);
-
             devolver_proceso_interrumpido(cpu, contexto->pid, SEG_FAULT); 
             
             ejecutando = 0; 
         }
 
         //  SI FUE UNA SYSCALL, EL PROCESO SE DESALOJA. CORTAMOS EL CICLO.
-        if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
+        else if (instruccion_actual.identificador_operacion >= INST_MUTEX_CREATE && 
             instruccion_actual.identificador_operacion <= INST_EXIT) {
             ejecutando = 0;
         }
@@ -372,38 +372,46 @@ void ciclo_de_instruccion(t_cpu *cpu,t_contexto* contexto) {
             t_list* paquete_interrupcion = recibir_paquete(cpu->socket_kernel_scheduler);
             
             if (paquete_interrupcion) {
+                //leo el codigo de interrupción
                 int codigo_interrupcion = *(int*)list_get(paquete_interrupcion, 0);
 
-                log_info(cpu->logger, "## Interrupción recibida");
+                //leo el pid
+                int pid_interrumpido = *(int*)list_get(paquete_interrupcion, 1);
 
-                enviar_contexto_a_memoria(cpu, contexto);
+                if (pid_interrumpido == contexto->pid) { //chequeo que sea el PID correcto
+                    log_info(cpu->logger, "## Interrupción recibida");
 
-                if (codigo_interrupcion == PROCESO_DESALOJADO_QUANTUM) {
-                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_QUANTUM);
-                } 
-                else if (codigo_interrupcion == PROCESO_DESALOJADO_PRIORIDAD) {
-                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_PRIORIDAD);
-                }
-                else if (codigo_interrupcion == PROCESO_DESALOJADO_COMPACTACION) {
-                    devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_COMPACTACION);
-                }
-                else {
-                     log_warning(cpu->logger, "Interrupción desconocida (%d). Se desaloja por precaución.", codigo_interrupcion);
-                     devolver_proceso_interrumpido(cpu, contexto->pid, codigo_interrupcion); 
-                }
+                    enviar_contexto_a_memoria(cpu, contexto);
 
-                ejecutando = 0; 
+                    if (codigo_interrupcion == PROCESO_DESALOJADO_QUANTUM) {
+                        devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_QUANTUM);
+                    } 
+                    else if (codigo_interrupcion == PROCESO_DESALOJADO_PRIORIDAD) {
+                        devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_PRIORIDAD);
+                    }
+                    else if (codigo_interrupcion == PROCESO_DESALOJADO_COMPACTACION) {
+                        devolver_proceso_interrumpido(cpu, contexto->pid, PROCESO_DESALOJADO_COMPACTACION);
+                    }
+                    else {
+                        log_warning(cpu->logger, "Interrupción desconocida (%d). Se desaloja por precaución.", codigo_interrupcion);
+                        devolver_proceso_interrumpido(cpu, contexto->pid, codigo_interrupcion); 
+                    }
+
+                    ejecutando = 0; 
+                } else {
+                    log_debug(cpu->logger, "Interrupción descartada. Iba dirigida al PID %d, pero está ejecutando el PID %d", pid_interrumpido, contexto->pid);
+                }
                 list_destroy_and_destroy_elements(paquete_interrupcion, free);
             }
         }
 
-
+        //limpieza
         free(cadena_leida);
         if(instruccion_actual.nombre_operacion) free(instruccion_actual.nombre_operacion);
         if(instruccion_actual.argumento_operando_destino) free(instruccion_actual.argumento_operando_destino);
         if(instruccion_actual.argumento_operando_origen) free(instruccion_actual.argumento_operando_origen);
 
-       //ejecutando = 0; // por ahora solo hago una iteracion del ciclo para probar, luego esto va a depender de la lógica de interrupciones y finalización del proceso
+     
     }
 } 
 
@@ -583,7 +591,7 @@ int execute(t_cpu* cpu, t_contexto* contexto, t_instruccion_decodificada instruc
         case INST_INIT_PROC:
         case INST_EXIT:
             // aca deberia avisarle a kernel que ejecute la syscall
-            ejecutar_SYSCALL(cpu, contexto, instruccion);
+            estado_ejecucion=ejecutar_SYSCALL(cpu, contexto, instruccion);
             break;
 
         case INST_DESCONOCIDA:

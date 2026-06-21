@@ -21,7 +21,7 @@ int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos);
 int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano);
 
 //syscalls
-void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion);
+int ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion);
 
 
 //mmu

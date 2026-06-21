@@ -122,7 +122,10 @@ int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     uint32_t dir_fisica = 0;
     int ms_id = 0;
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0; 
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    } 
     
     int socket_ms = obtener_socket_ms(cpu, ms_id);
     if (socket_ms == -1) return 0;
@@ -172,7 +175,11 @@ int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     uint32_t dir_fisica = 0;
     int ms_id = 0;
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0;
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
+    
 
     int socket_ms = obtener_socket_ms(cpu, ms_id);
     if (socket_ms == -1) return 0;
@@ -214,8 +221,14 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     uint32_t dir_fisica_origen = 0, dir_fisica_destino = 0;
     int ms_id_origen = 0, ms_id_destino = 0;
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) return 0;
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) return 0;
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) {
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) {
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
 
     int socket_ms_origen = obtener_socket_ms(cpu, ms_id_origen);
     int socket_ms_destino = obtener_socket_ms(cpu, ms_id_destino);
@@ -250,11 +263,11 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     return 1;
 }
 
-void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion){
+int ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion){
     log_info(cpu->logger, "Delegando SYSCALL %s al Kernel Scheduler", instruccion.nombre_operacion);
 
     // se guarda el contexto en memoria
-    enviar_contexto_a_memoria(cpu, ctx);
+    //enviar_contexto_a_memoria(cpu, ctx);
 
     t_paquete* paquete= NULL;
 
@@ -312,53 +325,52 @@ void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada in
         agregar_a_paquete(paquete, &id_segmento, sizeof(int));
     }
     else if (instruccion.identificador_operacion == INST_STDOUT) {
-        paquete = crear_paquete(STDOUT, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
-        // nos manda los nombres de los registros: "AX" "BX"
-        // tenemos que leer qué valor numerico tienen adentro antes de mandar el paquete
+
+        //obtengo la direccion logica y tamaño desde los registros
+
         uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
         uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
-        
-        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
+
+        uint32_t dir_fisica = 0;
+        int ms_id = -1;
+
+        if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) {
+            log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+            return 0; 
+        }
+
+        paquete = crear_paquete(STDOUT, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
         agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
     }
     else if (instruccion.identificador_operacion == INST_STDIN) {
-        paquete = crear_paquete(STDIN, crear_buffer());
-        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-        
         uint32_t dir_logica = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_destino);
         uint32_t tamanio = leer_valor_registro(&(ctx->registros), instruccion.argumento_operando_origen);
         
-        agregar_a_paquete(paquete, &dir_logica, sizeof(uint32_t));
+        uint32_t dir_fisica = 0;
+        int ms_id = -1;
+
+        if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) {
+            log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+            return 0;    
+        }
+
+        paquete = crear_paquete(STDIN, crear_buffer());
+        agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
         agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
     }
-    /*// avisamos al Scheduler que el proceso fue desalojado por una syscall
-    // Usamos el codigo PROCESO_DESALOJADO y enviamos la Syscall y sus parametros para que el Kernel la procese
-    t_paquete* paquete = crear_paquete(PROCESO_DESALOJADO, crear_buffer());
-    agregar_a_paquete(paquete, &(ctx->pid), sizeof(int));
-    agregar_a_paquete(paquete, instruccion.nombre_operacion, strlen(instruccion.nombre_operacion) + 1);
     
-
-    // enviamos argumentos
-    if (instruccion.argumento_operando_destino) {
-        agregar_a_paquete(paquete, instruccion.argumento_operando_destino, strlen(instruccion.argumento_operando_destino) + 1);
-    } else {
-        agregar_a_paquete(paquete, "", 1);
-    }
-    
-    if (instruccion.argumento_operando_origen) {
-        agregar_a_paquete(paquete, instruccion.argumento_operando_origen, strlen(instruccion.argumento_operando_origen) + 1);
-    } else {
-        agregar_a_paquete(paquete, "", 1);
-    }
-
-*/
     if(paquete != NULL) {
+        //Enviamos el contexto actualizado a memoria
+        enviar_contexto_a_memoria(cpu, ctx);
+
         log_debug(cpu->logger, "Enviando paquete de SYSCALL %s al Kernel Scheduler", instruccion.nombre_operacion);
         enviar_paquete(paquete, cpu->socket_kernel_scheduler, cpu->logger);
         eliminar_paquete(paquete);
     }
+    return 1;//todo salió bien
     
 }
 
