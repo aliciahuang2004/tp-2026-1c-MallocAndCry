@@ -2,9 +2,7 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 #include <commons/collections/dictionary.h>
-/*
-FALTA: CREAR_CTX,OBTENER_CTX,ACTUALIZAR_CTX,ENVIAR_CTX
-*/
+
 t_dictionary* tabla_contextos;
 pthread_mutex_t mutex_tabla_contextos = PTHREAD_MUTEX_INITIALIZER;
 

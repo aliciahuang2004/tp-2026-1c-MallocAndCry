@@ -3,6 +3,16 @@
 #include "contextos.h"
 #include "instrucciones.h"
 #include "procesos.h"
+#include "memory_stick.h"
+#include "estructuras.h"
+#include "huecos.h"
+#include "compactacion.h"
+#include "segmentos.h"
+
+uint32_t memoria_total = 0;
+t_list* lista_huecos_libres;
+pthread_mutex_t mutex_huecos = PTHREAD_MUTEX_INITIALIZER;
+
 
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
@@ -82,6 +92,16 @@ void* atender_conexion(void* arg) {
         t_list* paquete = recibir_paquete(socket_cliente);
         
         if (!paquete) {
+        t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
+
+            if(ms != NULL) {
+                
+                //para caso de corrupcion de memoria
+               manejar_desconexion_memory_stick(ms, km, logger);
+            } else {
+                log_warning(logger, "Se desconectó un módulo no identificado. Socket:%d", socket_cliente);
+            }
+            //DEBERIA TENER EN CUENTA QUÉ MODULO SE DESCONECTÓ? MAS ALLA DE LOS MS (aunque no se dijo nada sobre la desconexion de otros módulos),si deberia ver cuando una cpu se desconecta
             log_error(logger, "Error al recibir paquete o cliente desconectado en socket %d.", socket_cliente);
             break; // Salimos del bucle si el cliente se cae
         }
@@ -162,11 +182,13 @@ void* atender_conexion(void* arg) {
                 t_paquete *respuesta = crear_paquete(CREACION_DE_PROCESO_OK, crear_buffer());   
                 agregar_a_paquete(respuesta, &pid_nuevo, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
+                eliminar_paquete(respuesta);
                 }
                 else
                 {
                 log_error(logger, "ERROR AL EJECUTAR CREACION_DE_PROCESO PARA PID %d", pid_nuevo);
                 t_paquete *error = crear_paquete(CREACION_DE_PROCESO_ERROR, crear_buffer());
+                agregar_a_paquete(error, &pid_nuevo, sizeof(int));
                 enviar_paquete(error, socket_cliente, logger);
                 eliminar_paquete(error);
                 }
@@ -304,10 +326,6 @@ void* atender_conexion(void* arg) {
                 } else {
                     log_error(logger, "Error de segmentación en dirección global: %u", direccion_fisica_global);
                 }
-            }
-            break;
-            case LECTURA_DE_DATOS: ///***STDOUT
-            {
             }
             break;
             case FINALIZAR_PROCESO: ///***EXIT

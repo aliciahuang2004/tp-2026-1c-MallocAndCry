@@ -3,11 +3,10 @@
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 #include <stdint.h>
-#include <stdbool.h>/*
-buscar_best_fit();
-buscar_worst_fit();
+#include <stdbool.h>
+#include "kernel_memory.h"
+/*
 fusionar_huecos();
-agregar_hueco();
 */
 
 t_resultado_hueco agregar_hueco_libre(uint32_t base, uint32_t tamano);

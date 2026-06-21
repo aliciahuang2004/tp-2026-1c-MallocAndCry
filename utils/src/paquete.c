@@ -9,7 +9,7 @@
 t_buffer *crear_buffer()
 {
     t_buffer *buffer = malloc(sizeof(t_buffer));
-
+    memset(buffer, 0, sizeof(t_buffer));
     buffer->size = 0; 
     buffer->stream = NULL;
 
@@ -71,7 +71,8 @@ int enviar_paquete(t_paquete* paquete, int socket_cliente, t_log* logger)
 	void* a_enviar = serializar_paquete(paquete, bytes, logger);
 
 	int resultado = send(socket_cliente, a_enviar, bytes, 0);
-	if (resultado <= 0) {
+	free(a_enviar);
+    if (resultado <= 0) {
             if (resultado == -1) {
                 log_warning(logger, "Error al enviar (socket %d)", socket_cliente);
             } else {
@@ -80,7 +81,6 @@ int enviar_paquete(t_paquete* paquete, int socket_cliente, t_log* logger)
             return -1; // fallo
         }
 	
-	free(a_enviar);
 	return 0;
 
 	//free(a_enviar);

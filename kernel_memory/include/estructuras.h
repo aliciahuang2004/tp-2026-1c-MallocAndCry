@@ -59,7 +59,9 @@ typedef struct {
 
     uint32_t base;
 
-    uint32_t tamanio;
+    uint32_t limite;
+
+    uint32_t tamano;
 
 } t_hueco;
 
@@ -88,12 +90,17 @@ typedef struct {
 
     uint32_t base_global;
 
-    uint32_t tamano;
+    uint32_t limite_global;
+
+} t_ms_pos;
+
+typedef struct {
+
+    int id;
 
     int socket;
 
-} t_ms_info;  //t_memory_stick
-
+} t_cpu;
 typedef struct {
     int ms_id;
     uint32_t dir_local;

@@ -39,8 +39,10 @@ typedef enum{
     STDIN,
     INIT_PROC,
     EXIT_PROC,
+    SYSCALL_IO,
     // Operaciones de IO
-    IO_REQUEST,  // Solicitud de operación de IO de KS a IO
+    IO_REQUEST, // Solicitud de operación de IO de KS a IO
+    EJECUTAR_TAREA,
     IO_OK,       // Confirmación de finalización de IO al KS
     PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
     REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
