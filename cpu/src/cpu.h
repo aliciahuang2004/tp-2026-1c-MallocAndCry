@@ -123,4 +123,6 @@ int execute(t_cpu *cpu, t_contexto *contexto, t_instruccion_decodificada instruc
 bool hay_interrupcion_pendiente(int socket_fd);
 void enviar_contexto_a_memoria(t_cpu *cpu, t_contexto *contexto);
 void devolver_proceso_interrumpido(t_cpu *cpu, int pid, op_code motivo_desalojo);
+void desconectar_memory_stick(t_cpu* cpu, int ms_id);
+
 #endif

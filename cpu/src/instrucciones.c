@@ -137,6 +137,13 @@ int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     eliminar_paquete(paquete);
 
     t_list* respuesta = recibir_paquete(socket_ms);
+
+    if (respuesta == NULL) {
+        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_IN", ms_id);
+        desconectar_memory_stick(cpu, ms_id);
+        return 0; 
+    }
+
     int cod_op = *(int*)list_get(respuesta, 0);
     
     if (cod_op == DATOS_LEIDOS) {
@@ -201,6 +208,13 @@ int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     eliminar_paquete(paquete);
 
     t_list* respuesta = recibir_paquete(socket_ms);
+
+    if (respuesta == NULL) {
+        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_OUT", ms_id);
+        desconectar_memory_stick(cpu, ms_id);
+        return 0;
+    }
+
     int cod_op = *(int*)list_get(respuesta, 0);
     
     if (cod_op == IO_OK) {
@@ -242,6 +256,13 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     eliminar_paquete(paquete_leer);
 
     t_list* respuesta_lectura = recibir_paquete(socket_ms_origen);
+
+    if (respuesta_lectura == NULL) {
+        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Origen %d en COPY_MEM", ms_id_origen);
+        desconectar_memory_stick(cpu, ms_id_origen);
+        return 0;
+    }
+
     void* datos_leidos = list_get(respuesta_lectura, 1);
     
     log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_origen);
@@ -254,6 +275,13 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     eliminar_paquete(paquete_escribir);
 
     t_list* respuesta_escritura = recibir_paquete(socket_ms_destino);
+
+    if (respuesta_escritura == NULL) {
+        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Destino %d en COPY_MEM", ms_id_destino);
+        list_destroy_and_destroy_elements(respuesta_lectura, free);
+        desconectar_memory_stick(cpu, ms_id_destino);
+        return 0;
+    }
     
     log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_destino);
 
