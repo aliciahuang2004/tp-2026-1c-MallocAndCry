@@ -163,6 +163,7 @@ void* atender_io(void* arg);
 int finalizoConexionIO(t_tipo_io tipo);
 void liberarIO(t_tipo_io tipo);
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo);
+t_solicitud_io* retirarSolicitud(t_tipo_io tipo, int pid);
 
 // planificador
 void inicializarColas();
@@ -217,6 +218,8 @@ void finalizarProceso(int pid, op_code motivo);
 void eliminarProceso(int pid, op_code motivo);
 void enviarAIO(int socket_io, t_solicitud_io* solicitud);
 void enviarAKMSolicitudIO(t_solicitud_io* solicitud);
+void hacerSTDIN(t_solicitud_io* solicitud, int socket_io);
+void hacerSTDOUT(t_solicitud_io* solicitud, int socket_io);
 
 
 #endif /* KERNEL_SCHEDULER_H*/

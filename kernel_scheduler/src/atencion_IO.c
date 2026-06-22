@@ -26,11 +26,32 @@ void* atender_io(void* arg) {
 
         switch (cod_op) {
             case IO_OK://termino syscall
+                t_solicitud_io* solicitud = NULL;
+
+                if(tipoIO != IO_SLEEP){
+                    solicitud = retirarSolicitud(tipoIO,pid);
+                }
+                if (solicitud == NULL){
+                    log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                }
+
+                if(tipoIO == IO_STDIN){
+                    int tamanio = *(int*) list_get(paquete, 2);
+                    char* lecturaIO = (char*) list_get(paquete, 3);
+                    int tamanioLectura = strlen(lecturaIO) + 1;
+                    if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanio && tamanio == tamanioLectura){
+                        solicitud->leido = lecturaIO;
+                        log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
+                        sem_post(&sem_recibiLecuraDeIO);
+                    }
+                }
+
+                free(solicitud);
 
                 // Extraer de forma segura el PID que envió el módulo de I/O
                 log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
                 if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
-                    log_warning(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
+                    log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
                     if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
                         log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
                         break; // Salimos del case para evitar errores posteriores
@@ -45,8 +66,6 @@ void* atender_io(void* arg) {
                 liberarIO(tipoIO);
                 revisarProcesosBloqueadosParaTipoIO(tipoIO);
                 break;
-            /*case IO_REQUEST:
-                break;*/
             default:
                 log_warning(kernel->logger, "Operación desconocida de cliente en socket %d", socket_io);
                 break;
@@ -83,11 +102,23 @@ void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
         interfaces[tipo].ocupada = true;
         interfaces[tipo].pidAsignado = solicitud->pidSolicitaSyscall;
         log_info(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
-        pthread_mutex_unlock(&mutex_interfaces[tipo]);
-        enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
+        if(tipo != IO_STDOUT){
+            enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
+            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+        }else{
+            enviarAKMSolicitudIO(queue_peek(interfaces[STDOUT].solicitudes));
+            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+        }
         free(solicitud);
     } else {
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
     }
     
+}
+
+t_solicitud_io* retirarSolicitud(t_tipo_io tipo, int pid){
+    pthread_mutex_lock(&mutex_interfaces[tipo]);
+    t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
+    pthread_mutex_lock(&mutex_interfaces[tipo]);
+    return solicitud;
 }

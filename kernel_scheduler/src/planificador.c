@@ -57,6 +57,7 @@ void inicializarColas(){
     colaCPUs = queue_create();
 
 }
+
 void inicializarSemaforos(){
     //MUTEX
     pthread_mutex_init(&mutex_NEW, NULL);
@@ -191,6 +192,7 @@ t_pcb* elegirPorFIFO(){
     pthread_mutex_unlock(&mutex_READY[0]);
     return pcb;
 }
+
 t_pcb* elegirPorRR(){
     t_pcb* pcb = NULL; 
     pthread_mutex_lock(&mutex_READY[0]);
