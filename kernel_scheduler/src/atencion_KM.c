@@ -53,13 +53,12 @@ void* atender_kernel_memory(void* arg) {
             case RTA_LECTURA:{
                 int pid = *(int*) list_get(paquete, 1);
                 char* leido = (char*) list_get(paquete, 2);
+                int tamanioLectura = strlen(leido) + 1;
                 log_debug(kernel->logger, "## KM confirmó lectura : %s", leido);
                 pthread_mutex_lock(&mutex_interfaces[STDIN]);
                 t_solicitud_io* solicitud = queue_peek(interfaces[STDIN].solicitudes);
-
                 // *** chequeo por las dudas pero no deberia de haber error
-
-                if(solicitud->pidSolicitaSyscall == pid){
+                if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanioLectura){
                     solicitud->leido = leido;
                 }
                 pthread_mutex_unlock(&mutex_interfaces[STDIN]);
