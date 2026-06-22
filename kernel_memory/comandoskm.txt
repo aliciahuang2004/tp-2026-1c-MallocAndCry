@@ -1,0 +1,116 @@
+para las pruebas de memoria:
+luego de cambios,antes de probar
+
+make clean && make
+
+killall -9 kernel_memory cpu kernel_scheduler memory_stick 2>/dev/null
+
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_memory
+-----------------------------------------------------------------------------ks
+./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc
+./bin/kernel_scheduler kernel_scheduler.config hola.txt
+valgrind --leak-check=full ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+run
+bt
+-----------------------------------------------------------------------------ms
+valgrind --leak-check=full ./bin/memory_stick ms1.config 100 1
+gdb --args ./bin/memory_stick ms1.config 100 1
+./bin/memory_stick ms1.config 100 1
+gdb --args ./bin/memory_stick ms2.config 200 2
+./bin/memory_stick ms2.config 200 2
+gdb --args ./bin/memory_stick ms3.config 150 3
+./bin/memory_stick ms3.config 150 3
+gdb --args ./bin/memory_stick ms4.config 400 4
+./bin/memory_stick ms4.config 400 4
+------------------------------------------------------------------------------cpu
+valgrind --leak-check=full ./bin/cpu cpu.config 1
+gdb --args ./bin/cpu cpu.config 1 
+./bin/cpu cpu.config 1
+------------------------------------------------------------------------------km
+valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
+
+./bin/kernel_memory kernel_memory.config 
+gdb --args ./bin/kernel_memory kernel_memory.config 
+run
+bt
+./bin/kernel_memory kernel_memory.config 
+------------------------------------------------------------------------------
+valgrind --leak-check=full ./bin/io io.config STDIN 
+./bin/io io.config STDIN
+valgrind --leak-check=full ./bin/io io.config STDOUT
+./bin/io io.config STDOUT
+valgrind --leak-check=full ./bin/io io.config SLEEP
+./bin/io io.config SLEEP
+------------------------------------------------------------------------------
+cuando levanto km dos veces seguidas a veces tira mensaje "socket -1" :
+pkill -f kernel_memory
+pkill -f kernel_scheduler
+pkill -f cpu
+fuser -k 9001/tcp
+fuser -k 9002/tcp
+------------------------------------------------
+ver donde   / para qué uso lista ms (con id ms,tamaño,socket)
+en la funcion "nuevo_memory_stick" agrego ms 
+en la funcion "buscar_ms_por_socket" busco para detectar al ms caido
+
+base y limite global lo obtengo luego de agregar un hueco libre en la lista de huecos
+puedo añadir un ms con id,base global,limite global a "lista_ubicacion_global_ms"
+
+necesito
+para saber donde escribir necesito tener la base global y limite global del ms con su id
+para saber donde leer necesito tener la base global y limite global del ms con su id
+
+
+para stdin,stdout,
+-compactación:km debe saber a qué ms enviar peticion de escritura,lectura
+
+LISTA DE HUECOS lo uso cuando:
+- agrego un hueco cuando:un ms se conecta,un segmento es eliminado (memfree),un proceso es suspendido(sus segmentos son enviados a swap),
+un proceso es eliminado (sus segmentos son eliminados)
+- elimino un hueco cuando:creo un segmento (memalloc),
+
+CPUS_DESALOJADAS:km espera este mensaje de parte de ks,luego de q ks haya finalizado todos los procesos
+AUMENTO_DE_MEMORIA:km envia nuevo tamaño total de memoria a ks
+SEG_MAX_SIZE:km envia a cpu,cuando cpu hace handshake
+MS_NUEVO_CPU:km envia a todas las conectadas 
+
+SET AX 9
+SET BX 3
+SET CX 1
+SET DX 22
+SET EAX 234
+SET EBX 444
+MEM_ALLOC 1 32
+MEM_ALLOC 2 32
+MEM_ALLOC 3 32
+SET ECX 124
+SET EDX 90
+SET SI 100
+SET DI 12
+EXIT
+---
+PASO LA PRUEBA :D
+SET AX 9
+SET BX 3
+SET CX 1
+SET DX 22
+SET EAX 234
+MEM_ALLOC 5 32
+SET EBX 444
+SET ECX 124
+MEM_ALLOC 4 32
+SET EDX 90
+SET SI 100
+SET DI 12
+MEM_ALLOC 1 32
+MEM_FREE 4
+MEM_FREE 5
+MEM_ALLOC 2 32
+MEM_ALLOC 3 32
+MEM_FREE 2
+MEM_ALLOC 8 10
+MEM_FREE 1
+EXIT

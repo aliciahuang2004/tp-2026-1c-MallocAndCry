@@ -37,26 +37,8 @@ t_contexto* crear_contexto() {
     return contexto;
 }
 
-t_registros* solicitud_contexto(int pid)
-{
-    char pid_str[20];
-    sprintf(pid_str, "%d", pid);
-    pthread_mutex_lock(&mutex_procesos);
-    t_proceso* proceso = dictionary_get(procesos, pid_str);
-
-    if(proceso == NULL){ 
-     pthread_mutex_unlock(&mutex_procesos);
-        return NULL;
-        }
-
-    t_registros* copia = malloc(sizeof(t_registros));
-    memcpy(copia, &proceso->contexto->registros, sizeof(t_registros));
-    pthread_mutex_unlock(&mutex_procesos);
-        return copia; 
-}
-
 //----descomentar cuando cpu espere tabla de segmentos en case context response
-/*
+
 t_registros* solicitud_contexto(int pid, t_list** tabla_out)
 {
     char pid_str[20];
@@ -71,7 +53,7 @@ t_registros* solicitud_contexto(int pid, t_list** tabla_out)
     }
 
     t_registros* copia = malloc(sizeof(t_registros));
-    memcpy(copia, proceso->contexto->registros, sizeof(t_registros));
+    memcpy(copia,&(proceso->contexto->registros),sizeof(t_registros));
 
     // Copiar la tabla de segmentos
     t_list* tabla_copia = list_create();
@@ -86,7 +68,7 @@ t_registros* solicitud_contexto(int pid, t_list** tabla_out)
     pthread_mutex_unlock(&mutex_procesos);
     return copia;
 }
-*/
+
 void actualizar_contexto(int pid, t_registros* registros_nuevos) {
     char pid_str[20];
     sprintf(pid_str, "%d", pid);
