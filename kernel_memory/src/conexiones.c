@@ -85,6 +85,7 @@ void* atender_conexion(void* arg) {
 
     log_info(logger, "Nuevo hilo atendiendo conexión en socket %d", socket_cliente);
 
+    bool es_cpu = false;
     
     while (1) {
 
@@ -110,6 +111,7 @@ void* atender_conexion(void* arg) {
 
         switch (codigo_operacion) {
             case CPU_HANDSHAKE:
+                es_cpu = true;
                 int cpu_id = *(int *)list_get(paquete, 1);
                 log_info(logger, "CPU ID:%d conectada en socket %d", cpu_id, socket_cliente);
             
@@ -457,6 +459,11 @@ void* atender_conexion(void* arg) {
         }
         list_destroy_and_destroy_elements(paquete, free);
     }
+
+    if (es_cpu) {
+        remover_cpu_conectada(socket_cliente, logger);
+    }
+
     close(socket_cliente);
     log_info(logger, "Conexión cerrada en socket %d", socket_cliente);
 
@@ -464,4 +471,20 @@ void* atender_conexion(void* arg) {
     return NULL;
 }
 
+void remover_cpu_conectada(int socket_cliente, t_log* logger) {
+    pthread_mutex_lock(&mutex_cpus_conectadas);
     
+    for(int i = 0; i < list_size(cpus_conectadas); i++) {
+        t_cpu* cpu = list_get(cpus_conectadas, i);
+        
+        if (cpu->socket == socket_cliente) {
+            log_warning(logger, "CPU ID:%d desconectada. Removiendo de la lista (Socket: %d)", cpu->id, socket_cliente);
+            
+            list_remove(cpus_conectadas, i);
+            free(cpu);
+            break; 
+        }
+    }
+    
+    pthread_mutex_unlock(&mutex_cpus_conectadas);
+}
