@@ -30,9 +30,9 @@ void* atender_io(void* arg) {
 
                 if(tipoIO != IO_SLEEP){
                     solicitud = retirarSolicitud(tipoIO,pid);
-                }
-                if (solicitud == NULL){
-                    log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                    if (solicitud == NULL){
+                        log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                    }
                 }
 
                 if(tipoIO == IO_STDIN){
