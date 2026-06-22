@@ -21,6 +21,7 @@ t_io* inicializar_io(char* archivo_config, char* tipo_io) {
     io-> ip_kernel_scheduler= config_get_string_value(io->config, "IP_KERNEL_SCHEDULER");
     io-> puerto_kernel_scheduler= config_get_int_value(io->config, "PUERTO_KERNEL_SCHEDULER");
     io-> tipo_IO= strdup(tipo_io);
+    io->nombre = NULL;
     io-> socket_kernel_scheduler= -1;
     
     return io;
@@ -39,6 +40,7 @@ void liberar_io(t_io* io){
     if(io->logger) log_destroy(io->logger);
     if(io->config) config_destroy(io->config);
     if(io->tipo_IO) free(io->tipo_IO);
+    if(io->nombre) free(io->nombre);
     if(io->log_level) free(io->log_level);
     free(io);
 }
