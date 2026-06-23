@@ -56,6 +56,8 @@ extern t_list* lista_dir_global_ms;
 
 extern t_list* cpus_conectadas;
 
+extern t_list* lista_ms_conexion;
+
 
 //MUTEX
 extern pthread_mutex_t mutex_procesos;
@@ -74,11 +76,18 @@ extern pthread_mutex_t mutex_lista_dir_global_ms;
 
 extern pthread_mutex_t mutex_cpus_conectadas;
 
+extern pthread_mutex_t mutex_lista_ms_conexion;
+
 
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 int recibir_operacion(int socket_cliente);
 void enviar_operacion(int socket_cliente, op_code codigo);
 uint32_t aumentar_memoria_total(uint32_t tamano);
+void destruir_kernel_memory(t_kernel_memory* km);
+void eliminar_ms_conexion_elemento(void* elemento);
+void limpiar_lista_ms_conexiones(void);
+void capturar_sigint(int s);
+void destruir_elemento_diccionario(void* elemento);
 
 #endif /* KERNEL_MEMORY_H */

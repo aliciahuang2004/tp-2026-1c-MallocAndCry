@@ -19,6 +19,69 @@ int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     return 1;
 }
 
+int guardar_ms_conexion(int id,char* ip,char* puerto){
+    t_ms_conexion* ms_conexion = malloc(sizeof(t_ms_conexion));
+
+    if (ms_conexion == NULL) {
+        return 0;
+    }
+
+    memset(ms_conexion, 0, sizeof(t_ms_conexion));
+    ms_conexion->id = id;
+    ms_conexion->ip = ip;
+    ms_conexion->puerto = puerto;
+    pthread_mutex_lock(&mutex_lista_ms_conexion);
+    list_add(lista_ms_conexion, ms_conexion);
+    pthread_mutex_unlock(&mutex_lista_ms_conexion);
+
+    return 1;
+}
+
+void enviar_ms_a_cpu(int socket_cpu, t_log* logger) {
+    pthread_mutex_lock(&mutex_lista_dir_global_ms);
+    pthread_mutex_lock(&mutex_lista_ms_conexion);
+
+    int total_ms = list_size(lista_dir_global_ms);
+    log_info(logger, "Enviando %d Memory Sticks ya conectados a la nueva CPU (Socket: %d)", total_ms, socket_cpu);
+
+    for (int i = 0; i < total_ms; i++) {
+        t_ms_pos* ms_pos = list_get(lista_dir_global_ms, i);
+        
+        char* ms_ip = NULL;
+        char* ms_puerto = NULL;
+
+        for (int j = 0; j < list_size(lista_ms_conexion); j++) {
+            t_ms_conexion* ms_con = list_get(lista_ms_conexion, j);
+            if (ms_con->id == ms_pos->id) {
+                ms_ip = ms_con->ip;
+                ms_puerto = ms_con->puerto;
+                break;
+            }
+        }
+
+        if (ms_ip == NULL || ms_puerto == NULL) {
+            log_error(logger, "No se encontraron datos de conexión para MS ID: %d", ms_pos->id);
+            continue;
+        }
+
+        t_paquete* paquete = crear_paquete(MS_NUEVO_CPU, crear_buffer());
+        
+        agregar_a_paquete(paquete, &(ms_pos->id), sizeof(int));
+        agregar_a_paquete(paquete, ms_puerto, strlen(ms_puerto) + 1);
+        agregar_a_paquete(paquete, ms_ip, strlen(ms_ip) + 1);
+        agregar_a_paquete(paquete, &(ms_pos->base_global), sizeof(uint32_t));
+        agregar_a_paquete(paquete, &(ms_pos->limite_global), sizeof(uint32_t));
+        
+        enviar_paquete(paquete, socket_cpu, logger);
+        eliminar_paquete(paquete);
+
+        log_info(logger, "  [%d/%d] MS ID:%d enviado exitosamente a CPU", i + 1, total_ms, ms_pos->id);
+    }
+
+    pthread_mutex_unlock(&mutex_lista_ms_conexion);
+    pthread_mutex_unlock(&mutex_lista_dir_global_ms);
+}
+
 t_ms_info *buscar_ms_por_socket(int socket)
 {
     pthread_mutex_lock(&mutex_lista_ms);
@@ -181,57 +244,67 @@ void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_esc
     }
 }
 
-void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger) {
-    
+void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger)
+{
     void* buffer_completo = malloc(tamano_total);
     if (buffer_completo == NULL) {
         log_error(logger, "Error: No se pudo asignar memoria para el buffer de lectura completo");
         return NULL;
     }
 
-    int offset_armado = 0; 
+    int offset_armado = 0;
 
     for (int i = 0; i < list_size(lista_fragmentos); i++) {
+
         t_fragmento_memoria* frag = list_get(lista_fragmentos, i);
 
         int socket_ms = buscar_socket_ms_por_id(frag->ms_id);
         if (socket_ms == -1) {
-            log_error(logger, "Error: No se encontró el socket para el MS ID:%d", frag->ms_id);
+            log_error(logger, "No se encontró el socket para el MS ID:%d", frag->ms_id);
             free(buffer_completo);
             return NULL;
         }
 
+        // Enviar petición de lectura
         t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_peticion, &(frag->dir_local), sizeof(uint32_t));
-        agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(uint32_t));
+        agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(int));
 
-        log_debug(logger, "Solicitando fragmento %d al MS ID %d (%u bytes desde dir local %u)", 
-                  i, frag->ms_id, frag->tamano, frag->dir_local);
+        log_info(logger,"Solicitando fragmento %d al MS %d (%d bytes desde dir %u)",i,frag->ms_id,frag->tamano,frag->dir_local);
 
         enviar_paquete(paquete_peticion, socket_ms, logger);
         eliminar_paquete(paquete_peticion);
 
-        uint32_t cod_op;
-        if (recv(socket_ms, &cod_op, sizeof(uint32_t), MSG_WAITALL) <= 0) {
-            log_error(logger, "Error al recibir código de operación del MS ID:%d", frag->ms_id);
+        // Recibir respuesta
+        t_list* paquete_respuesta = recibir_paquete(socket_ms);
+
+        if (paquete_respuesta == NULL) {
+            log_error(logger, "Error al recibir respuesta del MS %d", frag->ms_id);
             free(buffer_completo);
             return NULL;
         }
 
-        t_list* paquete_respuesta = recibir_paquete(socket_ms);
-        
+        int cod_op = *(int*) list_get(paquete_respuesta, 0);
+
+        if (cod_op != DATOS_LEIDOS) {
+            log_error(logger,"Respuesta inesperada del MS %d. Se esperaba DATOS_LEIDOS y llegó %d",frag->ms_id,cod_op);
+
+            list_destroy_and_destroy_elements(paquete_respuesta, free);
+            free(buffer_completo);
+            return NULL;
+        }
+
         void* datos_leidos_ms = list_get(paquete_respuesta, 1);
 
-        memcpy(buffer_completo + offset_armado, datos_leidos_ms, frag->tamano);
+        memcpy((char*)buffer_completo + offset_armado,datos_leidos_ms,frag->tamano);
 
-        log_debug(logger, "Fragmento %d recibido y acoplado en el offset %d", i, offset_armado);
+        log_debug(logger,"Fragmento %d recibido y copiado en offset %d",i,offset_armado);
 
         offset_armado += frag->tamano;
 
         list_destroy_and_destroy_elements(paquete_respuesta, free);
     }
-
-    log_info(logger, "Lectura fragmentada unificada con éxito (%d bytes totales)", tamano_total);
+    log_info(logger,"Lectura fragmentada unificada con éxito (%u bytes)",tamano_total);
 
     return buffer_completo;
 }

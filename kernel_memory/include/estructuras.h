@@ -100,6 +100,15 @@ typedef struct {
 
     int id;
 
+    char* ip;
+
+    char* puerto;
+
+} t_ms_conexion;
+typedef struct {
+
+    int id;
+
     int socket;
 
 } t_cpu;

@@ -10,8 +10,6 @@
 #include "segmentos.h"
 
 uint32_t memoria_total = 0;
-t_list* lista_huecos_libres;
-pthread_mutex_t mutex_huecos = PTHREAD_MUTEX_INITIALIZER;
 
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
     while (1) {
@@ -117,7 +115,8 @@ void* atender_conexion(void* arg) {
                 log_info(logger, "CPU ID:%d conectada en socket %d", cpu_id, socket_cliente);
             
                 agregar_cpu_conectada(cpu_id, socket_cliente);
-
+                //enviar datos de los ms ya conectados antes que esta cpu
+                enviar_ms_a_cpu(socket_cliente,logger);
                 t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
                 agregar_a_paquete(respuesta, &km->segment_max_size, sizeof(int));
                 enviar_paquete(respuesta, socket_cliente, logger);
@@ -125,7 +124,8 @@ void* atender_conexion(void* arg) {
                 
                 break;
 
-            case MEMORY_STICK_HANDSHAKE: {
+            case MEMORY_STICK_HANDSHAKE: 
+            {
                 int ms_id = *(int *)list_get(paquete, 1);
                 uint32_t ms_tamano = *(int *)list_get(paquete, 2);
                 char* ms_puerto = (char*) list_get(paquete, 3);
@@ -136,20 +136,26 @@ void* atender_conexion(void* arg) {
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
 
                 int resultado = nuevo_memory_stick(ms_id, ms_tamano, socket_cliente);
-
-                if(resultado) {
-                    t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);//acá obtengo base y limite global del ms
-                    loguear_huecos(logger);
-                    agregar_posicion_ms(r,ms_id,logger);//ACA GUARDA BASE Y LIMITE GLOBAL DE LOS MS,FALTA PROBAR.ACA KM BUSCA A QUÉ MS ENVIAR PETICION DE ESCRITURA,LECTURA
-                    avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,r); 
-
-                    pthread_mutex_lock(&mutex_memoria_total);
-                    log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
-                    pthread_mutex_unlock(&mutex_memoria_total);
-                               
-                } else {
-                    log_error(logger, "Error al agregar Memory Stick ID:%d a la lista", ms_id);
+                if (!resultado) {
+                    log_error(logger, "Error al registrar el nuevo Memory Stick");
+                    break;   
                 }
+
+                int rta = guardar_ms_conexion(ms_id, ms_ip, ms_puerto);
+                if (!rta) {
+                    log_error(logger, "Error al guardar la información de conexión del Memory Stick");
+                    break;
+                }
+                
+                t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);//acá obtengo base y limite global del ms
+                loguear_huecos(logger);
+                agregar_posicion_ms(r,ms_id,logger);//ACA GUARDA BASE Y LIMITE GLOBAL DE LOS MS,FALTA PROBAR.ACA KM BUSCA A QUÉ MS ENVIAR PETICION DE ESCRITURA,LECTURA
+                avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,r); 
+
+                pthread_mutex_lock(&mutex_memoria_total);
+                log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
+                pthread_mutex_unlock(&mutex_memoria_total);
+                
                 break;
             }
 

@@ -114,3 +114,9 @@ MEM_FREE 2
 MEM_ALLOC 8 10
 MEM_FREE 1
 EXIT
+-----falta probar:
+levantar km,ks,ms,cpu 
+ejecutar solo instrucciones set ,noop
+para probar que km envíe correctamente los datos de ms a cpu,ya que cuando ms envió peticion MEMORY_STICK_HANDSHAKE cpu aún no estaba levantada
+entonces no recibió nada .que sucede con esa peticion? queda colgada? 
+deberia agregar en cpu_handshake "avisar_cpus_conectadas"
