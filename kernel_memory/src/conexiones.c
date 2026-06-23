@@ -338,22 +338,197 @@ void* atender_conexion(void* arg) {
              */
             }
             break;
+
+            case SWAP_REQUEST: {
+            swap_block_size = *(int*)list_get(paquete, 1);
+            int tamanio_total = *(int*)list_get(paquete, 2);
+            km_socket_swap = socket_cliente; 
+            
+            int total_bloques = tamanio_total / swap_block_size;
+            int bytes_bitmap = (total_bloques + 7) / 8; 
+            
+            void* puntero_bitmap = malloc(bytes_bitmap);
+            memset(puntero_bitmap, 0, bytes_bitmap);
+            bitmap_swap = bitarray_create_with_mode(puntero_bitmap, bytes_bitmap, LSB_FIRST);
+            
+            log_info(logger, "SWAP configurado: %d bloques de %d bytes", total_bloques, swap_block_size);
+            break;
+            }
             case SUSPENSION_DE_PROCESO:
             {
-                // SWAP Y MEMORY STICK
-                 //recibo pid
-                //km envia a swap los seg del proc
-                // SWAP Y MEMORY STICK
-                //SUSPENDIDO_OK,SUSPEDIDO_ERROR
-                //
+                int pid_a_suspender = *(int*)list_get(paquete, 1);
+            
+            pthread_mutex_lock(&mutex_procesos);
+            t_proceso* proceso = buscar_proceso(pid_a_suspender);
+            
+            if (proceso != NULL && !proceso->suspendido) {
+                log_info(logger, "Iniciando suspensión de PID: %d", pid_a_suspender);
+                
+                for (int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
+                    t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
+                    
+                    if (!seg->en_swap) {
+                        uint32_t tam_seg = seg->tamanio; 
+                        
+                        t_list* fragmentos = calcular_dir_local_ms(seg->base_global, tam_seg, logger);
+                        void* contenido = enviar_fragmentos_lectura(fragmentos, tam_seg, logger);
+                        list_destroy_and_destroy_elements(fragmentos, free);
+                        
+                        int bloques_necesarios = (tam_seg + swap_block_size - 1) / swap_block_size;
+                        int bloque_inicio = -1;
+                        
+                        for (int bit = 0; bit <= bitarray_get_max_bit(bitmap_swap) - bloques_necesarios; bit++) {
+                            bool hay_espacio = true;
+                            for (int b = 0; b < bloques_necesarios; b++) {
+                                if (bitarray_test_bit(bitmap_swap, bit + b)) {
+                                    hay_espacio = false; 
+                                    break;
+                                }
+                            }
+                            if (hay_espacio) { 
+                                bloque_inicio = bit; 
+                                break; 
+                            }
+                        }
+                        
+                        if (bloque_inicio != -1 && contenido != NULL) {
+
+                            for(int b = 0; b < bloques_necesarios; b++) {
+                                bitarray_set_bit(bitmap_swap, bloque_inicio + b);
+                            }
+                        
+                            int offset = 0;
+                            for (int b = 0; b < bloques_necesarios; b++) {
+                                int bytes_restantes = tam_seg - offset;
+                                int tamano_a_escribir;
+                                
+                                if (bytes_restantes > swap_block_size) {
+                                    tamano_a_escribir = swap_block_size;
+                                } else {
+                                    tamano_a_escribir = bytes_restantes;
+                                }
+
+                                t_paquete* p_swap = crear_paquete(ESCRITURA_SWAP, crear_buffer());
+                                int bloque_actual = bloque_inicio + b;
+                                agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
+                                agregar_a_paquete(p_swap, contenido + offset, tamano_a_escribir);
+                                
+                                enviar_paquete(p_swap, km_socket_swap, logger);
+                                eliminar_paquete(p_swap);
+                                
+                                int cod_op_swap;
+                                recv(km_socket_swap, &cod_op_swap, sizeof(int), MSG_WAITALL);
+                                t_list* resp_swap = recibir_paquete(km_socket_swap);
+                                list_destroy_and_destroy_elements(resp_swap, free);
+                                
+                                offset += tamano_a_escribir;
+                            }
+                            
+                            seg->en_swap = true;
+                            seg->bloque_swap = bloque_inicio;
+                            
+                            agregar_hueco_libre(seg->base_global, tam_seg);
+                            seg->base_global = 0; 
+                            seg->limite_global = 0;
+                        }
+                        if(contenido) free(contenido);
+                    }
+                }
+                proceso->suspendido = true;
+                
+                t_paquete* resp = crear_paquete(SUSPENSION_OK, crear_buffer());
+                enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                eliminar_paquete(resp);
+            }
+            pthread_mutex_unlock(&mutex_procesos);
+            break;
             }
             break;
             case DESUSPENSION_DE_PROCESO:
-            {/// SWAP + MS
-            /// SWAP + MS
-             //aca ks me pregunta si hay mem disponible para desuspender,en km veo y aviso ok o error
-            //DESUSPENDIDO_OK--KM YA PASÓ A MS LOS SEG DEL PROCESO,KS ESPERA ESTO 
+            {
+            int pid_a_desuspender = *(int*)list_get(paquete, 1);
+            
+            pthread_mutex_lock(&mutex_procesos);
+            t_proceso* proceso = buscar_proceso(pid_a_desuspender);
+            
+            if (proceso != NULL && proceso->suspendido) {
+                log_info(logger, "Iniciando desuspensión de PID: %d", pid_a_desuspender);
+                bool necesita_compactar = false;
+                
+                for (int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
+                    t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
+                    
+                    if(seg->en_swap) {
+                        pthread_mutex_lock(&mutex_huecos);
+                        t_hueco* hueco = buscar_hueco(seg->tamanio, km, logger);
+                        
+                        if(hueco == NULL) {
+                            necesita_compactar = true;
+                            pthread_mutex_unlock(&mutex_huecos);
+                            break;
+                        }
+                        
+                        uint32_t nueva_base = hueco->base;
+                        consumir_hueco(hueco, seg->tamanio);
+                        pthread_mutex_unlock(&mutex_huecos);
+                        
+                        int bloques_necesarios = (seg->tamanio + swap_block_size - 1) / swap_block_size;
+                        void* contenido_recuperado = malloc(seg->tamanio);
+                        int offset = 0;
+                        
+                        for(int b = 0; b < bloques_necesarios; b++) {
+                            int bytes_restantes = seg->tamanio - offset;
+                            int tamano_a_leer;
 
+                            if (bytes_restantes > swap_block_size) {
+                                tamano_a_leer = swap_block_size;
+                            } else {
+                                tamano_a_leer = bytes_restantes;
+                            }
+
+                            t_paquete* p_swap = crear_paquete(LECTURA_SWAP, crear_buffer());
+                            int bloque_actual = seg->bloque_swap + b;
+                            agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
+                            enviar_paquete(p_swap, km_socket_swap, logger);
+                            eliminar_paquete(p_swap);
+                            
+                            int cod_op_swap;
+                            recv(km_socket_swap, &cod_op_swap, sizeof(int), MSG_WAITALL);
+                            t_list* resp_swap = recibir_paquete(km_socket_swap);
+                            void* datos_recibidos = list_get(resp_swap, 1);
+                            
+                            memcpy(contenido_recuperado + offset, datos_recibidos, tamano_a_leer);
+                            bitarray_clean_bit(bitmap_swap, bloque_actual); 
+                            
+                            list_destroy_and_destroy_elements(resp_swap, free);
+                            offset += tamano_a_leer;
+                        }
+                        
+                        
+                        t_list* fragmentos = calcular_dir_local_ms(nueva_base, seg->tamanio, logger);
+                        enviar_fragmentos_escritura(fragmentos, contenido_recuperado, logger);
+                        list_destroy_and_destroy_elements(fragmentos, free);
+                        
+                        seg->en_swap = false;
+                        seg->base_global = nueva_base;
+                        seg->limite_global = nueva_base + seg->tamanio - 1;
+                        seg->bloque_swap = -1;
+                        
+                        free(contenido_recuperado);
+                    }
+                }
+                
+                if (necesita_compactar) {
+                    avisar_compactacion(km, logger);
+                } else {
+                    proceso->suspendido = false;
+                    t_paquete* resp = crear_paquete(DESUSPENSION_OK, crear_buffer());
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
+            }
+            pthread_mutex_unlock(&mutex_procesos);
+            break;
             }
             break;
             case ELIMINACION_DE_SEGMENTO: 

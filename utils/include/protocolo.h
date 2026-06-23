@@ -87,7 +87,11 @@ typedef enum{
     ESCRITURA_EN_MS,
     RTA_LECTURA,
     COMPACTACION_OK,
-    COMPACTACION_ERROR            
+    COMPACTACION_ERROR,
+    SUSPENSION_OK,
+    LECTURA_SWAP,
+    ESCRITURA_SWAP,
+    DESUSPENSION_OK
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

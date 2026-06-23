@@ -132,6 +132,16 @@ void* atender_kernel_memory(void* arg) {
             }*/
                 break;
             }
+            case SUSPENSION_OK: {
+            log_debug(kernel->logger, "## KM confirmo la suspension");
+            sem_post(&sem_suspension_ok);
+            break;
+            }
+            case DESUSPENSION_OK: {
+            log_debug(kernel->logger, "## KM confirmo la desuspension");
+            sem_post(&sem_desuspension_ok);
+            break;
+            }
             default:
                 log_warning(kernel->logger, "KM Listener: código de operación inesperado: %d", cod_op);
                 break;

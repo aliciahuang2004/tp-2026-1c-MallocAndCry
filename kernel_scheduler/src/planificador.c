@@ -29,6 +29,8 @@ sem_t sem_hayMemoria;
 sem_t* sem_hayIO;
 sem_t sem_recibiLecuraDeIO;
 sem_t sem_recibiLecuraDeKM;
+sem_t sem_suspension_ok;
+sem_t sem_desuspension_ok;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -84,6 +86,8 @@ void inicializarSemaforos(){
     sem_init(&sem_finSyscall,0,0);  // 
     sem_init(&sem_recibiLecuraDeIO,0,0);
     sem_init(&sem_recibiLecuraDeKM,0,0);
+    sem_init(&sem_suspension_ok, 0, 0);
+    sem_init(&sem_desuspension_ok, 0, 0);
 }
 
 void pasarProcesoNewAReady(){
@@ -557,6 +561,18 @@ void pasarProcesoBlockABlockSusp(int pid){
     }
     pthread_mutex_unlock(&mutex_BLOCK);
 
+    if (pcb != NULL) {
+        log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
+
+        
+        t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
+        agregar_a_paquete(paquete, &pid, sizeof(int));
+        enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+        eliminar_paquete(paquete);
+
+        
+        sem_wait(&sem_suspension_ok);
+
     pcb->estado = BLOCK_SUSP;
 
     //AGREGO SUSP BLOCK
@@ -568,6 +584,10 @@ void pasarProcesoBlockABlockSusp(int pid){
 
     sem_wait(&sem_finSyscall);
     pasarProcesoBlockSuspAReadySusp(pid);
+
+    } else {
+        log_error(kernel->logger, "Error: No se encontró el PID %d en la cola BLOCK", pid);
+    }
 
 }
 
@@ -616,6 +636,16 @@ void pasarProcesoReadySuspAReady(int pid){
     }
     pthread_mutex_unlock(&mutex_READY_SUSP);
 
+    if (pcb != NULL) {
+        log_info(kernel->logger,"## (<%d>) Intentando desuspender...", pcb->pid);
+
+        t_paquete* paquete = crear_paquete(DESUSPENSION_DE_PROCESO, crear_buffer());
+        agregar_a_paquete(paquete, &pid, sizeof(int));
+        enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+        eliminar_paquete(paquete);
+
+        sem_wait(&sem_desuspension_ok);
+
     //AGREGO A READY
 
     pcb->estado = READY;
@@ -642,6 +672,10 @@ void pasarProcesoReadySuspAReady(int pid){
        
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY_SUSP> al estado <READY>",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
+
+    } else {
+        log_error(kernel->logger, "Error: No se encontró el PID %d en la cola READY_SUSP", pid);
+    }
 
 }
 

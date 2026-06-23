@@ -35,6 +35,8 @@ typedef struct {
 
     uint32_t limite_global;
 
+    uint32_t tamanio;
+
     int memory_stick_id;
 
     bool en_swap;

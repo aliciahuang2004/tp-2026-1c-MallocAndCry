@@ -11,6 +11,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "estructuras.h"
+#include <commons/bitarray.h>
+
+extern t_bitarray* bitmap_swap;
+extern int swap_block_size;
+extern int km_socket_swap;
 
 typedef struct {
     t_log* logger;

@@ -137,6 +137,8 @@ extern sem_t* sem_hayIO;
 extern sem_t sem_recibiLecuraDeIO;
 extern sem_t sem_recibiLecuraDeKM;
 // extern sem_procesoCreado;
+extern sem_t sem_suspension_ok;
+extern sem_t sem_desuspension_ok;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;

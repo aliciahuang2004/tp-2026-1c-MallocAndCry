@@ -1,6 +1,10 @@
 #include "kernel_memory.h"
 #include "conexiones.h"
 
+t_bitarray* bitmap_swap = NULL;
+int swap_block_size = 0;
+int km_socket_swap = -1;
+
 int main(int argc, char* argv[]) {
 
     if (argc != 2 ){
