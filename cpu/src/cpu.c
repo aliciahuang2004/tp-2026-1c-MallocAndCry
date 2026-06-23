@@ -99,6 +99,14 @@ int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id)
     if (ip == NULL || puerto == NULL)
         return -1;
 
+    for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
+        t_ms_conectado* ms_existente = list_get(cpu->sockets_memory_sticks, i);
+        if(ms_existente->id == ms_id) {
+            log_warning(cpu->logger, "Aviso: El Memory Stick (ID: %d) ya está conectado en el socket %d. Ignorando nueva petición.", ms_id, ms_existente->socket);
+            return ms_existente->socket;
+        }
+    }
+
     int socket_ms = crear_conexion(cpu->logger, ip, puerto);
 
     if (socket_ms != -1)

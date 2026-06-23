@@ -1,7 +1,6 @@
 #include "kernel_memory.h"
 #include "procesos.h"
 
-
 t_list* lista_ms;
 t_list* lista_dir_global_ms;
 t_list* cpus_conectadas;
@@ -33,7 +32,7 @@ t_kernel_memory* iniciar_kernelMemory(char* argv){
     kernelMemory -> compaction_delay = config_get_int_value(kernelMemory->config, "COMPACTION_DELAY");
     kernelMemory->paths_por_pid = dictionary_create();
     
-    log_debug(kernelMemory->logger, "Kernel Memory inicializado correctamentew");
+    log_debug(kernelMemory->logger, "Kernel Memory inicializado correctamente");
 
     iniciar_tabla_procesos();
     
@@ -62,10 +61,10 @@ int recibir_operacion(int socket_cliente)
 	}
 }
 
-
 void enviar_operacion(int socket_cliente, op_code codigo) {
     send(socket_cliente, &codigo, sizeof(op_code), 0);
 }
+
 uint32_t aumentar_memoria_total(uint32_t tamano) {
     pthread_mutex_lock(&mutex_memoria_total);
 

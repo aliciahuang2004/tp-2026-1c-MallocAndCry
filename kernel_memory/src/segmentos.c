@@ -3,6 +3,7 @@
 #include "estructuras.h"
 #include "huecos.h"
 #include "procesos.h"
+
 void loguear_segmentos_proceso(t_proceso* proceso, t_log* logger) {//para probar
 
     log_info(logger,"----- SEGMENTOS DE PID %d -----",proceso->pid);
@@ -13,6 +14,7 @@ void loguear_segmentos_proceso(t_proceso* proceso, t_log* logger) {//para probar
         log_info(logger,"ID SEG:%d BASE:%u LIMITE:%u",seg->id_segmento,seg->base_global,seg->limite_global);
     }
 }
+
 void loguear_tabla_segmentos(t_list* tabla,t_log* logger)
 {
     for(int i = 0; i < list_size(tabla); i++)
@@ -22,6 +24,7 @@ void loguear_tabla_segmentos(t_list* tabla,t_log* logger)
         log_info(logger,"SEG[%d] ID=%d BASE=%u LIMITE=%u",i,seg->id_segmento,seg->base_global,seg->limite_global);
     }
 }
+
 int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_kernel_memory* km) {
     pthread_mutex_lock(&mutex_huecos);
 
@@ -63,8 +66,6 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
     return 1;
 }
-
-
 
 //busca al proceso,busca el seg por id en su tabla,guarda base y limite (dir logica?),elimina al seg de la tabla,agrega hueco libre
 int eliminar_segmento(int pid, int id_segmento, t_log* logger) {

@@ -62,6 +62,7 @@ extern pthread_mutex_t mutex_lista_ms;
 extern pthread_mutex_t mutex_swap;
 
 extern pthread_mutex_t mutex_tabla_contextos;
+
 extern pthread_mutex_t mutex_memoria_total;
 
 extern pthread_mutex_t mutex_lista_dir_global_ms;
@@ -74,4 +75,5 @@ void verificarKernelMemory(t_kernel_memory* kernelMemory);
 int recibir_operacion(int socket_cliente);
 void enviar_operacion(int socket_cliente, op_code codigo);
 uint32_t aumentar_memoria_total(uint32_t tamano);
+
 #endif /* KERNEL_MEMORY_H */

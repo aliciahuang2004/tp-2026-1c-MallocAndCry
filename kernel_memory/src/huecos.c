@@ -121,4 +121,4 @@ void loguear_huecos(t_log* logger)
         t_hueco* hueco = list_get(lista_huecos_libres, i);
         log_info(logger,"Hueco[%d] Base:%u Limite:%u Tamaño:%u",i,hueco->base,hueco->limite,hueco->tamano);
     }
-}
+} 

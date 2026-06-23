@@ -167,7 +167,7 @@ void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_esc
 
         char *datos_fragmentados = contenido_a_escribir + offset_contenido;
 
-        t_paquete *paquete_ms = crear_paquete(ESCRITURA_EN_MS, crear_buffer());
+        t_paquete *paquete_ms = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_ms, &(frag->dir_local), sizeof(uint32_t));
         agregar_a_paquete(paquete_ms, &(frag->tamano), sizeof(int));
         agregar_a_paquete(paquete_ms, datos_fragmentados, frag->tamano);
@@ -201,7 +201,7 @@ void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total,
             return NULL;
         }
 
-        t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());//este es el protocolo correcto?
+        t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_peticion, &(frag->dir_local), sizeof(uint32_t));
         agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(uint32_t));
 
