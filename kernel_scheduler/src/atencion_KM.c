@@ -53,15 +53,20 @@ void* atender_kernel_memory(void* arg) {
             case RTA_LECTURA:{
                 int pid = *(int*) list_get(paquete, 1);
                 char* leido = (char*) list_get(paquete, 2);
-                int tamanioLectura = strlen(leido) + 1;
-                log_debug(kernel->logger, "## KM confirmó lectura : %s", leido);
-                pthread_mutex_lock(&mutex_interfaces[STDIN]);
-                t_solicitud_io* solicitud = queue_peek(interfaces[STDIN].solicitudes);
-                // *** chequeo por las dudas pero no deberia de haber error
-                if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanioLectura){
-                    solicitud->leido = leido;
+                log_debug(kernel->logger, "## KM confirmó lectura para PID: %d", pid);
+                pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
+                t_solicitud_io* solicitud = queue_peek(interfaces[IO_STDOUT].solicitudes);
+                if(solicitud != NULL && solicitud->pidSolicitaSyscall == pid){
+                    solicitud->leido = malloc(solicitud->tamanio);
+                    memcpy(solicitud->leido, leido, solicitud->tamanio);
                 }
-                pthread_mutex_unlock(&mutex_interfaces[STDIN]);
+                pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
+                sem_post(&sem_recibiLecuraDeKM);
+                break;
+            }
+            case ESCRITURA_DE_DATOS_OK: {
+                int pid = *(int*) list_get(paquete, 1);
+                log_debug(kernel->logger, "## KM confirmó escritura STDIN para PID: %d", pid);
                 sem_post(&sem_recibiLecuraDeKM);
                 break;
             }

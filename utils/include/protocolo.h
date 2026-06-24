@@ -57,6 +57,7 @@ typedef enum{
     CONTEXT_ERROR,           //KM responde esto cuando no encuentra el CTX solicitado
     NUEVO_MEMORY_STICK,
     ESCRITURA_DE_DATOS,              //KS envía una serie de bytes y dir logica a KM para que MS lo escriba en sus segmentos
+    ESCRITURA_DE_DATOS_OK,           //KM responde esto a KS para confirmar que se escribió correctamente
     LECTURA_DE_DATOS,
     FINALIZAR_PROCESO,
     SUSPENSION_DE_PROCESO,

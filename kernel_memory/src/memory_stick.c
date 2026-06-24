@@ -237,9 +237,21 @@ void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_esc
         enviar_paquete(paquete_ms, socket_ms, logger);
         eliminar_paquete(paquete_ms);
 
-        log_info(logger, "Enviado fragmento %d al MS ID:%d | Tam: %d bytes en Dir Local: %u",
-                 i, frag->ms_id, frag->tamano, frag->dir_local);
-
+        log_info(logger, "Enviado fragmento %d al MS ID:%d | Tam: %d bytes en Dir Local: %u", i, frag->ms_id, frag->tamano, frag->dir_local);
+        
+        // Agrego espera confirmacion del Memory Stick antes de continuar
+        t_list* respuesta = recibir_paquete(socket_ms);
+        if (respuesta == NULL) {
+            log_error(logger, "Error al recibir confirmación de escritura del MS ID:%d", frag->ms_id);
+        } else {
+            int cod = *(int*) list_get(respuesta, 0);
+            if (cod == IO_OK) {
+                log_debug(logger, "Memory Stick con ID:%d confirmó escritura del fragmento %d", frag->ms_id, i);
+            } else {
+                log_error(logger, "Memory Stick con ID:%d respondió con código inesperado: %d", frag->ms_id, cod);
+            }
+            list_destroy_and_destroy_elements(respuesta, free);
+        }
         offset_contenido += frag->tamano;
     }
 }

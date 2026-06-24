@@ -45,11 +45,9 @@ void recibir_y_ejecutar_tarea(t_io* io, t_io_operation tipo_modulo) {
     log_info(io->logger, "## PID: %d - Inicio de IO", pid);
     switch (cod_op) {
         case STDIN: {
-            uint32_t dir_logica = 0;
             uint32_t tamano = 0;
-            if (list_size(paquete) > 2) dir_logica = *(uint32_t*) list_get(paquete, 2);
-            if (list_size(paquete) > 3) tamano = *(uint32_t*) list_get(paquete, 3);
-            log_debug(io->logger, "IO STDIN recibido: PID %d, dir_logica=%u, tamano=%u", pid, dir_logica, tamano);
+            if (list_size(paquete) > 2) tamano = *(uint32_t*) list_get(paquete, 2);
+            log_debug(io->logger, "IO STDIN recibido: PID %d, tamano=%u", pid, tamano);
             ejecutar_stdin(pid, tamano, io->socket_kernel_scheduler, io->logger);
             break;
         }

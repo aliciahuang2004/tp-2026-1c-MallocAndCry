@@ -218,6 +218,12 @@ void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectad
         int socket_io = interfaces[IO_STDIN].socket_interfaz;
         pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
         hacerSTDIN(solicitud,socket_io);
+        // KM confirmo OK, ahora sí desbloqueamos
+        if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
+            pasarProcesoBlockSuspAReadySusp(pid);
+        } else {
+            pasarProcesoBlockaReady(pid);
+        }
     } else {
         queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
         pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
@@ -250,7 +256,6 @@ void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conecta
         queue_push(interfaces[IO_STDOUT].solicitudes, solicitud);
         pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
     }
-    free(solicitud);
 }
 
 void finalizarProceso(int pid, op_code motivo){
@@ -402,7 +407,8 @@ void enviarAIO(int socket_io, t_solicitud_io* solicitud){
     } else if (solicitud->tipo == IO_STDIN){
         agregar_a_paquete(paquete, &(solicitud->tamanio), sizeof(uint32_t));
     } else if (solicitud->tipo == IO_STDOUT){
-        agregar_a_paquete(paquete, &solicitud->leido, sizeof(char*));
+        agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));  // tamanio en [2]
+        agregar_a_paquete(paquete, solicitud->leido, solicitud->tamanio);   // datos reales en [3]
     }
 
     enviar_paquete(paquete, socket_io, kernel->logger);
@@ -419,7 +425,7 @@ void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
         agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
         agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
         agregar_a_paquete(paquete,&solicitud->tamanio, sizeof(uint32_t));
-        agregar_a_paquete(paquete, &solicitud->leido, sizeof(char*));
+        agregar_a_paquete(paquete, &solicitud->leido, solicitud->tamanio);
     }
     if(solicitud->tipo == IO_STDOUT){
         paquete = crear_paquete(LECTURA_DE_DATOS, buffer);
@@ -437,6 +443,7 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
     enviarAIO(socket_io, solicitud);
     sem_wait(&sem_recibiLecuraDeIO);
     enviarAKMSolicitudIO(solicitud);
+    sem_wait(&sem_recibiLecuraDeKM);// espera que KM confirme la escritura
 }
 
 void hacerSTDOUT(t_solicitud_io* solicitud, int socket_io){

@@ -291,7 +291,11 @@ void* atender_conexion(void* arg) {
                     list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
                 } else {
                     log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
-                }   
+                }
+                t_paquete* confirmacion = crear_paquete(ESCRITURA_DE_DATOS_OK, crear_buffer());
+                agregar_a_paquete(confirmacion, &pid_recibido, sizeof(int));
+                enviar_paquete(confirmacion, km->socket_kernel_scheduler, logger);
+                eliminar_paquete(confirmacion);      
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
@@ -636,12 +640,13 @@ void* atender_conexion(void* arg) {
                 log_info(logger, "[Socket %d] Error en operación de lectura/escritura en Memory Stick recibida", socket_cliente);
             }
             break;
-            case IO_OK://(stdin)cuando envio peticion a case escritura de datos en ms,ms envia esto si salió todo bien
+            /*case IO_OK://(stdin)cuando envio peticion a case escritura de datos en ms,ms envia esto si salió todo bien
             {
                 //debería enviar confirmacion a ks acá?
                 log_info(logger, "[Socket %d] Confirmación de escritura exitosa en Memory Stick recibida", socket_cliente);
             }
-            break;
+            break;*/ //(Emi) ahora enviar_fragmentos_escritura recibe el IO_OK directamente del socket del MS
+
             case DATOS_LEIDOS://(stdout)cuando km envia peticion a case lectura de datos en ms,ms responde esto (datos_leidos) si todo salio bien
             {//en case lectura de datos ya envío rta a ks
                 log_info(logger, "[Socket %d] Confirmación de lectura exitosa en Memory Stick recibida", socket_cliente);
