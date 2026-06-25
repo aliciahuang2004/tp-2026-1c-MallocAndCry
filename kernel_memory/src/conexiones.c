@@ -8,6 +8,7 @@
 #include "huecos.h"
 #include "compactacion.h"
 #include "segmentos.h"
+#include "errno.h"
 
 uint32_t memoria_total = 0;
 
@@ -18,7 +19,10 @@ void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd){
 
         int fd_conexion_kernel_memory = esperar_cliente(kernel_memory_fd);
         log_debug(kernelMemory->logger, "Esperando que se conecte un cliente");
-
+        if (fd_conexion_kernel_memory == -1) {
+            log_error(kernelMemory->logger, "Error en accept(): %s", strerror(errno));
+            break;
+        }
         t_hacerConnect* datosConexion = malloc(sizeof(t_hacerConnect));
         datosConexion->logger = kernelMemory->logger;
 
@@ -299,9 +303,10 @@ void* atender_conexion(void* arg) {
             }
             break;
             case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
-            {                
-                uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 1);
-                uint32_t tamano = *(uint32_t*) list_get(paquete,2); 
+            {   
+                int pid_recibido = *(int*) list_get(paquete, 1);             
+                uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 2);
+                uint32_t tamano = *(uint32_t*) list_get(paquete,3); 
 
                 t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano,logger);
   
@@ -313,6 +318,7 @@ void* atender_conexion(void* arg) {
                 if (contenido_leido_completo != NULL) {
                     
                     t_paquete* respuesta_final = crear_paquete(RTA_LECTURA, crear_buffer());
+                    agregar_a_paquete(respuesta_final, &pid_recibido, sizeof(int));
                     agregar_a_paquete(respuesta_final,contenido_leido_completo,tamano);
                     enviar_paquete(respuesta_final,km->socket_kernel_scheduler,logger);
                     eliminar_paquete(respuesta_final);
