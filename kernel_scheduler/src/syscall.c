@@ -15,7 +15,7 @@ t_pcb* crear_PCB(char* path, int prioridad){
 void crearProceso(char* path, int prioridad){
     t_pcb* pcbNuevo = crear_PCB(path, prioridad);
     
-    enviarPathYPidKM(pcbNuevo->pid,path);
+    
     
     //AGREGAR A COLA NEW, es realmente necesario?
     
@@ -23,6 +23,7 @@ void crearProceso(char* path, int prioridad){
     queue_push(colaNEW, pcbNuevo);
     pthread_mutex_unlock(&mutex_NEW);
     log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
+    enviarPathYPidKM(pcbNuevo->pid,path);
 }
 
 void enviarPathYPidKM(int pid, char* path){
@@ -228,6 +229,7 @@ void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectad
         queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
         pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
     }
+    if(solicitud->leido != NULL) free(solicitud->leido);
     free(solicitud);
 }
 
@@ -424,8 +426,8 @@ void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
         paquete = crear_paquete(ESCRITURA_DE_DATOS, buffer);
         agregar_a_paquete(paquete, &solicitud->pidSolicitaSyscall, sizeof(int));
         agregar_a_paquete(paquete, &solicitud->direccion, sizeof(uint32_t));
-        agregar_a_paquete(paquete,&solicitud->tamanio, sizeof(uint32_t));
-        agregar_a_paquete(paquete, &solicitud->leido, solicitud->tamanio);
+        agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
+        agregar_a_paquete(paquete, solicitud->leido, solicitud->tamanio);
     }
     if(solicitud->tipo == IO_STDOUT){
         paquete = crear_paquete(LECTURA_DE_DATOS, buffer);

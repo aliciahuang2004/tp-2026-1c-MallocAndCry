@@ -40,15 +40,15 @@ void* atender_io(void* arg) {
                     char* lecturaIO = (char*) list_get(paquete, 3);
                     int tamanioLectura = strlen(lecturaIO) + 1;
                     if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanio){
-                        solicitud->leido = lecturaIO;
+                        solicitud->leido = strdup(lecturaIO);
                         log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
                     }
                     sem_post(&sem_recibiLecuraDeIO);
                 }
 
-                if (tipoIO != IO_STDOUT) {
                     // Extraer de forma segura el PID que envió el módulo de I/O
-                    log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
+                log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
+                if(tipoIO != IO_STDIN) {
                     if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
                         log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
                         if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
@@ -105,11 +105,12 @@ void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
         if(tipo != IO_STDOUT){
             enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
             pthread_mutex_unlock(&mutex_interfaces[tipo]);
+            free(solicitud);
         }else{
-            enviarAKMSolicitudIO(queue_peek(interfaces[STDOUT].solicitudes));
+            queue_push(interfaces[tipo].solicitudes, solicitud);
+            enviarAKMSolicitudIO(solicitud);            
             pthread_mutex_unlock(&mutex_interfaces[tipo]);
         }
-        free(solicitud);
     } else {
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
     }
