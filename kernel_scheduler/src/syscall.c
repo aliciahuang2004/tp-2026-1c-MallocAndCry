@@ -180,9 +180,9 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
-    log_info(kernel->logger,"ANTES DE SEMAFORO HAY IO");
+    log_info(kernel->logger,"ANTES DE SEMAFORO HAY IO"); //BORRAR
     sem_wait(&sem_hayIO[IO_SLEEP]);
-    log_info(kernel->logger,"DESPUES DE SEMAFORO HAY IO");
+    log_info(kernel->logger,"DESPUES DE SEMAFORO HAY IO"); //BORRAR
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;
@@ -280,7 +280,9 @@ void finalizarProceso(int pid, op_code motivo){
             pthread_mutex_unlock(&mutex_NEW);
             break;
         }
-        case DESCONEXION_CPU:{
+        case DESCONEXION_CPU:
+        case SEG_FAULT:
+        case EXIT_PROC:
             pthread_mutex_lock(&mutex_EXEC);
             t_queue* aux = queue_create();
             while (!queue_is_empty(colaEXEC)) {
@@ -292,7 +294,7 @@ void finalizarProceso(int pid, op_code motivo){
             queue_destroy(aux);
             pthread_mutex_unlock(&mutex_EXEC);
             break;
-        }
+        
         /*
         case DESCONEXION_IO:{
             //BUSCAR EN BLOQUEADO O SUSPENDIDO BLOQUEADO
@@ -311,21 +313,8 @@ void finalizarProceso(int pid, op_code motivo){
             break;
         }
         */
-        case EXIT_PROC: { 
-            pthread_mutex_lock(&mutex_EXEC);
-            t_queue* aux = queue_create();
-            while (!queue_is_empty(colaEXEC)) {
-                t_pcb* p = queue_pop(colaEXEC);
-                if (pcb == NULL && p->pid == pid) pcb = p;
-                else queue_push(aux, p);
-            }
-            while (!queue_is_empty(aux)) queue_push(colaEXEC, queue_pop(aux));
-            queue_destroy(aux);
-            pthread_mutex_unlock(&mutex_EXEC);
-            break;
-        }
         default:{
-            log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
+            log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual");
             break;
         }
     }
@@ -405,7 +394,10 @@ void eliminarProceso(int pid, op_code motivo){
         break;
 
     case DESCONEXION_CPU:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION_CPU>",pid);
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION DE CPU>",pid);
+        break;
+    case SEG_FAULT:
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>",pid);
         break;
     default:
         log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
