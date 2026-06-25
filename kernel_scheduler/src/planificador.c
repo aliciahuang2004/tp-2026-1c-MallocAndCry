@@ -734,9 +734,8 @@ t_cpu_conectada* buscarCPUSegunPID(int pid){
         t_cpu_conectada* cpu = queue_pop(colaCPUs);
         if (cpu_elegida == NULL && cpu->pidEjecutando == pid){
             cpu_elegida = cpu;
-        } else {
-            queue_push(colaAux, cpu);
         }
+        queue_push(colaAux, cpu);
     }
 
     while(!queue_is_empty(colaAux)){

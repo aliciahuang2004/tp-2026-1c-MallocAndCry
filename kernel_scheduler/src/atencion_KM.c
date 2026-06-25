@@ -47,7 +47,7 @@ void* atender_kernel_memory(void* arg) {
             case CREACION_DE_SEGMENTO_ERROR:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_error(kernel->logger, "## KM reportó error en creación de segmento - PID: %d", pid);
-                //SE VUELVE A MANDAR O FINALIZA?
+                enviarPIDAcpu(pid, buscarCPUSegunPID(pid));
                 break;
             }
             case RTA_LECTURA:{
@@ -78,8 +78,7 @@ void* atender_kernel_memory(void* arg) {
                 break;
             }
             case INICIAR_COMPACTACION:{
-                int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento - PID: %d", pid);
+                //log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento - PID: %d", pid);
                 //prepararParaCompactar();
                 /*
                 // pedirDesalojoPorCompactacion();
@@ -101,7 +100,7 @@ void* atender_kernel_memory(void* arg) {
 
                 break;
             }
-            case COMPACTACION_TERMINADA:{
+            case COMPACTACION_OK:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM informó fin de compactación para creación de segmento - PID: %d", pid);
                 // replanificar();
