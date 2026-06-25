@@ -1,6 +1,7 @@
 #include "kernel_scheduler.h"
 
 int pidParaAsignar = 0;
+bool noHayCompactacion = true;
 
 t_queue* colaNEW;
 t_queue** colasREADY;
@@ -329,23 +330,25 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
 void* monitorPrioridades(void* arg){
     while(1) {
-        sem_wait(&sem_readyPrioridad);
-        while(buscarCPULibre() == NULL){
-            pthread_mutex_lock(&mutex_CPU);
-            int cantidad = queue_size(colaCPUs);    
-            for(int i = 0; i < cantidad; i++) {
-                t_cpu_conectada* cpu = queue_pop(colaCPUs);
-                if(!cpu->libre ) {
-                    int prioridadActual = cpu->pidEjecutando;
-                    int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
-                    if(nuevaPrioridad != -1) {
-                        t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
-                        notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
+        while(noHayCompactacion){
+            sem_wait(&sem_readyPrioridad);
+            while(buscarCPULibre() == NULL){
+                pthread_mutex_lock(&mutex_CPU);
+                int cantidad = queue_size(colaCPUs);    
+                for(int i = 0; i < cantidad; i++) {
+                    t_cpu_conectada* cpu = queue_pop(colaCPUs);
+                    if(!cpu->libre ) {
+                        int prioridadActual = cpu->pidEjecutando;
+                        int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
+                        if(nuevaPrioridad != -1) {
+                            t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
+                            notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
+                        }
                     }
+                    queue_push(colaCPUs,cpu);
                 }
-                queue_push(colaCPUs,cpu);
+                pthread_mutex_unlock(&mutex_CPU);
             }
-            pthread_mutex_unlock(&mutex_CPU);
         }
     }
     return NULL;
@@ -416,23 +419,30 @@ void pasarProcesoExecAReady(int pid){
     pthread_mutex_unlock(&mutex_EXEC);
 
     pcb->estado = READY;
-    int socket_cpu = pcb->socketCPUEjecuta;
     pcb->socketCPUEjecuta = -1;
     
     //AGREGO A READY
-    pthread_mutex_lock(&mutex_READY[pcb->prioridad]);
-    queue_push(colasREADY[pcb->prioridad],pcb);
-    pthread_mutex_unlock(&mutex_READY[pcb->prioridad]);
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+    case RR:
+        pthread_mutex_lock(&mutex_READY[0]);
+        queue_push(colasREADY[0],pcb);
+        pthread_mutex_unlock(&mutex_READY[0]);
+        break;
+
+    case CMN:
+        pthread_mutex_lock(&mutex_READY[pcb->prioridad]);
+        queue_push(colasREADY[pcb->prioridad],pcb);
+        pthread_mutex_unlock(&mutex_READY[pcb->prioridad]);
+        sem_post(&sem_readyPrioridad); 
+        break;   
+    default:
+        log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
+        break;
+    }
     
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
-
-    t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
-    if(cpu != NULL){
-        //LIBERO CPU
-        liberarCPU(cpu);
-    }else{
-        log_error(kernel->logger, "ERROR al liberar CPU");
-    }
+    sem_post(&sem_hayProcesosEnReady);
 }
 
 void liberarCPU(t_cpu_conectada* cpu){
@@ -795,4 +805,62 @@ t_tipo_io buscarTipoIOPorSocket(int socket_io) {
         pthread_mutex_unlock(&mutex_interfaces[i]);
     }
     return -1; // No se encontró el tipo de IO para el socket dado
+}
+
+void reencolarAlInicio(int pid){
+    t_pcb* pcb = NULL;
+
+    //SACO DE EXEC
+    pthread_mutex_lock(&mutex_EXEC);
+    
+    int cantidad = queue_size(colaEXEC);
+    for(int i = 0; i < cantidad; i++){
+        t_pcb* pcbEjecuta = queue_pop(colaEXEC);
+        if (pcb == NULL && pcbEjecuta->pid == pid){
+            pcb = pcbEjecuta;
+        }else{
+            queue_push(colaEXEC,pcbEjecuta);
+        }        
+    }
+    pthread_mutex_unlock(&mutex_EXEC);
+
+    pcb->estado = READY;
+        
+    //AGREGO A READY
+
+    t_queue* colaAux = queue_create();
+    
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+    case RR:
+        //SACO TODO DE LA COLA, AGREGO, METO LO SACADO
+        pthread_mutex_lock(&mutex_READY[0]);
+        while(queue_is_empty(colasREADY[0])){
+            queue_push(colaAux,queue_pop(colasREADY[0]));
+        }
+        queue_push(colasREADY[0],pcb);
+        while(queue_is_empty(colaAux)){
+            queue_push(colasREADY[0],queue_pop(colaAux));
+        }
+        pthread_mutex_unlock(&mutex_READY[0]);
+        break;
+
+    case CMN:
+        int prioridad = pcb->prioridad;
+        pthread_mutex_lock(&mutex_READY[prioridad]);
+        while(queue_is_empty(colasREADY[prioridad])){
+            queue_push(colaAux,queue_pop(colasREADY[prioridad]));
+        }
+        queue_push(colasREADY[prioridad],pcb);
+        while(queue_is_empty(colaAux)){
+            queue_push(colasREADY[prioridad],queue_pop(colaAux));
+        }
+        pthread_mutex_unlock(&mutex_READY[prioridad]);
+        break;   
+    default:
+        log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
+        break;
+    }
+    queue_destroy(colaAux);
+    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
 }

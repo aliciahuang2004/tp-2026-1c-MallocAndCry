@@ -104,6 +104,7 @@ typedef struct {
 extern int pidParaAsignar;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
+extern bool noHayCompactacion;
 
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
@@ -156,6 +157,8 @@ void inicializar_interfaces();
 
 // atencionKM
 void* atender_kernel_memory(void* arg);
+void pedirDesalojoPorCompactacion();
+void chequearCPUsDesalojadas();
 
 // atencionCPU
 void* atender_cpu(void* arg);
@@ -203,6 +206,7 @@ t_cpu_conectada* buscarCPUSegunPID(int pid);
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
 void* loop_corto_plazo(void* args);
 t_tipo_io buscarTipoIOPorSocket(int socket_io);
+void reencolarAlInicio(int pid);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);

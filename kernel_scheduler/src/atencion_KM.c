@@ -1,7 +1,7 @@
 #include "kernel_scheduler.h"
 
 void* atender_kernel_memory(void* arg) {
-    log_info(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
+    log_debug(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
 
     while (1) {
         t_list* paquete = recibir_paquete(kernel->socket_kernel_memory);
@@ -78,33 +78,25 @@ void* atender_kernel_memory(void* arg) {
                 break;
             }
             case INICIAR_COMPACTACION:{
-                int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento - PID: %d", pid);
-                //prepararParaCompactar();
-                /*
-                // pedirDesalojoPorCompactacion();
-                // reencolar procesos
+                log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento");
+                
+                noHayCompactacion = false; // para el planificador
+                pedirDesalojoPorCompactacion();
+                chequearCPUsDesalojadas();
+                
                 t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
-            
-                agregar_a_paquete(paquete,&pidSolicitaSyscall,sizeof(int));
 
                 enviar_paquete(paquete,kernel->socket_kernel_memory,kernel->logger);
             
                 eliminar_paquete(paquete);
-
-                int cod_op2 = recibir_operacion(kernel->socket_kernel_memory);
-                if(cod_op2 == CREACION_DE_SEGMENTO_OK) {
-                    log_info(kernel->logger, "Compactación finalizada, reactivando planificador");
-                    // reactivar planificador
-                }
-                */
+                log_info(kernel->logger, "## Inicio de compactación");
 
                 break;
             }
             case COMPACTACION_TERMINADA:{
-                int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM informó fin de compactación para creación de segmento - PID: %d", pid);
-                // replanificar();
+                log_debug(kernel->logger, "## KM informó fin de compactación");
+                noHayCompactacion = true; // reinicia planificador
+                log_info(kernel->logger, "## Fin de compactación");
                 break;
             }
             case AUMENTO_DE_MEMORIA:{
@@ -156,4 +148,44 @@ void* atender_kernel_memory(void* arg) {
     }
 
     return NULL;
+}
+
+void pedirDesalojoPorCompactacion(){
+    t_cpu_conectada* cpuOcupada = NULL;
+
+    t_queue* cpuOcupadas = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidadCpu = queue_size(colaCPUs); 
+    for(int i = 0; i < cantidadCpu ; i++){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if(!cpu->libre){
+            cpuOcupada = cpu;
+            queue_push(cpuOcupadas,cpuOcupada);
+        }
+        queue_push(colaCPUs,cpu);
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+
+    log_debug(kernel->logger,"TOTAL CPU'S %d", cantidadCpu);
+    log_debug(kernel->logger,"TOTAL CPU'S OCUPADAS %d",  queue_size(cpuOcupadas));
+
+    while (queue_is_empty(cpuOcupadas)){
+        t_cpu_conectada* cpu = queue_pop(cpuOcupadas);
+        notificarDesalojo(cpu,NULL, PROCESO_DESALOJADO_COMPACTACION);
+    }
+    queue_destroy(cpuOcupadas);
+}
+
+void chequearCPUsDesalojadas(){
+    bool faltaLiberar =true ;
+    while(faltaLiberar){
+        pthread_mutex_lock(&mutex_EXEC);
+        int cantidad = queue_size(colaEXEC);
+        pthread_mutex_unlock(&mutex_EXEC);
+        log_debug(kernel->logger, "Procesos ejecutando %d", cantidad);
+        if(cantidad == 0){
+            faltaLiberar = false;
+        }
+    }
 }

@@ -66,12 +66,12 @@ void esperar_conexiones() {
         log_error(kernel->logger, "No se pudo iniciar el servidor Scheduler en puerto %s", kernel->puerto_escucha);
         return;
     }
-    log_info(kernel->logger, "Servidor Scheduler escuchando en puerto %s", kernel->puerto_escucha);
+    log_debug(kernel->logger, "Servidor Scheduler escuchando en puerto %s", kernel->puerto_escucha);
 
     while (1) {
         int cliente_fd = esperar_cliente(server_fd);
         if (cliente_fd != -1) {
-            log_info(kernel->logger, "Cliente conectado en socket %d", cliente_fd);
+            log_debug(kernel->logger, "Cliente conectado en socket %d", cliente_fd);
             pthread_t hilo_atencion;
             t_atencion_cliente* datos = malloc(sizeof(t_atencion_cliente));
             datos->socket_cliente = cliente_fd;
@@ -90,7 +90,7 @@ void* atender_cliente_scheduler(void* arg) {
     t_log* logger = datos->logger;
 
     while (1) {
-        log_info(logger, "Nuevo cliente detectado en socket %d. Leyendo operación...", socket_cliente);
+        log_debug(logger, "Nuevo cliente detectado en socket %d. Leyendo operación...", socket_cliente);
         t_list* paquete = recibir_paquete(socket_cliente);
         if (paquete == NULL) {
             log_error(logger, "El cliente en socket %d se desconectó o envió un paquete inválido", socket_cliente);
@@ -103,7 +103,7 @@ void* atender_cliente_scheduler(void* arg) {
             break;
         }
         int cod_op = *cod_op_ptr;
-        log_info(logger, "Código de operación recibido: %d", cod_op);
+        log_debug(logger, "Código de operación recibido: %d", cod_op);
 
         switch (cod_op) {
             case CPU_HANDSHAKE:{
@@ -150,7 +150,7 @@ void* atender_cliente_scheduler(void* arg) {
                 break;
             }
             case IO_HANDSHAKE:{
-                log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
+                log_debug(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
                 int* tipo_interfaz_ptr = (int*) list_get(paquete, 1);
 
                 if (tipo_interfaz_ptr == NULL) {
@@ -169,7 +169,7 @@ void* atender_cliente_scheduler(void* arg) {
                 if(interfaces[tipo_interfaz].socket_interfaz == -1){
                     interfaces[tipo_interfaz].socket_interfaz = socket_cliente;
                     interfaces[tipo_interfaz].ocupada = false;
-                    log_info(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
+                    log_debug(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
                     pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                 }else{
                     log_error(kernel->logger, "ERROR: Tipo %s, ya conectado en socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);

@@ -4,7 +4,7 @@ void* atender_cpu(void* arg){
     int socket_cpu = *(int*)arg;
     free(arg);
 
-    log_info(kernel->logger, "CPU Listener: hilo iniciado en socket %d", socket_cpu);
+    log_debug(kernel->logger, "CPU Listener: hilo iniciado en socket %d", socket_cpu);
     sem_post(&sem_hayCPUdisponible);
     
     while(1) {
@@ -22,7 +22,7 @@ void* atender_cpu(void* arg){
         int pidSolicitaSyscall = *(int*) list_get(paquete, 1);
         t_cpu_conectada* cpu_emisora = buscar_cpu_por_socket(socket_cpu);
 
-        log_info(kernel->logger, "ID CPU: %d", cpu_emisora->id_cpu);
+        log_debug(kernel->logger, "ID CPU: %d", cpu_emisora->id_cpu);
 
         switch (cod_op) {
             case MUTEX_CREATE:{
@@ -104,25 +104,26 @@ void* atender_cpu(void* arg){
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
-                log_info(kernel->logger, "## (<%d>) - Proceso desalojado por quantum", pidSolicitaSyscall);
+                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por fin de quantum - Pasando el proceso a Ready...", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_PRIORIDAD:{
-                log_info(kernel->logger, "## (<%d>) - Proceso desalojado por prioridad", pidSolicitaSyscall);
+                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por proceso con prioridad más alta", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_COMPACTACION:{
-                log_info(kernel->logger, "## (<%d>) - Proceso desalojado por prioridad", pidSolicitaSyscall);
-                // reencolar al inicio
+                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por compactacion", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                reencolarAlInicio(pidSolicitaSyscall);
+                liberarCPU(cpu_emisora);
                 break;
             }
 
             case SEG_FAULT: { 
-                log_error(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
+                log_debug(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
                 finalizarProceso(pidSolicitaSyscall,SEG_FAULT);
                 liberarCPU(cpu_emisora);
                 break;

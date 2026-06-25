@@ -4,7 +4,7 @@ void* atender_io(void* arg) {
     int socket_io = *(int*)arg;
     free(arg);
 
-    log_info(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
+    log_debug(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
     sem_post(&sem_hayIO[buscarTipoIOPorSocket(socket_io)]);
 
     while(1) {
@@ -38,7 +38,6 @@ void* atender_io(void* arg) {
                 if(tipoIO == IO_STDIN){
                     int tamanio = *(int*) list_get(paquete, 2);
                     char* lecturaIO = (char*) list_get(paquete, 3);
-                    int tamanioLectura = strlen(lecturaIO) + 1;
                     if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanio){
                         solicitud->leido = strdup(lecturaIO);
                         log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
@@ -55,11 +54,13 @@ void* atender_io(void* arg) {
                         break; // Salimos del case para evitar errores posteriores
                     } else {
                         pasarProcesoBlockSuspAReadySusp(pid);
-                        log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                        log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                     }
                 } else {
                     pasarProcesoBlockaReady(pid);
-                    log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                    log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
+                    log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
                 }
                 liberarIO(tipoIO);
                 revisarProcesosBloqueadosParaTipoIO(tipoIO);
@@ -88,7 +89,7 @@ void liberarIO(t_tipo_io tipo){
     pthread_mutex_lock(&mutex_interfaces[tipo]);
     interfaces[tipo].ocupada = false;
     interfaces[tipo].pidAsignado = -1;
-    log_info(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
+    log_debug(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
     pthread_mutex_unlock(&mutex_interfaces[tipo]);
     sem_post(&sem_hayIO[tipo]);
 }
@@ -99,7 +100,7 @@ void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
         t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
         interfaces[tipo].ocupada = true;
         interfaces[tipo].pidAsignado = solicitud->pidSolicitaSyscall;
-        log_info(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
+        log_debug(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
         if(tipo != IO_STDOUT){
             enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
             pthread_mutex_unlock(&mutex_interfaces[tipo]);
