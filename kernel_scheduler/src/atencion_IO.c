@@ -46,22 +46,20 @@ void* atender_io(void* arg) {
                     sem_post(&sem_recibiLecuraDeIO);
                 }
 
-                if (tipoIO != IO_STDOUT) {
                     // Extraer de forma segura el PID que envió el módulo de I/O
-                    log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
-                    if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
-                        log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
-                        if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
-                            log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
-                            break; // Salimos del case para evitar errores posteriores
-                        } else {
-                            pasarProcesoBlockSuspAReadySusp(pid);
-                            log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
-                        }
+                log_info(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
+                if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
+                    log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
+                    if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
+                        log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
+                        break; // Salimos del case para evitar errores posteriores
                     } else {
-                        pasarProcesoBlockaReady(pid);
-                        log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
+                        pasarProcesoBlockSuspAReadySusp(pid);
+                        log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                     }
+                } else {
+                    pasarProcesoBlockaReady(pid);
+                    log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
                 }
                 liberarIO(tipoIO);
                 revisarProcesosBloqueadosParaTipoIO(tipoIO);

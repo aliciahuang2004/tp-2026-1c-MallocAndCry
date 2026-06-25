@@ -179,9 +179,9 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
-
+    log_info(kernel->logger,"ANTES DE SEMAFORO HAY IO");
     sem_wait(&sem_hayIO[IO_SLEEP]);
-
+    log_info(kernel->logger,"DESPUES DE SEMAFORO HAY IO");
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;
@@ -260,6 +260,8 @@ void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conecta
 
 void finalizarProceso(int pid, op_code motivo){
     t_pcb* pcb = NULL;
+
+    //BUSCAMOS PCB SEGUN MOTIVO DE FINALIZACION
     switch (motivo){
         case CREACION_DE_PROCESO_ERROR:{
             pthread_mutex_lock(&mutex_NEW);
@@ -276,11 +278,22 @@ void finalizarProceso(int pid, op_code motivo){
             pthread_mutex_unlock(&mutex_NEW);
             break;
         }
+        case DESCONEXION_CPU:{
+            pthread_mutex_lock(&mutex_EXEC);
+            t_queue* aux = queue_create();
+            while (!queue_is_empty(colaEXEC)) {
+                t_pcb* p = queue_pop(colaEXEC);
+                if (pcb == NULL && p->pid == pid) pcb = p;
+                else queue_push(aux, p);
+            }
+            while (!queue_is_empty(aux)) queue_push(colaEXEC, queue_pop(aux));
+            queue_destroy(aux);
+            pthread_mutex_unlock(&mutex_EXEC);
+            break;
+        }
         /*
         case DESCONEXION_IO:{
-            t_pcb* p = NULL;
             //BUSCAR EN BLOQUEADO O SUSPENDIDO BLOQUEADO
-
             pthread_mutex_lock(&mutex_BLOCK);
             t_queue* aux = queue_create();
             while (!queue_is_empty(colaBLOCK)) {
@@ -309,9 +322,10 @@ void finalizarProceso(int pid, op_code motivo){
             pthread_mutex_unlock(&mutex_EXEC);
             break;
         }
-        default:
+        default:{
             log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
             break;
+        }
     }
     
 
@@ -320,6 +334,7 @@ void finalizarProceso(int pid, op_code motivo){
         exit(EXIT_FAILURE);
     }
 
+    //LO PASAMOS A LA COLA EXIT
     pcb->estado = EXIT;
 
     pthread_mutex_lock(&mutex_EXIT);
@@ -328,6 +343,7 @@ void finalizarProceso(int pid, op_code motivo){
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
 
+    //AVISAMOS A KM PARA QUE LIBERE SEGMENTOS SI LOS TIENE
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO, buffer); //Km espera este codigo
 
@@ -341,6 +357,7 @@ void finalizarProceso(int pid, op_code motivo){
     }
     eliminar_paquete(paquete);
 
+    //ELIMINO EL PROCESO
     eliminarProceso(pid,motivo);
         
 }
@@ -384,7 +401,10 @@ void eliminarProceso(int pid, op_code motivo){
     case CREACION_DE_PROCESO_ERROR:
         log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <ERROR AL CREAR EL PROCESO>",pid);
         break;
-    
+
+    case DESCONEXION_CPU:
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION_CPU>",pid);
+        break;
     default:
         log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
         break;
