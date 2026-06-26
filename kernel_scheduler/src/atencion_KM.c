@@ -26,28 +26,26 @@ void* atender_kernel_memory(void* arg) {
                 finalizarProceso(pid,CREACION_DE_PROCESO_ERROR);
                 break;
             }
-            /*case ELIMINACION_DE_SEGMENTO_OK:{
+            case ELIMINACION_DE_SEG_OK: {
                 int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM confirmó eliminación de proceso - PID: %d", pid);
-                enviarPIDAcpu(pid,buscarCPUSegunPID(pid));
+                log_debug(kernel->logger, "## KM confirmó eliminación de segmento - PID: %d", pid);
                 break;
             }
-            case ELIMINACION_DE_SEGMENTO_ERROR:{
+            case ELIMINACION_DE_SEG_ERROR: {
                 int pid = *(int*) list_get(paquete, 1);
-                log_error(kernel->logger, "## KM reportó error en eliminación de proceso - PID: %d", pid);
-                //SE VUELVE A MANDAR O FINALIZA?
+                log_error(kernel->logger, "## KM reportó error en eliminación de segmento - PID: %d", pid);
                 break;
-            }*/
+            }
+
             case CREACION_DE_SEGMENTO_OK:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM confirmó creación de segmento - PID: %d", pid);
                 enviarPIDAcpu(pid,buscarCPUSegunPID(pid));
                 break;
             }
-            case CREACION_DE_SEGMENTO_ERROR:{
+            case CREACION_DE_SEGMENTO_ERROR:{ // en nuestro flujo e compactacion cuando llega CREACION_DE_SEGMENTO_ERROR, el proceso ya fue movido a READY y la CPU ya fue liberada
                 int pid = *(int*) list_get(paquete, 1);
                 log_error(kernel->logger, "## KM reportó error en creación de segmento - PID: %d", pid);
-                enviarPIDAcpu(pid, buscarCPUSegunPID(pid));
                 break;
             }
             case RTA_LECTURA:{
@@ -93,7 +91,7 @@ void* atender_kernel_memory(void* arg) {
 
                 break;
             }
-            case COMPACTACION_TERMINADA:{
+            case COMPACTACION_OK:{
                 log_debug(kernel->logger, "## KM informó fin de compactación");
                 noHayCompactacion = true; // reinicia planificador
                 log_info(kernel->logger, "## Fin de compactación");
@@ -169,8 +167,9 @@ void pedirDesalojoPorCompactacion(){
 
     log_debug(kernel->logger,"TOTAL CPU'S %d", cantidadCpu);
     log_debug(kernel->logger,"TOTAL CPU'S OCUPADAS %d",  queue_size(cpuOcupadas));
-
-    while (queue_is_empty(cpuOcupadas)){
+    log_debug(kernel->logger, "[DEBUG-1] queue_is_empty(cpuOcupadas)=%d (0=tiene CPUs, 1=vacia)", queue_is_empty(cpuOcupadas));
+    while (!queue_is_empty(cpuOcupadas)){
+        log_debug(kernel->logger, "[DEBUG-2] Enviando desalojo a una CPU");
         t_cpu_conectada* cpu = queue_pop(cpuOcupadas);
         notificarDesalojo(cpu,NULL, PROCESO_DESALOJADO_COMPACTACION);
     }

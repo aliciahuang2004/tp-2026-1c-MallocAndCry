@@ -289,8 +289,16 @@ void esperar_proceso(t_cpu *cpu)
                 log_warning(cpu->logger, "Código de operación desconocido: %d", cod_op);
             }
             list_destroy_and_destroy_elements(paquete, free);
+
+        }else if (cod_op == PROCESO_DESALOJADO_COMPACTACION)
+        {
+            int pid_desalojado = *(int *)list_get(paquete, 1);
+            log_info(cpu->logger, "## CPU desalojada por compactacion. PID: %d", pid_desalojado);
+            devolver_proceso_interrumpido(cpu, pid_desalojado, PROCESO_DESALOJADO_COMPACTACION);
+            list_destroy_and_destroy_elements(paquete, free);
         }
     }
+    
 }
 
 t_contexto *solicitar_contexto(t_cpu *cpu, int pid)

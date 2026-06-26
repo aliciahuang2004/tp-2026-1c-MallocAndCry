@@ -117,6 +117,7 @@ void* atender_cpu(void* arg){
             }
             case PROCESO_DESALOJADO_COMPACTACION:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por compactacion", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                log_debug(kernel->logger, "[DEBUG-4] KS recibio respuesta compactacion de CPU, pid=%d", pidSolicitaSyscall);
                 reencolarAlInicio(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;

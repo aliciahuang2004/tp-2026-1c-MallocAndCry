@@ -244,9 +244,6 @@ t_cpu_conectada* elegirCPU(){
     //MARCO CPU COMO OCUPADA Y LA AGREGO A LA COLA
     if (cpu_elegida != NULL) {
         cpu_elegida->libre = false;
-        pthread_mutex_lock(&mutex_CPU);
-        queue_push(colaCPUs, cpu_elegida); 
-        pthread_mutex_unlock(&mutex_CPU);
     }
     return cpu_elegida;
 }
@@ -834,11 +831,11 @@ void reencolarAlInicio(int pid){
     case RR:
         //SACO TODO DE LA COLA, AGREGO, METO LO SACADO
         pthread_mutex_lock(&mutex_READY[0]);
-        while(queue_is_empty(colasREADY[0])){
+        while(!queue_is_empty(colasREADY[0])){
             queue_push(colaAux,queue_pop(colasREADY[0]));
         }
         queue_push(colasREADY[0],pcb);
-        while(queue_is_empty(colaAux)){
+        while(!queue_is_empty(colaAux)){
             queue_push(colasREADY[0],queue_pop(colaAux));
         }
         pthread_mutex_unlock(&mutex_READY[0]);
@@ -847,11 +844,11 @@ void reencolarAlInicio(int pid){
     case CMN:
         int prioridad = pcb->prioridad;
         pthread_mutex_lock(&mutex_READY[prioridad]);
-        while(queue_is_empty(colasREADY[prioridad])){
+        while(!queue_is_empty(colasREADY[prioridad])){
             queue_push(colaAux,queue_pop(colasREADY[prioridad]));
         }
         queue_push(colasREADY[prioridad],pcb);
-        while(queue_is_empty(colaAux)){
+        while(!queue_is_empty(colaAux)){
             queue_push(colasREADY[prioridad],queue_pop(colaAux));
         }
         pthread_mutex_unlock(&mutex_READY[prioridad]);
@@ -862,4 +859,5 @@ void reencolarAlInicio(int pid){
     }
     queue_destroy(colaAux);
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
+    sem_post(&sem_hayProcesosEnReady);
 }
