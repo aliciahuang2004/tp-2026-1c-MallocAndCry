@@ -180,9 +180,7 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
-    log_info(kernel->logger,"ANTES DE SEMAFORO HAY IO"); //BORRAR
     sem_wait(&sem_hayIO[IO_SLEEP]);
-    log_info(kernel->logger,"DESPUES DE SEMAFORO HAY IO"); //BORRAR
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;
