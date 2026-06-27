@@ -172,6 +172,9 @@ void pasarProcesoReadyAExec(){
     
     pcbAEjecutar->estado = EXEC;
     pcbAEjecutar->socketCPUEjecuta = cpuElegida->socket_cliente;
+    
+    log_debug(kernel->logger," PID ELEGIDO:%d - CPU ELEGIDA:%d - EJECUTA SEGUN: %d", pcbAEjecutar->pid, cpuElegida->id_cpu,ejecutaPorRR);
+
     pthread_mutex_lock(&mutex_EXEC);
     queue_push(colaEXEC,pcbAEjecutar);
     pthread_mutex_unlock(&mutex_EXEC);
@@ -214,8 +217,8 @@ t_pcb* elegirPorCMN(){
         pthread_mutex_lock(&mutex_READY[i]);
         if (!queue_is_empty(colasREADY[i])){
             pcbELegido = queue_pop(colasREADY[i]);
-            pthread_mutex_unlock(&mutex_READY[i]);
         }
+        pthread_mutex_unlock(&mutex_READY[i]);
     }
     if (pcbELegido != NULL){
         return pcbELegido;
