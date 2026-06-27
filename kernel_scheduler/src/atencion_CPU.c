@@ -13,6 +13,8 @@ void* atender_cpu(void* arg){
             t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
             if(cpu != NULL){
                 finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
+                quitarCPU(cpu);
+                free(cpu);
                 return NULL;
             }
             log_error(kernel->logger, "Error al recibir pedido de syscall");
@@ -137,4 +139,24 @@ void* atender_cpu(void* arg){
 
         list_destroy_and_destroy_elements(paquete,free);
     }
+}
+
+void quitarCPU(t_cpu_conectada* cpuDesconectada){
+    t_queue* colaAux = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+
+    while (!queue_is_empty(colaCPUs)){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if (cpuDesconectada == cpu){
+            log_debug(kernel->logger,"Se retira CPU con ID:%d por que fue desconectada", cpu->id_cpu);
+        } else {
+            queue_push(colaAux, cpu);
+        }
+    }
+    while(!queue_is_empty(colaAux)){
+        queue_push(colaCPUs, queue_pop(colaAux));
+    }
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_CPU);
 }

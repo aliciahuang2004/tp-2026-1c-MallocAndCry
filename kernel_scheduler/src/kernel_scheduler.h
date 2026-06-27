@@ -162,6 +162,7 @@ void chequearCPUsDesalojadas();
 
 // atencionCPU
 void* atender_cpu(void* arg);
+void quitarCPU(t_cpu_conectada* cpuDesconectada);
 
 // atencionIO
 void* atender_io(void* arg);

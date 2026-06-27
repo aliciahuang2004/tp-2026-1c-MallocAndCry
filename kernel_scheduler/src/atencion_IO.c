@@ -17,7 +17,7 @@ void* atender_io(void* arg) {
                 pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                 int pid = finalizoConexionIO(tipoIO);
                 finalizarProceso(pid,DESCONEXION_IO);
-            return NULL;
+                return NULL;
             }
             pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }
