@@ -90,6 +90,10 @@ void inicializarSemaforos(){
     sem_init(&sem_recibiLecuraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
     sem_init(&sem_desuspension_ok, 0, 0);
+
+    diccionario_mutex = dictionary_create();
+    pthread_mutex_init(&mutex_diccionario, NULL);
+
 }
 
 void pasarProcesoNewAReady(){
