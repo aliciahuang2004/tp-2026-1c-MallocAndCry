@@ -58,7 +58,7 @@ t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
 
     return lista_segmentos_temp;
 }
-int iniciar_compactacion(t_log* logger) {
+int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
     log_info(logger, "== [COMPACTACIÓN] Solicitud de compactación recibida ==");
 
     t_list* lista_ordenada = obtener_lista_temp_ord(list_create(), logger);
@@ -77,7 +77,7 @@ int iniciar_compactacion(t_log* logger) {
         uint32_t base_vieja = seg->base_global;
 
         t_list* frag_lectura = calcular_dir_local_ms(base_vieja, tamano_segmento, logger);
-        void* contenido_temporal = enviar_fragmentos_lectura(frag_lectura, tamano_segmento, logger);
+        void* contenido_temporal = enviar_fragmentos_lectura(frag_lectura, tamano_segmento, logger,km);
         list_destroy_and_destroy_elements(frag_lectura, free);
 
         if (contenido_temporal == NULL) {
@@ -90,7 +90,7 @@ int iniciar_compactacion(t_log* logger) {
         seg->limite_global = proxima_base_libre + (tamano_segmento - 1);
 
         t_list* frag_escritura = calcular_dir_local_ms(seg->base_global, tamano_segmento, logger);
-        enviar_fragmentos_escritura(frag_escritura, contenido_temporal, logger);
+        enviar_fragmentos_escritura(frag_escritura, contenido_temporal, logger,km);
         list_destroy_and_destroy_elements(frag_escritura, free);
 
         free(contenido_temporal);

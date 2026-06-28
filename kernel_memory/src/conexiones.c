@@ -96,16 +96,6 @@ void* atender_conexion(void* arg) {
         t_list* paquete = recibir_paquete(socket_cliente);
         
         if (!paquete) {
-        t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
-
-            if(ms != NULL) {
-                
-                //para caso de corrupcion de memoria
-               manejar_desconexion_memory_stick(ms, km, logger);
-            } else {
-                log_warning(logger, "Se desconectó un módulo no identificado. Socket:%d", socket_cliente);
-            }
-            //DEBERIA TENER EN CUENTA QUÉ MODULO SE DESCONECTÓ? MAS ALLA DE LOS MS (aunque no se dijo nada sobre la desconexion de otros módulos),si deberia ver cuando una cpu se desconecta
             log_error(logger, "Error al recibir paquete o cliente desconectado en socket %d.", socket_cliente);
             break; // Salimos del bucle si el cliente se cae
         }
@@ -116,7 +106,7 @@ void* atender_conexion(void* arg) {
             case CPU_HANDSHAKE:
                 es_cpu = true;
                 int cpu_id = *(int *)list_get(paquete, 1);
-                log_info(logger, "CPU ID:%d conectada en socket %d", cpu_id, socket_cliente);
+                log_info(logger, "[Socket %d] Conexión con CPU ID:%d exitosa", socket_cliente,cpu_id);
             
                 agregar_cpu_conectada(cpu_id, socket_cliente);
                 //enviar datos de los ms ya conectados antes que esta cpu
@@ -129,7 +119,7 @@ void* atender_conexion(void* arg) {
                 break;
 
             case MEMORY_STICK_HANDSHAKE: 
-            {
+            { 
                 int ms_id = *(int *)list_get(paquete, 1);
                 uint32_t ms_tamano = *(int *)list_get(paquete, 2);
                 char* ms_puerto = (char*) list_get(paquete, 3);
@@ -159,8 +149,10 @@ void* atender_conexion(void* arg) {
                 pthread_mutex_lock(&mutex_memoria_total);
                 log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
                 pthread_mutex_unlock(&mutex_memoria_total);
-                
-                break;
+                free(datos);
+                list_destroy_and_destroy_elements(paquete, free);
+                return NULL;
+                       
             }
 
             case KERNEL_SCHEDULER_HANDSHAKE:
@@ -225,7 +217,7 @@ void* atender_conexion(void* arg) {
                 break;
             }
 
-            case REQUEST_CONTEXTO://descomentar cuando cpu espere tabla
+            case REQUEST_CONTEXTO:
             {
                 int pid_solicitado = *(int *)list_get(paquete, 1);
                 int cpu_id         = *(int *)list_get(paquete, 2);
@@ -260,9 +252,6 @@ void* atender_conexion(void* arg) {
                         agregar_a_paquete(respuesta, &seg->base_global,    sizeof(uint32_t));
                         agregar_a_paquete(respuesta, &seg->limite_global,  sizeof(uint32_t));
                         agregar_a_paquete(respuesta, &seg->memory_stick_id,sizeof(int));//sirve a cpu cuando ejecuta mov out ,mov in?
-                       //nose si deberia usar estos dos campos o borrarlos
-                       // agregar_a_paquete(respuesta, &seg->en_swap,        sizeof(bool));
-                       //agregar_a_paquete(respuesta, &seg->bloque_swap,    sizeof(int));
                     }
                     enviar_paquete(respuesta, socket_cliente, logger);
                     eliminar_paquete(respuesta);
@@ -279,7 +268,7 @@ void* atender_conexion(void* arg) {
             }  
             break;
         
-           case ESCRITURA_DE_DATOS: ///***ESPERO STDIN DE KS
+           case ESCRITURA_DE_DATOS: 
             { 
                 int pid_recibido  = *(int*) list_get(paquete, 1);
                 uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 2);
@@ -291,7 +280,7 @@ void* atender_conexion(void* arg) {
 
                 if (lista_fragmentos_temp != NULL) {
             
-                    enviar_fragmentos_escritura(lista_fragmentos_temp, contenido_a_escribir, logger);
+                    enviar_fragmentos_escritura(lista_fragmentos_temp, contenido_a_escribir, logger,km);
                     list_destroy_and_destroy_elements(lista_fragmentos_temp, free);
                 } else {
                     log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
@@ -302,7 +291,7 @@ void* atender_conexion(void* arg) {
                 eliminar_paquete(confirmacion);      
             }
             break;
-            case LECTURA_DE_DATOS: ///***ESPERO STDOUT DE KS
+            case LECTURA_DE_DATOS: 
             {   
                 int pid_recibido = *(int*) list_get(paquete, 1);             
                 uint32_t direccion_fisica_global = *(uint32_t*) list_get(paquete, 2);
@@ -311,10 +300,9 @@ void* atender_conexion(void* arg) {
                 t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano,logger);
   
                 if (lista_fragmentos_temp != NULL) {
-                //ms me retorna lo leido acá,envío lo leido a ks acá
-                void* contenido_leido_completo = enviar_fragmentos_lectura(lista_fragmentos_temp, tamano, logger);
+                //ms me retorna lo leido acá,envío lo leido a ks acá ó si ms se desconecta se detecta acá y tambien envia aviso a ks-
+                void* contenido_leido_completo = enviar_fragmentos_lectura(lista_fragmentos_temp, tamano, logger,km);
 
-                //descomentar cuando ks espere contenido leido desde ms***
                 if (contenido_leido_completo != NULL) {
                     
                     t_paquete* respuesta_final = crear_paquete(RTA_LECTURA, crear_buffer());
@@ -334,7 +322,7 @@ void* atender_conexion(void* arg) {
                 }
             }
             break;
-            case FINALIZAR_PROCESO: ///***EXIT
+            case FINALIZAR_PROCESO: 
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 int respuesta = eliminar_proceso(pid_recibido,km,logger);
@@ -355,7 +343,7 @@ void* atender_conexion(void* arg) {
             }
             break;
 
-            case SWAP_REQUEST: {
+          case SWAP_REQUEST: {
             swap_block_size = *(int*)list_get(paquete, 1);
             int tamanio_total = *(int*)list_get(paquete, 2);
             km_socket_swap = socket_cliente; 
@@ -368,11 +356,14 @@ void* atender_conexion(void* arg) {
             bitmap_swap = bitarray_create_with_mode(puntero_bitmap, bytes_bitmap, LSB_FIRST);
             
             log_info(logger, "SWAP configurado: %d bloques de %d bytes", total_bloques, swap_block_size);
-            break;
-            }
-            case SUSPENSION_DE_PROCESO:
-            {
-                int pid_a_suspender = *(int*)list_get(paquete, 1);
+            free(datos);
+            list_destroy_and_destroy_elements(paquete, free);
+            return NULL;
+
+        }
+
+        case SUSPENSION_DE_PROCESO: {
+            int pid_a_suspender = *(int*)list_get(paquete, 1);
             
             pthread_mutex_lock(&mutex_procesos);
             t_proceso* proceso = buscar_proceso(pid_a_suspender);
@@ -380,19 +371,26 @@ void* atender_conexion(void* arg) {
             if (proceso != NULL && !proceso->suspendido) {
                 log_info(logger, "Iniciando suspensión de PID: %d", pid_a_suspender);
                 
-                for (int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
-                    t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
+                t_list* tabla_segmentos = proceso->contexto->tabla_segmentos;
+                pthread_mutex_unlock(&mutex_procesos); // Liberamos para que las CPUs sigan respondiendo FETCH
+                
+                for (int i = 0; i < list_size(tabla_segmentos); i++) {
+                    pthread_mutex_lock(&mutex_procesos);
+                    t_segmento* seg = list_get(tabla_segmentos, i);
+                    bool en_swap = seg->en_swap;
+                    uint32_t tam_seg = seg->tamanio;
+                    uint32_t base_global = seg->base_global;
+                    pthread_mutex_unlock(&mutex_procesos);
                     
-                    if (!seg->en_swap) {
-                        uint32_t tam_seg = seg->tamanio; 
-                        
-                        t_list* fragmentos = calcular_dir_local_ms(seg->base_global, tam_seg, logger);
-                        void* contenido = enviar_fragmentos_lectura(fragmentos, tam_seg, logger);
+                    if (!en_swap) {
+                        t_list* fragmentos = calcular_dir_local_ms(base_global, tam_seg, logger);
+                        void* contenido = enviar_fragmentos_lectura(fragmentos, tam_seg, logger,km);
                         list_destroy_and_destroy_elements(fragmentos, free);
                         
                         int bloques_necesarios = (tam_seg + swap_block_size - 1) / swap_block_size;
                         int bloque_inicio = -1;
                         
+                        pthread_mutex_lock(&mutex_huecos); // Protegemos acceso a bitarray_swap si es compartido
                         for (int bit = 0; bit <= bitarray_get_max_bit(bitmap_swap) - bloques_necesarios; bit++) {
                             bool hay_espacio = true;
                             for (int b = 0; b < bloques_necesarios; b++) {
@@ -408,60 +406,81 @@ void* atender_conexion(void* arg) {
                         }
                         
                         if (bloque_inicio != -1 && contenido != NULL) {
-
                             for(int b = 0; b < bloques_necesarios; b++) {
                                 bitarray_set_bit(bitmap_swap, bloque_inicio + b);
                             }
+                            pthread_mutex_unlock(&mutex_huecos);
                         
                             int offset = 0;
+                            bool transaccion_exitosa = true;
+                            
                             for (int b = 0; b < bloques_necesarios; b++) {
                                 int bytes_restantes = tam_seg - offset;
-                                int tamano_a_escribir;
-                                
-                                if (bytes_restantes > swap_block_size) {
-                                    tamano_a_escribir = swap_block_size;
-                                } else {
-                                    tamano_a_escribir = bytes_restantes;
-                                }
+                                int tamano_a_escribir = (bytes_restantes > swap_block_size) ? swap_block_size : bytes_restantes;
 
                                 t_paquete* p_swap = crear_paquete(ESCRITURA_SWAP, crear_buffer());
                                 int bloque_actual = bloque_inicio + b;
                                 agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
                                 agregar_a_paquete(p_swap, contenido + offset, tamano_a_escribir);
                                 
-                                enviar_paquete(p_swap, km_socket_swap, logger);
+                                pthread_mutex_lock(&mutex_socket_swap);
+                                int err_envio = enviar_paquete(p_swap, km_socket_swap, logger);
                                 eliminar_paquete(p_swap);
                                 
-                                int cod_op_swap;
-                                recv(km_socket_swap, &cod_op_swap, sizeof(int), MSG_WAITALL);
+                                if (err_envio == -1) {
+                                    log_error(logger, "Error al enviar bloque %d a SWAP.", bloque_actual);
+                                    pthread_mutex_unlock(&mutex_socket_swap);
+                                    transaccion_exitosa = false;
+                                    break;
+                                }
+                                
                                 t_list* resp_swap = recibir_paquete(km_socket_swap);
+                                pthread_mutex_unlock(&mutex_socket_swap);
+                                
+                                if (resp_swap == NULL) {
+                                    log_error(logger, "SWAP desconectado o respuesta inválida.");
+                                    transaccion_exitosa = false;
+                                    break;
+                                }
                                 list_destroy_and_destroy_elements(resp_swap, free);
                                 
                                 offset += tamano_a_escribir;
                             }
                             
-                            seg->en_swap = true;
-                            seg->bloque_swap = bloque_inicio;
-                            
-                            agregar_hueco_libre(seg->base_global, tam_seg);
-                            seg->base_global = 0; 
-                            seg->limite_global = 0;
+                            if (transaccion_exitosa) {
+                                pthread_mutex_lock(&mutex_procesos);
+                                seg->en_swap = true;
+                                seg->bloque_swap = bloque_inicio;
+                                pthread_mutex_unlock(&mutex_procesos);
+                                
+                                agregar_hueco_libre(base_global, tam_seg);
+                                
+                                pthread_mutex_lock(&mutex_procesos);
+                                seg->base_global = 0; 
+                                seg->limite_global = 0;
+                                pthread_mutex_unlock(&mutex_procesos);
+                            }
+                        } else {
+                            pthread_mutex_unlock(&mutex_huecos);
                         }
                         if(contenido) free(contenido);
                     }
                 }
+                
+                pthread_mutex_lock(&mutex_procesos);
                 proceso->suspendido = true;
+                pthread_mutex_unlock(&mutex_procesos);
                 
                 t_paquete* resp = crear_paquete(SUSPENSION_OK, crear_buffer());
                 enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                 eliminar_paquete(resp);
+            } else {
+                pthread_mutex_unlock(&mutex_procesos);
             }
-            pthread_mutex_unlock(&mutex_procesos);
             break;
-            }
-            break;
-            case DESUSPENSION_DE_PROCESO:
-            {
+        }
+
+        case DESUSPENSION_DE_PROCESO: {
             int pid_a_desuspender = *(int*)list_get(paquete, 1);
             
             pthread_mutex_lock(&mutex_procesos);
@@ -470,13 +489,20 @@ void* atender_conexion(void* arg) {
             if (proceso != NULL && proceso->suspendido) {
                 log_info(logger, "Iniciando desuspensión de PID: %d", pid_a_desuspender);
                 bool necesita_compactar = false;
+                t_list* tabla_segmentos = proceso->contexto->tabla_segmentos;
+                pthread_mutex_unlock(&mutex_procesos);
                 
-                for (int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
-                    t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
+                for (int i = 0; i < list_size(tabla_segmentos); i++) {
+                    pthread_mutex_lock(&mutex_procesos);
+                    t_segmento* seg = list_get(tabla_segmentos, i);
+                    bool en_swap = seg->en_swap;
+                    uint32_t tam_seg = seg->tamanio;
+                    int bloque_swap = seg->bloque_swap;
+                    pthread_mutex_unlock(&mutex_procesos);
                     
-                    if(seg->en_swap) {
+                    if(en_swap) {
                         pthread_mutex_lock(&mutex_huecos);
-                        t_hueco* hueco = buscar_hueco(seg->tamanio, km, logger);
+                        t_hueco* hueco = buscar_hueco(tam_seg, km, logger);
                         
                         if(hueco == NULL) {
                             necesita_compactar = true;
@@ -485,50 +511,67 @@ void* atender_conexion(void* arg) {
                         }
                         
                         uint32_t nueva_base = hueco->base;
-                        consumir_hueco(hueco, seg->tamanio);
+                        consumir_hueco(hueco, tam_seg);
                         pthread_mutex_unlock(&mutex_huecos);
                         
-                        int bloques_necesarios = (seg->tamanio + swap_block_size - 1) / swap_block_size;
-                        void* contenido_recuperado = malloc(seg->tamanio);
+                        int bloques_necesarios = (tam_seg + swap_block_size - 1) / swap_block_size;
+                        void* contenido_recuperado = malloc(tam_seg);
                         int offset = 0;
+                        bool lectura_completa = true;
                         
                         for(int b = 0; b < bloques_necesarios; b++) {
-                            int bytes_restantes = seg->tamanio - offset;
-                            int tamano_a_leer;
-
-                            if (bytes_restantes > swap_block_size) {
-                                tamano_a_leer = swap_block_size;
-                            } else {
-                                tamano_a_leer = bytes_restantes;
-                            }
+                            int bytes_restantes = tam_seg - offset;
+                            int tamano_a_leer = (bytes_restantes > swap_block_size) ? swap_block_size : bytes_restantes;
 
                             t_paquete* p_swap = crear_paquete(LECTURA_SWAP, crear_buffer());
-                            int bloque_actual = seg->bloque_swap + b;
+                            int bloque_actual = bloque_swap + b;
                             agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
-                            enviar_paquete(p_swap, km_socket_swap, logger);
+                            
+                            pthread_mutex_lock(&mutex_socket_swap);
+                            int err_envio = enviar_paquete(p_swap, km_socket_swap, logger);
                             eliminar_paquete(p_swap);
                             
-                            int cod_op_swap;
-                            recv(km_socket_swap, &cod_op_swap, sizeof(int), MSG_WAITALL);
-                            t_list* resp_swap = recibir_paquete(km_socket_swap);
-                            void* datos_recibidos = list_get(resp_swap, 1);
+                            if (err_envio == -1) {
+                                log_error(logger, "Error de red solicitando lectura a SWAP.");
+                                pthread_mutex_unlock(&mutex_socket_swap);
+                                lectura_completa = false;
+                                break;
+                            }
                             
-                            memcpy(contenido_recuperado + offset, datos_recibidos, tamano_a_leer);
-                            bitarray_clean_bit(bitmap_swap, bloque_actual); 
+                            t_list* resp_swap = recibir_paquete(km_socket_swap);
+                            pthread_mutex_unlock(&mutex_socket_swap);
+                            
+                            if (resp_swap == NULL) {
+                                log_error(logger, "Error: No se recibió respuesta de lectura desde SWAP.");
+                                lectura_completa = false;
+                                break;
+                            }
+                            
+                            void* datos_recibidos = list_get(resp_swap, 1);
+                            if (datos_recibidos != NULL) {
+                                memcpy(contenido_recuperado + offset, datos_recibidos, tamano_a_leer);
+                                
+                                pthread_mutex_lock(&mutex_huecos);
+                                bitarray_clean_bit(bitmap_swap, bloque_actual); 
+                                pthread_mutex_unlock(&mutex_huecos);
+                            }
                             
                             list_destroy_and_destroy_elements(resp_swap, free);
                             offset += tamano_a_leer;
                         }
                         
-                        
-                        t_list* fragmentos = calcular_dir_local_ms(nueva_base, seg->tamanio, logger);
-                        enviar_fragmentos_escritura(fragmentos, contenido_recuperado, logger);
-                        list_destroy_and_destroy_elements(fragmentos, free);
-                        
-                        seg->en_swap = false;
-                        seg->base_global = nueva_base;
-                        seg->limite_global = nueva_base + seg->tamanio - 1;
-                        seg->bloque_swap = -1;
+                        if (lectura_completa) {
+                            t_list* fragmentos = calcular_dir_local_ms(nueva_base, tam_seg, logger);
+                            enviar_fragmentos_escritura(fragmentos, contenido_recuperado, logger,km);
+                            list_destroy_and_destroy_elements(fragmentos, free);
+                            
+                            pthread_mutex_lock(&mutex_procesos);
+                            seg->en_swap = false;
+                            seg->base_global = nueva_base;
+                            seg->limite_global = nueva_base + tam_seg - 1;
+                            seg->bloque_swap = -1;
+                            pthread_mutex_unlock(&mutex_procesos);
+                        }
                         
                         free(contenido_recuperado);
                     }
@@ -537,16 +580,20 @@ void* atender_conexion(void* arg) {
                 if (necesita_compactar) {
                     avisar_compactacion(km, logger);
                 } else {
+                    pthread_mutex_lock(&mutex_procesos);
                     proceso->suspendido = false;
+                    pthread_mutex_unlock(&mutex_procesos);
+                    
                     t_paquete* resp = crear_paquete(DESUSPENSION_OK, crear_buffer());
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
                 }
+            } else {
+                pthread_mutex_unlock(&mutex_procesos);
             }
-            pthread_mutex_unlock(&mutex_procesos);
             break;
-            }
-            break;
+        }
+            
             case ELIMINACION_DE_SEGMENTO: 
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
@@ -623,10 +670,7 @@ void* atender_conexion(void* arg) {
             break;
             case CPUS_DESALOJADAS:
             {
-                //PARA ESTE PUNTO KS YA DEBIÓ ¡FINALIZAR? TODOS LOS PROCESOS,POR LO QUE YA DEBERIA TENER TODOS LOS CONTEXTOS ACTUALIZADOS? 
-                //tp dice desalojar los proc de las cpus pero no dice nada sobre los procesos en bloqueado por que van a tener seg en swap
-                //y esos se quedan alli? durante la compactacion?
-                int rta = iniciar_compactacion(logger);
+                int rta = iniciar_compactacion(logger,km);
                  if(rta == 1) {
                     t_paquete* resp = crear_paquete(COMPACTACION_OK, crear_buffer());
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
@@ -641,24 +685,12 @@ void* atender_conexion(void* arg) {
             }
             break;
              case ERROR_OPERACION://ms lo envia cuando falla stdin o stdout 
-            {
+            {   //no deberia ir aca?
                 //qué hago si falla? creo que no se considera en las pruebas
                 log_info(logger, "[Socket %d] Error en operación de lectura/escritura en Memory Stick recibida", socket_cliente);
             }
             break;
-            /*case IO_OK://(stdin)cuando envio peticion a case escritura de datos en ms,ms envia esto si salió todo bien
-            {
-                //debería enviar confirmacion a ks acá?
-                log_info(logger, "[Socket %d] Confirmación de escritura exitosa en Memory Stick recibida", socket_cliente);
-            }
-            break;*/ //(Emi) ahora enviar_fragmentos_escritura recibe el IO_OK directamente del socket del MS
-
-            case DATOS_LEIDOS://(stdout)cuando km envia peticion a case lectura de datos en ms,ms responde esto (datos_leidos) si todo salio bien
-            {//en case lectura de datos ya envío rta a ks
-                log_info(logger, "[Socket %d] Confirmación de lectura exitosa en Memory Stick recibida", socket_cliente);
-            }
-            break;
-        
+            
         default:
           log_error(logger, "[Socket %d] Código de operación desconocido: %d", socket_cliente, codigo_operacion);
           break;

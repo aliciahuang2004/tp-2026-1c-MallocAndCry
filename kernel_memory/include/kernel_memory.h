@@ -78,6 +78,7 @@ extern pthread_mutex_t mutex_cpus_conectadas;
 
 extern pthread_mutex_t mutex_lista_ms_conexion;
 
+extern pthread_mutex_t mutex_socket_swap;
 
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
