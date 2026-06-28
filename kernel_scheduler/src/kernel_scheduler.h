@@ -33,6 +33,7 @@ typedef struct{
     char* path;
     t_estado estado;
     int socketCPUEjecuta;
+    bool ejecutaPorRR;
 } t_pcb;
 
 typedef struct {

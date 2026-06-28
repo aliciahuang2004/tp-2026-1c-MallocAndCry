@@ -139,7 +139,6 @@ t_planificador obtenerPlanificacion(char* planificador){
 
 void pasarProcesoReadyAExec(){
     t_pcb* pcbAEjecutar;
-    bool ejecutaPorRR = false;
 
     //ELEGIR DE READY
 
@@ -149,12 +148,10 @@ void pasarProcesoReadyAExec(){
             break;
         case RR:
             pcbAEjecutar = elegirPorRR();
-            ejecutaPorRR = true;
             break;
 
         case CMN:
             pcbAEjecutar = elegirPorCMN();
-            ejecutaPorRR = colaDeProcesoEjecutaRR(pcbAEjecutar->prioridad);
             break;
         default:
             log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
@@ -163,7 +160,7 @@ void pasarProcesoReadyAExec(){
     // ELEGIR CPU
     t_cpu_conectada* cpuElegida = elegirCPU();
     if(cpuElegida == NULL || pcbAEjecutar == NULL) {
-        log_error(kernel->logger,"No se pudo asignar proceso a CPU");
+        log_error(kernel->logger,"No se pudo asignar proceso a CPU:%d PID:%d", cpuElegida->id_cpu, pcbAEjecutar->pid);
         return;
     }
     // LO AGREGO A EXEC
@@ -172,20 +169,12 @@ void pasarProcesoReadyAExec(){
     
     pcbAEjecutar->estado = EXEC;
     pcbAEjecutar->socketCPUEjecuta = cpuElegida->socket_cliente;
-    
-    log_debug(kernel->logger," PID ELEGIDO:%d - CPU ELEGIDA:%d - EJECUTA SEGUN: %d", pcbAEjecutar->pid, cpuElegida->id_cpu,ejecutaPorRR);
 
     pthread_mutex_lock(&mutex_EXEC);
     queue_push(colaEXEC,pcbAEjecutar);
     pthread_mutex_unlock(&mutex_EXEC);
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcbAEjecutar->pid);
-
-    if(ejecutaPorRR) {
-        pthread_t hiloQuantum;
-        pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
-        pthread_detach(hiloQuantum);
-    }
 
     // ENVIAR A CPU
     enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
@@ -291,6 +280,13 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
     enviar_paquete(paquete, cpu->socket_cliente, kernel->logger);
 
     eliminar_paquete(paquete);
+
+    if(buscarPCBPorPID(pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+        log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
+        pthread_t hiloQuantum;
+        pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpu);
+        pthread_detach(hiloQuantum);
+    }
 
 }
 

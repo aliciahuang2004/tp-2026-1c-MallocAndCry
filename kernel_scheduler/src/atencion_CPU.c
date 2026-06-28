@@ -47,11 +47,7 @@ void* atender_cpu(void* arg){
                 // enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
             }
-            case MEM_ALLOC: {//POSIBLE BLOQUEADO => PEDIMOS DESALOJO
-                /*//lineas agregadas para prueba en km 407 a 409,412,413,415 a 421.
-                printf("\n\n*********** ENTRE A MEM_ALLOC ***********\n");//este log lo agregué porque en mis pruebas cuando cpu envía syscall mem_alloc a ks,aveces entraba en el switch de "atender_cliente_scheduler" y a veces en este
-                fflush(stdout);
-                */
+            case MEM_ALLOC: {
                 int idSegmento = *(int*) list_get(paquete, 2);
                 int tamanio = *(int*) list_get(paquete, 3);
                 printf("PID=%d SEG=%d TAM=%d\n",pidSolicitaSyscall,idSegmento,tamanio);

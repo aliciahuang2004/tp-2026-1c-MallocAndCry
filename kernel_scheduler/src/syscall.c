@@ -7,6 +7,24 @@ t_pcb* crear_PCB(char* path, int prioridad){
     pcbCreado->path = strdup(path);
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
     pcbCreado->socketCPUEjecuta = -1;
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+        pcbCreado->ejecutaPorRR = false;
+        break;
+    case RR:
+        pcbCreado->ejecutaPorRR = true;
+        break;
+    case CMN:
+        if(colaDeProcesoEjecutaRR(prioridad)){
+            pcbCreado->ejecutaPorRR = true;
+            log_debug(kernel->logger,"PLANIFICA CMN- CON RR");
+        }
+        else{
+            pcbCreado->ejecutaPorRR = false;
+            log_debug(kernel->logger,"PLANIFICA CMN- CON FIFO");
+        }
+        break;
+    }
     pidParaAsignar ++;
 
     return pcbCreado;
