@@ -67,7 +67,11 @@ void* atender_cpu(void* arg){
             case SLEEP:{
                 int tiempo_ms = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <SLEEP>", pidSolicitaSyscall);
-                liberarCPU(cpu_emisora);;
+                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
+                    pthread_cancel(hiloQuantum);
+                }
+                liberarCPU(cpu_emisora);
                 manejar_sleep(pidSolicitaSyscall, tiempo_ms, cpu_emisora);
                 break;
             }
@@ -98,18 +102,30 @@ void* atender_cpu(void* arg){
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
                 finalizarProceso(pidSolicitaSyscall,EXIT_PROC);
+                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
+                    pthread_cancel(hiloQuantum);
+                }
                 liberarCPU(cpu_emisora);;                
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por fin de quantum - Pasando el proceso a Ready...", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
+                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
+                    pthread_cancel(hiloQuantum);
+                }
                 liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_PRIORIDAD:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por proceso con prioridad más alta", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
+                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
+                    pthread_cancel(hiloQuantum);
+                }
                 liberarCPU(cpu_emisora);
                 break;
             }
@@ -124,6 +140,10 @@ void* atender_cpu(void* arg){
             case SEG_FAULT: { 
                 log_debug(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
                 finalizarProceso(pidSolicitaSyscall,SEG_FAULT);
+                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
+                    pthread_cancel(hiloQuantum);
+                }
                 liberarCPU(cpu_emisora);
                 break;
             }

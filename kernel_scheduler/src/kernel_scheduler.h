@@ -107,6 +107,7 @@ extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
 extern bool noHayCompactacion;
 
+extern pthread_t hiloQuantum;
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
 

@@ -2,6 +2,7 @@
 
 int pidParaAsignar = 0;
 bool noHayCompactacion = true;
+pthread_t hiloQuantum;
 
 t_queue* colaNEW;
 t_queue** colasREADY;
@@ -178,6 +179,12 @@ void pasarProcesoReadyAExec(){
 
     // ENVIAR A CPU
     enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
+
+    if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+        log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
+        pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
+        pthread_detach(hiloQuantum);
+    }
 }
 
 t_pcb* elegirPorFIFO(){
@@ -281,19 +288,13 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
 
     eliminar_paquete(paquete);
 
-    if(buscarPCBPorPID(pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-        log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
-        pthread_t hiloQuantum;
-        pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpu);
-        pthread_detach(hiloQuantum);
-    }
-
 }
 
 void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
     
     usleep(kernel->rr_quantum * 1000);
+    log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
     
     notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     
