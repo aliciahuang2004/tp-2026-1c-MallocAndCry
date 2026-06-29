@@ -217,10 +217,12 @@ void inicializar_interfaces() {
     interfaces[IO_STDOUT].solicitudes = queue_create();
     
     sem_hayIO = malloc(3 * sizeof(sem_t));
+    sem_haySolicitudIO = malloc(3 * sizeof(sem_t));
 
     for (int i = 0; i < 3; i++) {
         pthread_mutex_init(&mutex_interfaces[i], NULL);
         sem_init(&sem_hayIO[i],0,0);
+        sem_init(&sem_haySolicitudIO[i],0,0);
     }
 
 }

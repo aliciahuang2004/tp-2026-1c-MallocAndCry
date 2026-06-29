@@ -198,20 +198,13 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
-    sem_wait(&sem_hayIO[IO_SLEEP]);
+
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
-    if (!interfaces[IO_SLEEP].ocupada) {
-        interfaces[IO_SLEEP].ocupada = true;
-        interfaces[IO_SLEEP].pidAsignado = pid;
-        pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
-        enviarAIO(interfaces[IO_SLEEP].socket_interfaz, solicitud);
-        free(solicitud);
-    } else {
-        queue_push(interfaces[IO_SLEEP].solicitudes, solicitud);
-        pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
-    }
+    queue_push(interfaces[IO_SLEEP].solicitudes, solicitud);
+    pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
+
+    sem_post(&sem_haySolicitudIO[IO_SLEEP]);
     
-   // liberarCPU(cpu);
 }
 
 void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectada* cpu) {

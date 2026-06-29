@@ -29,6 +29,7 @@ sem_t sem_hayCPUdisponible;
 sem_t sem_finSyscall;
 sem_t sem_hayMemoria;
 sem_t* sem_hayIO;
+sem_t* sem_haySolicitudIO;
 sem_t sem_recibiLecuraDeIO;
 sem_t sem_recibiLecuraDeKM;
 sem_t sem_suspension_ok;
@@ -581,20 +582,17 @@ void pasarProcesoBlockABlockSusp(int pid){
         enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
         eliminar_paquete(paquete);
 
-        
         sem_wait(&sem_suspension_ok);
 
-    pcb->estado = BLOCK_SUSP;
+        pcb->estado = BLOCK_SUSP;
 
-    //AGREGO SUSP BLOCK
-    pthread_mutex_lock(&mutex_BLOCK_SUSP);
-    queue_push(colaBLOCK_SUSP,pcb);
-    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+        //AGREGO SUSP BLOCK
+        pthread_mutex_lock(&mutex_BLOCK_SUSP);
+        queue_push(colaBLOCK_SUSP,pcb);
+        pthread_mutex_unlock(&mutex_BLOCK_SUSP);
 
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
+        log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
 
-    sem_wait(&sem_finSyscall);
-    pasarProcesoBlockSuspAReadySusp(pid);
 
     } else {
         log_error(kernel->logger, "Error: No se encontró el PID %d en la cola BLOCK", pid);
@@ -864,4 +862,53 @@ void reencolarAlInicio(int pid){
     queue_destroy(colaAux);
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
     sem_post(&sem_hayProcesosEnReady);
+}
+
+void inicializarHilos(){
+    //CPU E IO AL CONECTARSE
+
+    //KM
+    pthread_t hilo_escucha_km;
+    if (pthread_create(&hilo_escucha_km, NULL, atender_kernel_memory, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo de escucha de Kernel Memory");
+        return ;
+    }
+    pthread_detach(hilo_escucha_km);
+
+    //PLANIFICADOR CORTO PLAZO
+    pthread_t hilo_corto_plazo;
+    if (pthread_create(&hilo_corto_plazo, NULL, loop_corto_plazo, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo del Planificador de Corto Plazo");
+        return ;
+    }
+    pthread_detach(hilo_corto_plazo);
+
+    //MONITOR PRIORIDADES
+    if(kernel->queues_preemption && obtenerPlanificacion(kernel->planification_algorithm) == CMN){
+        pthread_t hiloMonitorPrioridades;
+        if (pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL) != 0) {
+            log_error(kernel->logger, "No se pudo crear el hilo de monitorización de prioridades");
+            return ;
+        }
+        pthread_detach(hiloMonitorPrioridades);
+    }
+
+    //ATENCION DE SYSCALL IO
+    pthread_t solicitudSleep;
+    if(pthread_create(&solicitudSleep, NULL, atencionIOsleep, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall SLEEP");
+            return ;
+    }
+    pthread_detach(solicitudSleep);
+
+}
+
+void* atencionIOsleep(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_SLEEP]);
+        sem_wait(&sem_haySolicitudIO[IO_SLEEP]);
+        revisarProcesosBloqueadosParaTipoIO(IO_SLEEP);
+    }
+    return NULL;
 }

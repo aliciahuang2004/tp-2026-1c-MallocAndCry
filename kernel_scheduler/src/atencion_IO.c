@@ -26,15 +26,11 @@ void* atender_io(void* arg) {
 
         switch (cod_op) {
             case IO_OK://termino syscall
-                t_solicitud_io* solicitud = NULL;
-
-                if(tipoIO != IO_SLEEP){
-                    solicitud = retirarSolicitud(tipoIO,pid);
-                    if (solicitud == NULL){
-                        log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
-                    }
+                t_solicitud_io* solicitud = retirarSolicitud(tipoIO,pid);
+                if (solicitud == NULL){
+                    log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
                 }
-
+                
                 if(tipoIO == IO_STDIN){
                     int tamanio = *(int*) list_get(paquete, 2);
                     char* lecturaIO = (char*) list_get(paquete, 3);
@@ -66,7 +62,7 @@ void* atender_io(void* arg) {
                     log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
                 }
                 liberarIO(tipoIO);
-                revisarProcesosBloqueadosParaTipoIO(tipoIO);
+                
                 break;
             default:
                 log_warning(kernel->logger, "Operación desconocida de cliente en socket %d", socket_io);
@@ -99,24 +95,25 @@ void liberarIO(t_tipo_io tipo){
 
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
     pthread_mutex_lock(&mutex_interfaces[tipo]);
-    if (!queue_is_empty(interfaces[tipo].solicitudes)) {
-        t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
+    if (!queue_is_empty(interfaces[tipo].solicitudes) && interfaces[tipo].ocupada == false) {
+        t_solicitud_io* solicitud = queue_peek(interfaces[tipo].solicitudes);
         interfaces[tipo].ocupada = true;
         interfaces[tipo].pidAsignado = solicitud->pidSolicitaSyscall;
         log_debug(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
-        if(tipo != IO_STDOUT){
+        switch (tipo){
+        case IO_STDIN:
+            hacerSTDIN(solicitud, interfaces[tipo].socket_interfaz);
+            break;
+        case IO_SLEEP:
             enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
-            pthread_mutex_unlock(&mutex_interfaces[tipo]);
-            free(solicitud);
-        }else{
-            queue_push(interfaces[tipo].solicitudes, solicitud);
-            enviarAKMSolicitudIO(solicitud);            
-            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+            break;
+        case IO_STDOUT:
+            hacerSTDOUT(solicitud, interfaces[tipo].socket_interfaz);          
+            break;
         }
-    } else {
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
+        free(solicitud);
     }
-    
 }
 
 t_solicitud_io* retirarSolicitud(t_tipo_io tipo, int pid){

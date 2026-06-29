@@ -137,6 +137,7 @@ extern sem_t sem_hayCPUdisponible;
 extern sem_t sem_finSyscall;
 extern sem_t sem_hayMemoria;
 extern sem_t* sem_hayIO;
+extern sem_t* sem_haySolicitudIO;
 extern sem_t sem_recibiLecuraDeIO;
 extern sem_t sem_recibiLecuraDeKM;
 // extern sem_procesoCreado;
@@ -210,6 +211,8 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
 void* loop_corto_plazo(void* args);
 t_tipo_io buscarTipoIOPorSocket(int socket_io);
 void reencolarAlInicio(int pid);
+void inicializarHilos();
+void* atencionIOsleep(void* args);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);
