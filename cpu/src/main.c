@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
     sem_init(&sem_contexto_recibido, 0, 0);
     sem_init(&sem_instruccion_recibida, 0, 0);
 
+    //Hilo para KM
     pthread_t hilo_km;
     if (pthread_create(&hilo_km, NULL, escuchar_kernel_memory, cpu) != 0) {
         log_error(cpu->logger, "Error al crear el hilo de Kernel Memory");
@@ -31,10 +32,10 @@ int main(int argc, char* argv[]) {
     }
     pthread_detach(hilo_km);
 
-
+    /*/
     if (conectar_memory_stick(cpu, cpu->ip_memory_stick_inicial, cpu->puerto_memory_stick_inicial,0) == -1) {
         log_warning(cpu->logger, "Error en la conexion con memory stick.");
-    }
+    }*/ //comento esto porque el kernel ahora me va a avisar cuando haya un memory stick disponible y me va a dar la ip y puerto para conectarme
 
     log_info(cpu->logger, "## CPU %s inicializada y conectada exitosamente", cpu->id);
 

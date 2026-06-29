@@ -42,8 +42,8 @@ uint32_t leer_valor_registro(t_registros* registros, char* nombre_registro) {
 
 // NOOP
 void ejecutar_NOOP(t_cpu* cpu, t_contexto* ctx) {
-    usleep(1000 * config_get_int_value(cpu->config, "INSTRUCTION_DELAY"));
-    log_debug(cpu->logger, "Ejecutando NOOP: Simulando retardo de instrucción");
+    //usleep(1000 * config_get_int_value(cpu->config, "INSTRUCTION_DELAY"));
+    log_debug(cpu->logger, "Ejecutando NOOP");
 }
 
 // SET
@@ -100,12 +100,23 @@ void ejecutar_JNZ(t_cpu* cpu,t_registros* reg, char* registro_evaluado, uint32_t
 }
 
 int obtener_socket_ms(t_cpu* cpu, int ms_id) {
+
+    int socket_encontrado = -1;
+
+    pthread_mutex_lock(&cpu->mutex_lista_ms); //cierro
+
     for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
         t_ms_conectado* ms = list_get(cpu->sockets_memory_sticks, i);
-        if(ms->id == ms_id) return ms->socket;
+        if(ms->id == ms_id) {
+            socket_encontrado = ms->socket;
+            break;
+        }
     }
-    log_error(cpu->logger, "No se encontró un Memory Stick conectado con el ID %d", ms_id);
-    return -1;
+    pthread_mutex_unlock(&cpu->mutex_lista_ms); //abro
+    if (socket_encontrado == -1) {
+        log_error(cpu->logger, "No se encontró un Memory Stick conectado con el ID %d", ms_id);
+    }
+    return socket_encontrado;
 }
 
 // MOV_IN:
@@ -444,3 +455,54 @@ bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, ui
 
     return true;
 }
+/*
+t_list* fragmentar_acceso_memoria(t_cpu* cpu, uint32_t dir_fisica_global, int tamanio_total) {
+    t_list* fragmentos = list_create();
+    int bytes_restantes = tamanio_total;
+    uint32_t dir_actual = dir_fisica_global;
+    int offset = 0;
+
+    pthread_mutex_lock(&cpu->mutex_lista_ms); // Bloqueamos lectura
+
+    while (bytes_restantes > 0) {
+        t_ms_conectado* ms_encontrado = NULL;
+        
+        // 1. Buscamos en qué MS cae la dir_actual
+        for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
+            t_ms_conectado* ms = list_get(cpu->sockets_memory_sticks, i);
+            if (dir_actual >= ms->base_global && dir_actual <= ms->limite_global) {
+                ms_encontrado = ms;
+                break;
+            }
+        }
+
+        if (ms_encontrado == NULL) {
+            log_error(cpu->logger, "SEG_FAULT de Hardware: Dir %u fuera de límites de MS", dir_actual);
+            list_destroy_and_destroy_elements(fragmentos, free);
+            pthread_mutex_unlock(&cpu->mutex_lista_ms);
+            return NULL;
+        }
+
+        // 2. Calculamos cuánto entra en este MS
+        uint32_t dir_local = dir_actual - ms_encontrado->base_global;
+        uint32_t espacio_disponible = (ms_encontrado->limite_global - ms_encontrado->base_global + 1) - dir_local;
+        int bytes_a_operar = (bytes_restantes < espacio_disponible) ? bytes_restantes : espacio_disponible;
+
+        // 3. Guardamos el fragmento
+        t_fragmento_cpu* frag = malloc(sizeof(t_fragmento_cpu));
+        frag->socket_ms = ms_encontrado->socket;
+        frag->dir_local = dir_local;
+        frag->tamano = bytes_a_operar;
+        frag->offset = offset;
+        list_add(fragmentos, frag);
+
+        // 4. Avanzamos los contadores
+        bytes_restantes -= bytes_a_operar;
+        dir_actual += bytes_a_operar;
+        offset += bytes_a_operar;
+    }
+
+    pthread_mutex_unlock(&cpu->mutex_lista_ms);
+    return fragmentos;
+}
+    */

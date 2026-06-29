@@ -36,7 +36,7 @@ t_cpu *iniciar_cpu(char *path_config, char *id_cpu)
     }
 
     cpu->sockets_memory_sticks = list_create();
-
+    pthread_mutex_init(&cpu->mutex_lista_ms, NULL); // Inicializamos el mutex para proteger la lista de sockets de Memory Sticks
     return cpu;
 }
 
@@ -94,18 +94,22 @@ int conectar_kernel_scheduler(t_cpu *cpu)
     return -1;
 }
 
-int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id)
+int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_t base, uint32_t limite)
 {
     if (ip == NULL || puerto == NULL)
         return -1;
 
+    pthread_mutex_lock(&cpu->mutex_lista_ms);
     for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
         t_ms_conectado* ms_existente = list_get(cpu->sockets_memory_sticks, i);
         if(ms_existente->id == ms_id) {
             log_warning(cpu->logger, "Aviso: El Memory Stick (ID: %d) ya está conectado en el socket %d. Ignorando nueva petición.", ms_id, ms_existente->socket);
+            pthread_mutex_unlock(&cpu->mutex_lista_ms);
             return ms_existente->socket;
         }
     }
+
+    pthread_mutex_unlock(&cpu->mutex_lista_ms);// libero el mutex sino lo encuentro
 
     int socket_ms = crear_conexion(cpu->logger, ip, puerto);
 
@@ -120,6 +124,7 @@ int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id)
         {
             log_error(cpu->logger, "Fallo el envío del Handshake a Memory Stick %s:%s", ip, puerto);
             eliminar_paquete(paquete);
+            pthread_mutex_unlock(&cpu->mutex_lista_ms);
             return -1;
         }
         eliminar_paquete(paquete);
@@ -128,12 +133,19 @@ int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id)
         t_ms_conectado *ms_conectado = malloc(sizeof(t_ms_conectado));
         ms_conectado->id = ms_id;
         ms_conectado->socket = socket_ms;
+        ms_conectado->base_global = base;
+        ms_conectado->limite_global = limite;
 
+        pthread_mutex_lock(&cpu->mutex_lista_ms);
         list_add(cpu->sockets_memory_sticks, ms_conectado);
-        log_info(cpu->logger, "## CPU conectada a Memory Stick (ID: %d) en %s:%s", ms_id, ip, puerto);
+        pthread_mutex_unlock(&cpu->mutex_lista_ms);
+
+        log_info(cpu->logger, "## CPU conectada a Memory Stick (ID: %d) en %s:%s | Base: %u| Límite: %u", ms_id, ip, puerto, base, limite);
+
 
         return socket_ms;
     }
+    pthread_mutex_unlock(&cpu->mutex_lista_ms);
     return -1;
 }
 
@@ -161,9 +173,11 @@ void *escuchar_kernel_memory(void *arg)
             int ms_id = *(int *)list_get(paquete, 1);
             char *ms_puerto = (char *)list_get(paquete, 2);
             char *ms_ip = (char *)list_get(paquete, 3);
+            uint32_t base = *(uint32_t *)list_get(paquete, 4);
+            uint32_t limite = *(uint32_t *)list_get(paquete, 5);
 
             log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
-            conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id);
+            conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id, base, limite);
             break;
         }
         case CONTEXT_RESPONSE:
@@ -244,7 +258,7 @@ void liberar_cpu(t_cpu *cpu)
         free(cpu->id);
     if (cpu->sockets_memory_sticks)
         list_destroy(cpu->sockets_memory_sticks);
-
+    pthread_mutex_destroy(&cpu->mutex_lista_ms);
     free(cpu);
 }
 
@@ -708,6 +722,9 @@ int execute(t_cpu *cpu, t_contexto *contexto, t_instruccion_decodificada instruc
 }
 
 void desconectar_memory_stick(t_cpu* cpu, int ms_id) {
+
+    pthread_mutex_lock(&cpu->mutex_lista_ms);
+
     for (int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
         t_ms_conectado* ms = list_get(cpu->sockets_memory_sticks, i);
         if (ms->id == ms_id) {
@@ -717,8 +734,11 @@ void desconectar_memory_stick(t_cpu* cpu, int ms_id) {
             
             list_remove(cpu->sockets_memory_sticks, i);
             free(ms);
+            pthread_mutex_unlock(&cpu->mutex_lista_ms);
             return;
         }
     }
+
+    pthread_mutex_unlock(&cpu->mutex_lista_ms);
     log_error(cpu->logger, "No se encontró el Memory Stick con ID %d para desconectar", ms_id);
 }

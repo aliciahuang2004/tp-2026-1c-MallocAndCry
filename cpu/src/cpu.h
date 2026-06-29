@@ -21,8 +21,16 @@ typedef struct
     int socket_kernel_scheduler;
     int socket_kernel_memory;
     t_list *sockets_memory_sticks; // Para manejar múltiples sticks dinámicos
+    pthread_mutex_t mutex_lista_ms; // Mutex para proteger la lista de sockets
     int segment_max_size;          // tamaño máximo del segmento que nos pasa el kernel memory
 } t_cpu;
+
+typedef struct {
+    int socket_ms;
+    uint32_t dir_local;
+    int tamano;
+    int offset; // En qué byte de nuestro buffer armamos el fragmento
+} t_fragmento_cpu;
 
 // estructura de registros
 typedef struct
@@ -96,6 +104,8 @@ typedef struct
 {
     int id;
     int socket;
+    uint32_t base_global;
+    uint32_t limite_global;
 } t_ms_conectado;
 
 // semaforos y buffers globales para la recepcion asincronica
@@ -110,7 +120,7 @@ t_cpu *iniciar_cpu(char *path_config, char *id_cpu);
 int conectar_kernel_memory(t_cpu *cpu);
 int conectar_kernel_scheduler(t_cpu *cpu);
 void *escuchar_kernel_memory(void *arg);
-int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id);
+int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_t base, uint32_t limite);
 
 void liberar_cpu(t_cpu *cpu);
 
