@@ -11,6 +11,7 @@ SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_memory
 ./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc
 ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 valgrind --leak-check=full ./bin/kernel_scheduler kernel_scheduler.config hola.txt
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config pruebam.txt
 
 gdb --args ./bin/kernel_scheduler kernel_scheduler.config hola.txt
 run
@@ -44,38 +45,40 @@ valgrind --leak-check=full ./bin/io io.config STDOUT
 ./bin/io io.config STDOUT
 valgrind --leak-check=full ./bin/io io.config SLEEP
 ./bin/io io.config SLEEP
+---------------------------------------------------------------------------
+-/bin/swap swap.config 
 ------------------------------------------------------------------------------
 cuando levanto km dos veces seguidas a veces tira mensaje "socket -1" :
+puertos 
+km 9001
+ks 9002
+cpu1 9004
+ms1 9003
+ms2 9006
+ms3 9007
+ms4 9008
+swap -
+io stdin -
+io sleep -
+io stdout -
+
 pkill -f kernel_memory
 pkill -f kernel_scheduler
 pkill -f cpu
 fuser -k 9001/tcp
 fuser -k 9002/tcp
+fuser -k 9003/tcp
+fuser -k 9004/tcp
+fuser -k 9005/tcp
+fuser -k 9006/tcp
+fuser -k -n tcp 9003
+fuser -k -n tcp 9004
+fuser -k -n tcp 9006
+fuser -k -n tcp 9005
+fuser -k -n tcp 9006
+fuser -k -n tcp 9007
 ------------------------------------------------
-ver donde   / para qué uso lista ms (con id ms,tamaño,socket)
-en la funcion "nuevo_memory_stick" agrego ms 
-en la funcion "buscar_ms_por_socket" busco para detectar al ms caido
 
-base y limite global lo obtengo luego de agregar un hueco libre en la lista de huecos
-puedo añadir un ms con id,base global,limite global a "lista_ubicacion_global_ms"
-
-necesito
-para saber donde escribir necesito tener la base global y limite global del ms con su id
-para saber donde leer necesito tener la base global y limite global del ms con su id
-
-
-para stdin,stdout,
--compactación:km debe saber a qué ms enviar peticion de escritura,lectura
-
-LISTA DE HUECOS lo uso cuando:
-- agrego un hueco cuando:un ms se conecta,un segmento es eliminado (memfree),un proceso es suspendido(sus segmentos son enviados a swap),
-un proceso es eliminado (sus segmentos son eliminados)
-- elimino un hueco cuando:creo un segmento (memalloc),
-
-CPUS_DESALOJADAS:km espera este mensaje de parte de ks,luego de q ks haya finalizado todos los procesos
-AUMENTO_DE_MEMORIA:km envia nuevo tamaño total de memoria a ks
-SEG_MAX_SIZE:km envia a cpu,cuando cpu hace handshake
-MS_NUEVO_CPU:km envia a todas las conectadas 
 
 SET AX 9
 SET BX 3
@@ -120,3 +123,5 @@ ejecutar solo instrucciones set ,noop
 para probar que km envíe correctamente los datos de ms a cpu,ya que cuando ms envió peticion MEMORY_STICK_HANDSHAKE cpu aún no estaba levantada
 entonces no recibió nada .que sucede con esa peticion? queda colgada? 
 deberia agregar en cpu_handshake "avisar_cpus_conectadas"
+
+

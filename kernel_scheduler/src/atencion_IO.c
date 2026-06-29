@@ -43,6 +43,9 @@ void* atender_io(void* arg) {
                         log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
                     }
                     sem_post(&sem_recibiLecuraDeIO);
+                    liberarIO(tipoIO);
+                    revisarProcesosBloqueadosParaTipoIO(tipoIO);
+                    break; 
                 }
 
                     // Extraer de forma segura el PID que envió el módulo de I/O

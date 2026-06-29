@@ -2,6 +2,7 @@
 
 int pidParaAsignar = 0;
 bool noHayCompactacion = true;
+pthread_t hiloQuantum;
 
 t_queue* colaNEW;
 t_queue** colasREADY;
@@ -89,6 +90,10 @@ void inicializarSemaforos(){
     sem_init(&sem_recibiLecuraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
     sem_init(&sem_desuspension_ok, 0, 0);
+
+    diccionario_mutex = dictionary_create();
+    pthread_mutex_init(&mutex_diccionario, NULL);
+
 }
 
 void pasarProcesoNewAReady(){
@@ -139,7 +144,6 @@ t_planificador obtenerPlanificacion(char* planificador){
 
 void pasarProcesoReadyAExec(){
     t_pcb* pcbAEjecutar;
-    bool ejecutaPorRR = false;
 
     //ELEGIR DE READY
 
@@ -149,12 +153,10 @@ void pasarProcesoReadyAExec(){
             break;
         case RR:
             pcbAEjecutar = elegirPorRR();
-            ejecutaPorRR = true;
             break;
 
         case CMN:
             pcbAEjecutar = elegirPorCMN();
-            ejecutaPorRR = colaDeProcesoEjecutaRR(pcbAEjecutar->prioridad);
             break;
         default:
             log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
@@ -163,7 +165,7 @@ void pasarProcesoReadyAExec(){
     // ELEGIR CPU
     t_cpu_conectada* cpuElegida = elegirCPU();
     if(cpuElegida == NULL || pcbAEjecutar == NULL) {
-        log_error(kernel->logger,"No se pudo asignar proceso a CPU");
+        log_error(kernel->logger,"No se pudo asignar proceso a CPU:%d PID:%d", cpuElegida->id_cpu, pcbAEjecutar->pid);
         return;
     }
     // LO AGREGO A EXEC
@@ -172,20 +174,21 @@ void pasarProcesoReadyAExec(){
     
     pcbAEjecutar->estado = EXEC;
     pcbAEjecutar->socketCPUEjecuta = cpuElegida->socket_cliente;
+
     pthread_mutex_lock(&mutex_EXEC);
     queue_push(colaEXEC,pcbAEjecutar);
     pthread_mutex_unlock(&mutex_EXEC);
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcbAEjecutar->pid);
 
-    if(ejecutaPorRR) {
-        pthread_t hiloQuantum;
+    // ENVIAR A CPU
+    enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
+
+    if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+        log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
         pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
         pthread_detach(hiloQuantum);
     }
-
-    // ENVIAR A CPU
-    enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
 }
 
 t_pcb* elegirPorFIFO(){
@@ -214,8 +217,8 @@ t_pcb* elegirPorCMN(){
         pthread_mutex_lock(&mutex_READY[i]);
         if (!queue_is_empty(colasREADY[i])){
             pcbELegido = queue_pop(colasREADY[i]);
-            pthread_mutex_unlock(&mutex_READY[i]);
         }
+        pthread_mutex_unlock(&mutex_READY[i]);
     }
     if (pcbELegido != NULL){
         return pcbELegido;
@@ -295,6 +298,7 @@ void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
     
     usleep(kernel->rr_quantum * 1000);
+    log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
     
     notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     

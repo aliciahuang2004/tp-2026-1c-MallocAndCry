@@ -172,6 +172,7 @@ void* atender_cliente_scheduler(void* arg) {
                     log_debug(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
                     pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                 }else{
+                    pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                     log_error(kernel->logger, "ERROR: Tipo %s, ya conectado en socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
                     close(socket_cliente);
                     return NULL ;

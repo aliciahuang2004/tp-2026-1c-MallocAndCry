@@ -2,6 +2,7 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 
+
 int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     t_ms_info* ms_info = malloc(sizeof(t_ms_info));
 
@@ -212,7 +213,7 @@ t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, uint32_t tamano_conten
     return lista_fragmentos_temp;
 }
 
-void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_escribir, t_log *logger)
+void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_escribir, t_log *logger,t_kernel_memory* km)
 {
     int offset_contenido = 0;
 
@@ -237,26 +238,36 @@ void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_esc
         enviar_paquete(paquete_ms, socket_ms, logger);
         eliminar_paquete(paquete_ms);
 
+      
         log_info(logger, "Enviado fragmento %d al MS ID:%d | Tam: %d bytes en Dir Local: %u", i, frag->ms_id, frag->tamano, frag->dir_local);
-        
-        // Agrego espera confirmacion del Memory Stick antes de continuar
-        t_list* respuesta = recibir_paquete(socket_ms);
-        if (respuesta == NULL) {
-            log_error(logger, "Error al recibir confirmación de escritura del MS ID:%d", frag->ms_id);
-        } else {
-            int cod = *(int*) list_get(respuesta, 0);
-            if (cod == IO_OK) {
-                log_debug(logger, "Memory Stick con ID:%d confirmó escritura del fragmento %d", frag->ms_id, i);
+       
+        t_list* respuesta_ms = recibir_paquete(socket_ms); 
+
+        if (respuesta_ms != NULL) {
+            int* cod_op_ptr = (int*) list_get(respuesta_ms, 0);
+            int cod_op_ms = *cod_op_ptr;
+            
+            if (cod_op_ms == IO_OK) {
+                log_info(logger, "MS ID:%d confirmó la operación (IO_OK).", frag->ms_id);
             } else {
-                log_error(logger, "Memory Stick con ID:%d respondió con código inesperado: %d", frag->ms_id, cod);
+                log_error(logger, "Se esperaba IO_OK (24) pero llegó cod_op: %d desde el MS ID:%d", cod_op_ms, frag->ms_id);
             }
-            list_destroy_and_destroy_elements(respuesta, free);
+            
+            list_destroy_and_destroy_elements(respuesta_ms, free);
+        } else {
+            log_error(logger, "El Memory Stick ID:%d se desconectó inesperadamente esperando confirmación", frag->ms_id);
+           
+            t_ms_info* ms_desconectado = buscar_ms_por_socket(socket_ms);
+            if (ms_desconectado != NULL) {
+                manejar_desconexion_memory_stick(ms_desconectado, km, logger);
+            }
         }
+        
         offset_contenido += frag->tamano;
     }
 }
 
-void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger)
+void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger,t_kernel_memory* km)
 {
     void* buffer_completo = malloc(tamano_total);
     if (buffer_completo == NULL) {
@@ -277,7 +288,6 @@ void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total,
             return NULL;
         }
 
-        // Enviar petición de lectura
         t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_peticion, &(frag->dir_local), sizeof(uint32_t));
         agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(int));
@@ -287,7 +297,6 @@ void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total,
         enviar_paquete(paquete_peticion, socket_ms, logger);
         eliminar_paquete(paquete_peticion);
 
-        // Recibir respuesta
         t_list* paquete_respuesta = recibir_paquete(socket_ms);
 
         if (paquete_respuesta == NULL) {
@@ -299,7 +308,12 @@ void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total,
         int cod_op = *(int*) list_get(paquete_respuesta, 0);
 
         if (cod_op != DATOS_LEIDOS) {
-            log_error(logger,"Respuesta inesperada del MS %d. Se esperaba DATOS_LEIDOS y llegó %d",frag->ms_id,cod_op);
+            log_info(logger,"Respuesta inesperada del MS %d. Se esperaba DATOS_LEIDOS y llegó %d.O desconexion de ms",frag->ms_id,cod_op);
+
+             t_ms_info* ms_desconectado = buscar_ms_por_socket(socket_ms);
+            if (ms_desconectado != NULL) {
+                manejar_desconexion_memory_stick(ms_desconectado, km, logger);
+            }
 
             list_destroy_and_destroy_elements(paquete_respuesta, free);
             free(buffer_completo);

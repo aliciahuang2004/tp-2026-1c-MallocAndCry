@@ -7,6 +7,24 @@ t_pcb* crear_PCB(char* path, int prioridad){
     pcbCreado->path = strdup(path);
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
     pcbCreado->socketCPUEjecuta = -1;
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+        pcbCreado->ejecutaPorRR = false;
+        break;
+    case RR:
+        pcbCreado->ejecutaPorRR = true;
+        break;
+    case CMN:
+        if(colaDeProcesoEjecutaRR(prioridad)){
+            pcbCreado->ejecutaPorRR = true;
+            log_debug(kernel->logger,"PLANIFICA CMN- CON RR");
+        }
+        else{
+            pcbCreado->ejecutaPorRR = false;
+            log_debug(kernel->logger,"PLANIFICA CMN- CON FIFO");
+        }
+        break;
+    }
     pidParaAsignar ++;
 
     return pcbCreado;
@@ -180,9 +198,7 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     solicitud->leido = NULL;
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
-    log_info(kernel->logger,"ANTES DE SEMAFORO HAY IO"); //BORRAR
     sem_wait(&sem_hayIO[IO_SLEEP]);
-    log_info(kernel->logger,"DESPUES DE SEMAFORO HAY IO"); //BORRAR
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
     if (!interfaces[IO_SLEEP].ocupada) {
         interfaces[IO_SLEEP].ocupada = true;

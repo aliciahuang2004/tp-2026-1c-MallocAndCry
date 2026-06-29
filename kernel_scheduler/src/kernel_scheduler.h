@@ -33,6 +33,7 @@ typedef struct{
     char* path;
     t_estado estado;
     int socketCPUEjecuta;
+    bool ejecutaPorRR;
 } t_pcb;
 
 typedef struct {
@@ -106,6 +107,7 @@ extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
 extern bool noHayCompactacion;
 
+extern pthread_t hiloQuantum;
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
 
@@ -162,6 +164,7 @@ void chequearCPUsDesalojadas();
 
 // atencionCPU
 void* atender_cpu(void* arg);
+void quitarCPU(t_cpu_conectada* cpuDesconectada);
 
 // atencionIO
 void* atender_io(void* arg);
