@@ -439,7 +439,9 @@ void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
 void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
 
     enviarAIO(socket_io, solicitud);
+    log_warning(kernel->logger, "EsperandoIO_OK, enviando a KM para PID %d", solicitud->pidSolicitaSyscall);
     sem_wait(&sem_recibiLecuraDeIO);
+    log_warning(kernel->logger, "IO_OK, enviando a KM para PID %d", solicitud->pidSolicitaSyscall);
     enviarAKMSolicitudIO(solicitud);
     sem_wait(&sem_recibiEscrituraDeKM);// espera que KM confirme la escritura
 
@@ -461,7 +463,6 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
         log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", solicitud->pidSolicitaSyscall);
     }
     free(ioSolicitud);
-    liberarIO(IO_STDIN);
 }
 
 void hacerSTDOUT(t_solicitud_io* solicitud, int socket_io){

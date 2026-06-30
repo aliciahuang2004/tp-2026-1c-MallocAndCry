@@ -459,6 +459,7 @@ void liberarCPU(t_cpu_conectada* cpu){
     cpu->pidEjecutando = -1;
     cpu->pcbEjecutando = NULL;
     pthread_mutex_unlock(&mutex_CPU);
+    log_debug(kernel->logger,"Se libero CPU: %d", cpu->id_cpu);
     sem_post(&sem_hayCPUdisponible);
 }
 

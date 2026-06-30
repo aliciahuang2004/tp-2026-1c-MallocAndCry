@@ -585,6 +585,7 @@ void* atender_conexion(void* arg) {
                     pthread_mutex_unlock(&mutex_procesos);
                     
                     t_paquete* resp = crear_paquete(DESUSPENSION_OK, crear_buffer());
+                    agregar_a_paquete(resp, &pid_a_desuspender, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
                 }

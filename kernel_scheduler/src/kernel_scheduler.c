@@ -139,12 +139,6 @@ void* atender_cliente_scheduler(void* arg) {
                 pthread_create(&hilo_cpu, NULL, atender_cpu, socket_cpu_ptr);
                 pthread_detach(hilo_cpu);
 
-               /* if(!kernel->procesoInicialCreado){
-                    log_info(logger, "Creando proceso inicial...");
-                    crearProceso(pathInicial, 0);
-                    kernel->procesoInicialCreado = true; 
-                }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
-                
                 list_destroy_and_destroy_elements(paquete, free);
                 return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 break;
