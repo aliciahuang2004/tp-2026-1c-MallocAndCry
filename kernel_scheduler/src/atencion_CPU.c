@@ -74,7 +74,7 @@ void* atender_cpu(void* arg){
             case STDIN:{
                 uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
+                log_info(kernel->logger, "## (<%d>) - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 manejar_stdin(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
@@ -90,7 +90,7 @@ void* atender_cpu(void* arg){
             case INIT_PROC: {// NO BLOQUEA
                 char* path_script = (char*) list_get(paquete, 2);
                 int prioridad = *(int*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)",pidSolicitaSyscall, path_script, prioridad);
+                log_info(kernel->logger, "## (<%d>) - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)",pidSolicitaSyscall, path_script, prioridad);
                 crearProceso(path_script, prioridad);
                 enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
@@ -120,7 +120,13 @@ void* atender_cpu(void* arg){
                 liberarCPU(cpu_emisora);
                 break;
             }
-
+            case CORRUPCION_MEMORIA:{
+                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por corrupción de memoria", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                log_debug(kernel->logger, "[DEBUG-4] KS recibio respuesta compactacion de CPU, pid=%d", pidSolicitaSyscall);
+                finalizarProceso(pidSolicitaSyscall,CORRUPCION_MEMORIA);
+                liberarCPU(cpu_emisora);
+                break;
+            }
             case SEG_FAULT: { 
                 log_debug(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
                 finalizarProceso(pidSolicitaSyscall,SEG_FAULT);

@@ -1,8 +1,6 @@
 #include "kernel_scheduler.h"
 
 int pidParaAsignar = 0;
-int pcbFinalizados = -2;
-bool noHayCompactacion = true;
 
 t_queue* colaNEW;
 t_queue** colasREADY;
@@ -338,7 +336,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
 void* monitorPrioridades(void* arg){
     while(1) {
-        while(noHayCompactacion){
+        while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             sem_wait(&sem_readyPrioridad);
             while(buscarCPULibre() == NULL){
                 pthread_mutex_lock(&mutex_CPU);
@@ -583,7 +581,6 @@ void pasarProcesoBlockABlockSusp(int pid){
     if (pcb != NULL) {
         log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
 
-        
         t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
         agregar_a_paquete(paquete, &pid, sizeof(int));
         enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
@@ -629,7 +626,6 @@ void pasarProcesoBlockSuspAReadySusp(int pid){
     pthread_mutex_lock(&mutex_READY_SUSP);
     queue_push(colaREADY_SUSP,pcb);
     pthread_mutex_unlock(&mutex_READY_SUSP);
-    ordenarSuspReadySegunPrioridad();
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>",pcb->pid);
 
@@ -775,10 +771,10 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
 }
 
 void* loop_corto_plazo(void* args) {
-    log_info(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
+    log_debug(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
     
     while(1) {
-        while(noHayCompactacion){
+        while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             sem_wait(&sem_hayCPUdisponible);
             sem_wait(&sem_hayProcesosEnReady);
             pasarProcesoReadyAExec();
@@ -979,10 +975,88 @@ void ordenarSuspReadySegunPrioridad(){
 
 void* finalizarKernelScheduler(void* args){
     while(1){
-        if (pidParaAsignar == (pcbFinalizados+1)){
-            log_debug(kernel->logger,"FINALIZAR KS");
+        if (pidParaAsignar == (kernel->pcbFinalizados)){
+            log_debug(kernel->logger,"FINALIZAR KS - NO HAY MAS PROCESOS ");
             return EXIT_SUCCESS;
         }
         
     }
+}
+t_pcb* retiraSegunPID(int pid, t_queue* cola, pthread_mutex_t mutex){
+    t_pcb* pcbEncontrada = NULL;
+
+    t_queue* colaAux = queue_create();
+    
+    pthread_mutex_lock(&mutex);
+
+    while (!queue_is_empty(cola)){
+        t_pcb* pcb = queue_pop(cola);
+        if (pcbEncontrada == NULL && pcb->pid == pid){
+            pcbEncontrada = pcb;
+        }else{
+            queue_push(colaAux, pcb);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(cola, queue_pop(colaAux));
+    }
+    
+    queue_destroy(colaAux);
+    
+    pthread_mutex_unlock(&mutex);
+    
+    return pcbEncontrada;
+}
+
+t_pcb* retiraSegunPIDdeREADY(int pid){
+    t_pcb* pcbEncontrada = NULL;
+
+    t_queue* colaAux = queue_create();
+
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case CMN:
+        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+            pthread_mutex_lock(&mutex_READY[i]);
+            while (!queue_is_empty(colasREADY[i])){
+                t_pcb* pcb = queue_pop(colasREADY[i]);
+                if (pcbEncontrada == NULL && pcb->pid == pid){
+                    pcbEncontrada = pcb;
+                }else{
+                    queue_push(colaAux, pcb);
+                }
+            }
+            while(!queue_is_empty(colaAux)){
+                queue_push(colasREADY[i], queue_pop(colaAux));
+            }
+            
+            queue_destroy(colaAux);
+            
+            pthread_mutex_unlock(&mutex_READY[i]);
+        }
+        return pcbEncontrada;
+
+    case FIFO:
+    case RR:
+        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+            pthread_mutex_lock(&mutex_READY[0]);
+            while (!queue_is_empty(colasREADY[0])){
+                t_pcb* pcb = queue_pop(colasREADY[0]);
+                if (pcbEncontrada == NULL && pcb->pid == pid){
+                    pcbEncontrada = pcb;
+                }else{
+                    queue_push(colaAux, pcb);
+                }
+            }
+            while(!queue_is_empty(colaAux)){
+                queue_push(colasREADY[0], queue_pop(colaAux));
+            }
+            
+            queue_destroy(colaAux);
+            
+            pthread_mutex_unlock(&mutex_READY[0]);
+        }
+        return pcbEncontrada;
+    }
+    return pcbEncontrada;
 }

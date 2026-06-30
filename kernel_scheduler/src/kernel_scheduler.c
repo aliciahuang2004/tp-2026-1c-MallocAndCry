@@ -33,7 +33,9 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     while(kernel_scheduler->queues_algorithms[kernel_scheduler->cantidadColasMultinivel] != NULL) {
         kernel_scheduler->cantidadColasMultinivel++;
     }
-
+    kernel_scheduler->noHayCompactacion = true;
+    kernel_scheduler->noHayCorrupcion = true;
+    kernel_scheduler->pcbFinalizados = 0;
     log_debug(kernel_scheduler->logger, "El kernel scheduler se inicializo correctamente");
     
     return kernel_scheduler;

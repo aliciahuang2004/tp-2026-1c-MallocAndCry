@@ -52,6 +52,9 @@ typedef struct {
     int suspension_time;
     // bool procesoInicialCreado;
     int cantidadColasMultinivel;
+    bool noHayCompactacion;
+    bool noHayCorrupcion;
+    int pcbFinalizados;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -103,10 +106,8 @@ typedef struct {
 
 // extern char* pathInicial;
 extern int pidParaAsignar;
-extern int pcbFinalizados;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
-extern bool noHayCompactacion;
 
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
@@ -163,7 +164,14 @@ void inicializar_interfaces();
 void* atender_kernel_memory(void* arg);
 void pedirDesalojoPorCompactacion();
 void chequearCPUsDesalojadas();
-void solicitarDesuspenderProceso();
+void solicitarDesuspenderProceso(int pid);
+void finalizarTodosLosProcesos();
+void pedirDesalojoPorCorrupcion(); // SE FINALIZA LOS EXEC
+void finalizarProcesosBlock();
+void finalizarProcesosBlockSusp();
+void finalizarProcesosNew();
+void finalizarProcesosReady();
+void finalizarProcesosReadySusp();
 
 // atencionCPU
 void* atender_cpu(void* arg);
@@ -204,9 +212,9 @@ void pasarProcesoBlockABlockSusp(int pid);
 void pasarProcesoBlockSuspAReadySusp(int pid);
 void pasarProcesoReadySuspAReady(int pid);
 
-void pasarProcesoExecAExit();
-void pasarProcesoReadyAExit();
-void pasarProcesoBlockAExit();
+void pasarProcesoExecAExit(); // finaliza por DESCONEXION_CPU
+void pasarProcesoReadyAExit();  //finaliza por CORRUPCION
+void pasarProcesoBlockAExit(); // finaliza por DESCONEXION_IO
 
 t_cpu_conectada* buscarCPUSegunPID(int pid);
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
@@ -219,6 +227,8 @@ void* atencionIOstdIN(void* args);
 void* atencionIOstdOUT(void* args);
 void ordenarSuspReadySegunPrioridad();
 void* finalizarKernelScheduler(void* args);
+t_pcb* retiraSegunPID(int pid, t_queue* cola, pthread_mutex_t mutex);
+t_pcb* retiraSegunPIDdeREADY(int pid);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);

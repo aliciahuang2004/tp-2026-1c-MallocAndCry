@@ -239,7 +239,7 @@ void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conecta
 }
 
 void finalizarProceso(int pid, op_code motivo){
-    pcbFinalizados++;
+    kernel->pcbFinalizados++;
     t_pcb* pcb = NULL;
 
     //BUSCAMOS PCB SEGUN MOTIVO DE FINALIZACION
@@ -273,8 +273,6 @@ void finalizarProceso(int pid, op_code motivo){
             queue_destroy(aux);
             pthread_mutex_unlock(&mutex_EXEC);
             break;
-        
-        /*
         case DESCONEXION_IO:{
             //BUSCAR EN BLOQUEADO O SUSPENDIDO BLOQUEADO
             pthread_mutex_lock(&mutex_BLOCK);
@@ -285,13 +283,44 @@ void finalizarProceso(int pid, op_code motivo){
                 else queue_push(aux, p);
             }
             while (!queue_is_empty(aux)){
-                queue_push(colaEXEC, queue_pop(aux));
+                queue_push(colaBLOCK, queue_pop(aux));
             }
             queue_destroy(aux);
             pthread_mutex_unlock(&mutex_BLOCK);
+            if( pcb == NULL){
+                pthread_mutex_lock(&mutex_BLOCK_SUSP);
+                t_queue* aux = queue_create();
+                while (!queue_is_empty(colaBLOCK_SUSP)) {
+                    t_pcb* p = queue_pop(colaBLOCK_SUSP);
+                    if (pcb == NULL && p->pid == pid) pcb = p;
+                    else queue_push(aux, p);
+                }
+                while (!queue_is_empty(aux)){
+                    queue_push(colaBLOCK_SUSP, queue_pop(aux));
+                }
+                queue_destroy(aux);
+                pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+                }
             break;
         }
-        */
+        case CORRUPCION_MEMORIA:{
+            pcb = retiraSegunPID(pid,colaNEW,mutex_NEW);
+            if (pcb == NULL){
+                pcb = retiraSegunPID(pid,colaEXEC,mutex_EXEC);
+            }
+            if (pcb == NULL){
+                pcb = retiraSegunPID(pid,colaBLOCK,mutex_BLOCK);
+            }
+            if (pcb == NULL){
+                pcb = retiraSegunPID(pid,colaBLOCK_SUSP,mutex_BLOCK_SUSP);
+            }
+            if (pcb == NULL){
+                pcb = retiraSegunPID(pid,colaREADY_SUSP,mutex_READY_SUSP);
+            }
+            if (pcb == NULL){
+                pcb = retiraSegunPIDdeREADY(pid);
+            }
+        }
         default:{
             log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual");
             break;
@@ -375,6 +404,12 @@ void eliminarProceso(int pid, op_code motivo){
     case DESCONEXION_CPU:
         log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION DE CPU>",pid);
         break;
+    case DESCONEXION_IO:
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION DE IO>",pid);
+        break;
+        case CORRUPCION_MEMORIA:
+        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>",pid);
+        break;
     case SEG_FAULT:
         log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>",pid);
         break;
@@ -454,6 +489,7 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
             log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", solicitud->pidSolicitaSyscall);
         } else {
             pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
+            solicitarDesuspenderProceso(solicitud->pidSolicitaSyscall);
             log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", solicitud->pidSolicitaSyscall);
             log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
         }

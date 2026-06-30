@@ -57,6 +57,7 @@ void* atender_io(void* arg) {
                                 break; // Salimos del case para evitar errores posteriores
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(pid);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }
@@ -83,6 +84,7 @@ void* atender_io(void* arg) {
                                 break; // Salimos del case para evitar errores posteriores
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(pid);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }
