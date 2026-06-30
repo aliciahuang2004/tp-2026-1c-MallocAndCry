@@ -65,7 +65,7 @@ void* atender_kernel_memory(void* arg) {
             case ESCRITURA_DE_DATOS_OK: {
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM confirmó escritura STDIN para PID: %d", pid);
-                sem_post(&sem_recibiLecuraDeKM);
+                sem_post(&sem_recibiEscrituraDeKM);
                 break;
             }
             case CORRUPCION_MEMORIA:{
@@ -98,33 +98,9 @@ void* atender_kernel_memory(void* arg) {
                 break;
             }
             case AUMENTO_DE_MEMORIA:{
-                log_debug(kernel->logger, "## KM informó tener un aumento de memoria");
-                sem_post(&sem_hayMemoria); 
-                // OJO PORQUE AL PEDIR CREAR SEGMENTO VUELVO A PERDER MEMORIA 
-                // ENTONCES DEBERIA HACER sem_wait(&sem_hayMemoria); AL RECIBIR CREACION DE MEMORIA
-
-            /*
-            t_pcb* pcb = sacardeColaBlockPorPID(pid);
-            if (pcb != NULL) {
-                pcb->estado = READY;
-                pthread_mutex_lock(&mutex_READY);
-                queue_push(colaREADY, pcb);
-                pthread_mutex_unlock(&mutex_READY);
-                log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pid);
-                sem_post(&sem_procesosReady);
-            } else {
-                log_error(kernel->logger,
-                        "KM Listener: CREACION_DE_SEGMENTO_OK - no se encontró PID %d en BLOCK", pid);
-            }
-            break;
-            */
-/*
-            case AUMENTO_DE_MEMORIA: {
-                uint32_t memoria_total = *(uint32_t*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM reporta aumento de memoria disponible: %u bytes", memoria_total);
-                break;
-            }
-            }*/
+                log_debug(kernel->logger, "## KM informó tener un aumento de memoria, eligiendo proceso suspendido");
+                solicitarDesuspenderProceso();
+                // pedir hacer swap
                 break;
             }
             case SUSPENSION_OK: {
@@ -133,8 +109,10 @@ void* atender_kernel_memory(void* arg) {
             break;
             }
             case DESUSPENSION_OK: {
-            log_debug(kernel->logger, "## KM confirmo la desuspension");
-            sem_post(&sem_desuspension_ok);
+                int pid = *(int*) list_get(paquete, 1);
+                log_debug(kernel->logger, "## KM confirmo la desuspension");
+                pasarProcesoReadySuspAReady(pid);
+                solicitarDesuspenderProceso();
             break;
             }
             default:
@@ -182,9 +160,27 @@ void chequearCPUsDesalojadas(){
         pthread_mutex_lock(&mutex_EXEC);
         int cantidad = queue_size(colaEXEC);
         pthread_mutex_unlock(&mutex_EXEC);
-        log_debug(kernel->logger, "Procesos ejecutando %d", cantidad);
         if(cantidad == 0){
+            log_debug(kernel->logger, "Procesos ejecutando %d", cantidad);
             faltaLiberar = false;
         }
     }
+}
+
+void solicitarDesuspenderProceso(){
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(DESUSPENSION_DE_PROCESO, buffer); 
+
+    pthread_mutex_lock(&mutex_READY_SUSP);
+    t_pcb* pcb = queue_peek(colaREADY_SUSP);
+    pthread_mutex_unlock(&mutex_READY_SUSP);
+    agregar_a_paquete(paquete, &pcb->pid, sizeof(int));
+
+    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+
+    if (resultado != 0) {
+        log_error(kernel->logger, "Error al enviar pedido de desuspencion a Kernel Memory");
+        exit(EXIT_FAILURE);
+    }
+    eliminar_paquete(paquete);
 }

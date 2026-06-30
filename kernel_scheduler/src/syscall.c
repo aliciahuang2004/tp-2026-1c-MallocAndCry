@@ -108,6 +108,7 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
 
         // Usar pasarProcesoExecABlock para hacer la transición completa
         pasarProcesoExecABlock(pidSolicitaSyscall);
+        liberarCPU(cpu);
     }
 }
 
@@ -180,11 +181,6 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
     enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
     
     eliminar_paquete(solicitud);
-
-    // int cop_op = recibir_operacion(kernel->socket_kernel_memory);
-    /*if (cop_op == LIBERAR_MEMORIA_OK){
-        // podria verificar que se libera y pasar de suspReady a Ready y semaforo ready
-    }*/
     
 }
 
@@ -204,7 +200,6 @@ void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu) {
     pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
 
     sem_post(&sem_haySolicitudIO[IO_SLEEP]);
-    
 }
 
 void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectada* cpu) {
@@ -218,28 +213,11 @@ void manejar_stdin(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectad
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
 
-    sem_wait(&sem_hayIO[IO_STDIN]);
-
     pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
-    if (!interfaces[IO_STDIN].ocupada) {
-        interfaces[IO_STDIN].ocupada = true;
-        interfaces[IO_STDIN].pidAsignado = pid;
-        queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
-        int socket_io = interfaces[IO_STDIN].socket_interfaz;
-        pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
-        hacerSTDIN(solicitud,socket_io);
-        // KM confirmo OK, ahora sí desbloqueamos
-        if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
-            pasarProcesoBlockSuspAReadySusp(pid);
-        } else {
-            pasarProcesoBlockaReady(pid);
-        }
-    } else {
-        queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
-        pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
-    }
-    if(solicitud->leido != NULL) free(solicitud->leido);
-    free(solicitud);
+    queue_push(interfaces[IO_STDIN].solicitudes, solicitud);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);
+    
+    sem_post(&sem_haySolicitudIO[IO_STDIN]);
 }
 
 void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conectada* cpu) {
@@ -253,23 +231,15 @@ void manejar_stdout(int pid, uint32_t dir_fisica, uint32_t tamano, t_cpu_conecta
 
     pasarProcesoExecABlock(pid);  // mueve a BLOCK
 
-    sem_wait(&sem_hayIO[IO_STDOUT]);
-
     pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
-    if (!interfaces[IO_STDOUT].ocupada) {
-        interfaces[IO_STDOUT].ocupada = true;
-        interfaces[IO_STDOUT].pidAsignado = pid;
-        queue_push(interfaces[IO_STDOUT].solicitudes, solicitud);
-        int socket_io = interfaces[IO_STDOUT].socket_interfaz;
-        pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
-        hacerSTDOUT(solicitud,socket_io);
-    } else {
-        queue_push(interfaces[IO_STDOUT].solicitudes, solicitud);
-        pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
-    }
+    queue_push(interfaces[IO_STDOUT].solicitudes, solicitud);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
+    
+    sem_post(&sem_haySolicitudIO[IO_STDOUT]);
 }
 
 void finalizarProceso(int pid, op_code motivo){
+    pcbFinalizados++;
     t_pcb* pcb = NULL;
 
     //BUSCAMOS PCB SEGUN MOTIVO DE FINALIZACION
@@ -437,6 +407,8 @@ void enviarAIO(int socket_io, t_solicitud_io* solicitud){
     enviar_paquete(paquete, socket_io, kernel->logger);
 
     eliminar_paquete(paquete);
+    
+    log_debug(kernel->logger,"Se envio solicitud a io: %d", solicitud->tipo);
 }
 
 void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
@@ -460,17 +432,39 @@ void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
     enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
 
     eliminar_paquete(paquete);
+
+    log_debug(kernel->logger,"Se envio solicitud a km: %d", solicitud->tipo);
 }
 
 void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
+
     enviarAIO(socket_io, solicitud);
     sem_wait(&sem_recibiLecuraDeIO);
     enviarAKMSolicitudIO(solicitud);
-    sem_wait(&sem_recibiLecuraDeKM);// espera que KM confirme la escritura
+    sem_wait(&sem_recibiEscrituraDeKM);// espera que KM confirme la escritura
+
+    t_solicitud_io* ioSolicitud = retirarSolicitud(IO_STDIN, solicitud->pidSolicitaSyscall);
+
+    log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", solicitud->pidSolicitaSyscall, socket_io);
+    if (buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK, mutex_BLOCK) == NULL) {
+        log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", solicitud->pidSolicitaSyscall);
+        if (buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
+            log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", solicitud->pidSolicitaSyscall);
+        } else {
+            pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
+            log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", solicitud->pidSolicitaSyscall);
+            log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+        }
+    } else {
+        pasarProcesoBlockaReady(solicitud->pidSolicitaSyscall);
+        log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", solicitud->pidSolicitaSyscall);
+        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", solicitud->pidSolicitaSyscall);
+    }
+    free(ioSolicitud);
+    liberarIO(IO_STDIN);
 }
 
 void hacerSTDOUT(t_solicitud_io* solicitud, int socket_io){
-    
     enviarAKMSolicitudIO(solicitud);
     sem_wait(&sem_recibiLecuraDeKM);
     enviarAIO(socket_io, solicitud);

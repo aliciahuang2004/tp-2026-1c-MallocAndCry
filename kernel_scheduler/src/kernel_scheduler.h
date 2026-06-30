@@ -103,11 +103,11 @@ typedef struct {
 
 // extern char* pathInicial;
 extern int pidParaAsignar;
+extern int pcbFinalizados;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
 extern bool noHayCompactacion;
 
-extern pthread_t hiloQuantum;
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
 
@@ -134,15 +134,16 @@ extern pthread_mutex_t mutex_CPU;
 extern sem_t sem_hayProcesosEnReady;
 extern sem_t sem_readyPrioridad;
 extern sem_t sem_hayCPUdisponible;
-extern sem_t sem_finSyscall;
-extern sem_t sem_hayMemoria;
+// extern sem_t sem_finSyscall;
+// extern sem_t sem_hayMemoria;
 extern sem_t* sem_hayIO;
 extern sem_t* sem_haySolicitudIO;
 extern sem_t sem_recibiLecuraDeIO;
 extern sem_t sem_recibiLecuraDeKM;
+extern sem_t sem_recibiEscrituraDeKM;
 // extern sem_procesoCreado;
 extern sem_t sem_suspension_ok;
-extern sem_t sem_desuspension_ok;
+// extern sem_t sem_desuspension_ok;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;
@@ -162,6 +163,7 @@ void inicializar_interfaces();
 void* atender_kernel_memory(void* arg);
 void pedirDesalojoPorCompactacion();
 void chequearCPUsDesalojadas();
+void solicitarDesuspenderProceso();
 
 // atencionCPU
 void* atender_cpu(void* arg);
@@ -213,6 +215,10 @@ t_tipo_io buscarTipoIOPorSocket(int socket_io);
 void reencolarAlInicio(int pid);
 void inicializarHilos();
 void* atencionIOsleep(void* args);
+void* atencionIOstdIN(void* args);
+void* atencionIOstdOUT(void* args);
+void ordenarSuspReadySegunPrioridad();
+void* finalizarKernelScheduler(void* args);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);

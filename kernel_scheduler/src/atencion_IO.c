@@ -26,26 +26,31 @@ void* atender_io(void* arg) {
 
         switch (cod_op) {
             case IO_OK://termino syscall
-                t_solicitud_io* solicitud = retirarSolicitud(tipoIO,pid);
-                if (solicitud == NULL){
-                    log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
+                if(tipoIO != IO_STDIN){
+                    t_solicitud_io* solicitud = retirarSolicitud(tipoIO,pid);
+                    if (solicitud == NULL){
+                        log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                    }
                 }
-                
+
                 if(tipoIO == IO_STDIN){
                     int tamanio = *(int*) list_get(paquete, 2);
                     char* lecturaIO = (char*) list_get(paquete, 3);
-                    if(solicitud->pidSolicitaSyscall == pid && solicitud->tamanio == tamanio){
-                        solicitud->leido = strdup(lecturaIO);
+                    pthread_mutex_lock(&mutex_interfaces[tipoIO]);
+                    t_solicitud_io* solicitudSTDIN = queue_peek(interfaces[tipoIO].solicitudes);
+                    if(solicitudSTDIN->pidSolicitaSyscall == pid && solicitudSTDIN->tamanio == tamanio){
+                        solicitudSTDIN->leido = strdup(lecturaIO);
                         log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
+                        pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                     }
+                    free(solicitudSTDIN);
                     sem_post(&sem_recibiLecuraDeIO);
                     liberarIO(tipoIO);
-                    revisarProcesosBloqueadosParaTipoIO(tipoIO);
-                    break; 
+                    break;
                 }
 
                     // Extraer de forma segura el PID que envió el módulo de I/O
-                log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
                 if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
                     log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
                     if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {

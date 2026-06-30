@@ -1,8 +1,8 @@
 #include "kernel_scheduler.h"
 
 int pidParaAsignar = 0;
+int pcbFinalizados = -2;
 bool noHayCompactacion = true;
-pthread_t hiloQuantum;
 
 t_queue* colaNEW;
 t_queue** colasREADY;
@@ -26,14 +26,15 @@ pthread_mutex_t mutex_EXIT;
 sem_t sem_hayProcesosEnReady;
 sem_t sem_readyPrioridad;
 sem_t sem_hayCPUdisponible;
-sem_t sem_finSyscall;
-sem_t sem_hayMemoria;
+// sem_t sem_finSyscall;
+// sem_t sem_hayMemoria;
 sem_t* sem_hayIO;
 sem_t* sem_haySolicitudIO;
 sem_t sem_recibiLecuraDeIO;
 sem_t sem_recibiLecuraDeKM;
+sem_t sem_recibiEscrituraDeKM;
 sem_t sem_suspension_ok;
-sem_t sem_desuspension_ok;
+// sem_t sem_desuspension_ok;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -83,14 +84,15 @@ void inicializarSemaforos(){
 
     //SEMAFOROS
     sem_init(&sem_hayCPUdisponible,0,0); // CPU se conecta o liberamos
-    sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
+    // sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
     sem_init(&sem_hayProcesosEnReady, 0, 0);
     sem_init(&sem_readyPrioridad,0,0);
-    sem_init(&sem_finSyscall,0,0);  // 
+    // sem_init(&sem_finSyscall,0,0);  // 
     sem_init(&sem_recibiLecuraDeIO,0,0);
     sem_init(&sem_recibiLecuraDeKM,0,0);
+    sem_init(&sem_recibiEscrituraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
-    sem_init(&sem_desuspension_ok, 0, 0);
+    // sem_init(&sem_desuspension_ok, 0, 0);
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
@@ -187,6 +189,7 @@ void pasarProcesoReadyAExec(){
 
     if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
         log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
+        pthread_t hiloQuantum;
         pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
         pthread_detach(hiloQuantum);
     }
@@ -297,11 +300,14 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
 
 void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
+    int pid = cpu->pidEjecutando;
     
     usleep(kernel->rr_quantum * 1000);
-    log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
-    
-    notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
+
+    if(buscarPCBPorPID(pid, colaEXEC, mutex_EXEC) == cpu->pcbEjecutando){
+        log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
+        notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
+    }
     
     return NULL;
 }
@@ -622,11 +628,10 @@ void pasarProcesoBlockSuspAReadySusp(int pid){
     pthread_mutex_lock(&mutex_READY_SUSP);
     queue_push(colaREADY_SUSP,pcb);
     pthread_mutex_unlock(&mutex_READY_SUSP);
+    ordenarSuspReadySegunPrioridad();
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>",pcb->pid);
 
-    sem_wait(&sem_hayMemoria);
-    pasarProcesoReadySuspAReady(pid);
 }
 
 void pasarProcesoReadySuspAReady(int pid){
@@ -644,16 +649,6 @@ void pasarProcesoReadySuspAReady(int pid){
         }        
     }
     pthread_mutex_unlock(&mutex_READY_SUSP);
-
-    if (pcb != NULL) {
-        log_info(kernel->logger,"## (<%d>) Intentando desuspender...", pcb->pid);
-
-        t_paquete* paquete = crear_paquete(DESUSPENSION_DE_PROCESO, crear_buffer());
-        agregar_a_paquete(paquete, &pid, sizeof(int));
-        enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
-        eliminar_paquete(paquete);
-
-        sem_wait(&sem_desuspension_ok);
 
     //AGREGO A READY
 
@@ -682,9 +677,6 @@ void pasarProcesoReadySuspAReady(int pid){
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY_SUSP> al estado <READY>",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
 
-    } else {
-        log_error(kernel->logger, "Error: No se encontró el PID %d en la cola READY_SUSP", pid);
-    }
 
 }
 
@@ -785,9 +777,11 @@ void* loop_corto_plazo(void* args) {
     log_info(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
     
     while(1) {
-        sem_wait(&sem_hayCPUdisponible);
-        sem_wait(&sem_hayProcesosEnReady);
+        while(noHayCompactacion){
+            sem_wait(&sem_hayCPUdisponible);
+            sem_wait(&sem_hayProcesosEnReady);
             pasarProcesoReadyAExec();
+        }
     }
     return NULL;
 }
@@ -867,6 +861,15 @@ void reencolarAlInicio(int pid){
 void inicializarHilos(){
     //CPU E IO AL CONECTARSE
 
+    //MONITOREAR EL CIERRE
+    pthread_t finalizarKS;
+    if (pthread_create(&finalizarKS, NULL, finalizarKernelScheduler, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo para finalizar KERNEL SCHEDULER");
+        return ;
+    }
+    pthread_detach(finalizarKS);
+
+
     //KM
     pthread_t hilo_escucha_km;
     if (pthread_create(&hilo_escucha_km, NULL, atender_kernel_memory, NULL) != 0) {
@@ -901,6 +904,20 @@ void inicializarHilos(){
     }
     pthread_detach(solicitudSleep);
 
+    pthread_t solicitudStdIn;
+    if(pthread_create(&solicitudStdIn, NULL, atencionIOstdIN, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall STDIN");
+            return ;
+    }
+    pthread_detach(solicitudStdIn);
+
+    pthread_t solicitudStdOut;
+    if(pthread_create(&solicitudStdOut, NULL, atencionIOstdOUT, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall STDOUT");
+            return ;
+    }
+    pthread_detach(solicitudStdOut);
+
 }
 
 void* atencionIOsleep(void* args) {
@@ -911,4 +928,60 @@ void* atencionIOsleep(void* args) {
         revisarProcesosBloqueadosParaTipoIO(IO_SLEEP);
     }
     return NULL;
+}
+
+void* atencionIOstdIN(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_STDIN]);
+        sem_wait(&sem_haySolicitudIO[IO_STDIN]);
+        revisarProcesosBloqueadosParaTipoIO(IO_STDIN);
+    }
+    return NULL;
+}
+
+void* atencionIOstdOUT(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_STDOUT]);
+        sem_wait(&sem_haySolicitudIO[IO_STDOUT]);
+        revisarProcesosBloqueadosParaTipoIO(IO_STDOUT);
+    }
+    return NULL;
+}
+
+void ordenarSuspReadySegunPrioridad(){
+    int maximaPrioridad = 0;
+
+    t_list* listaAux = list_create();
+
+    pthread_mutex_lock(&mutex_READY_SUSP);
+    while(!queue_is_empty(colaREADY_SUSP)){
+        t_pcb* pcb = queue_pop(colaREADY_SUSP);
+        list_add(listaAux,pcb);
+        if(pcb->prioridad > maximaPrioridad){
+            maximaPrioridad = pcb->prioridad;
+        }
+    }
+
+    for (int i = 0; i <= maximaPrioridad; i++){
+        for(int j = 0; j< list_size(listaAux); j++){
+            t_pcb* pcb = list_get(listaAux, j);
+            if(pcb->prioridad == i){
+                queue_push(colaREADY_SUSP,pcb);
+            }
+        }
+    }
+    pthread_mutex_unlock(&mutex_READY_SUSP);
+    list_destroy_and_destroy_elements(listaAux, free);
+}
+
+void* finalizarKernelScheduler(void* args){
+    while(1){
+        if (pidParaAsignar == (pcbFinalizados+1)){
+            log_debug(kernel->logger,"FINALIZAR KS");
+            return EXIT_SUCCESS;
+        }
+        
+    }
 }
