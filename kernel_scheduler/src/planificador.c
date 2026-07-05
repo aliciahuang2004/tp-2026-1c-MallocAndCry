@@ -144,7 +144,7 @@ t_planificador obtenerPlanificacion(char* planificador){
 }
 
 void pasarProcesoReadyAExec(){
-    t_pcb* pcbAEjecutar;
+    t_pcb* pcbAEjecutar = NULL;
 
     //ELEGIR DE READY
 
@@ -166,7 +166,7 @@ void pasarProcesoReadyAExec(){
     // ELEGIR CPU
     t_cpu_conectada* cpuElegida = elegirCPU();
     if(cpuElegida == NULL || pcbAEjecutar == NULL) {
-        log_error(kernel->logger,"No se pudo asignar proceso a CPU:%d PID:%d", cpuElegida->id_cpu, pcbAEjecutar->pid);
+        log_error(kernel->logger,"No se pudo asignar proceso a CPU o PID (cpu=%p, pcb=%p)", (void*)cpuElegida, (void*)pcbAEjecutar);
         return;
     }
     // LO AGREGO A EXEC
@@ -327,6 +327,10 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
         break;
     case PROCESO_DESALOJADO_PRIORIDAD:
         t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,mutex_EXEC);
+        if(pcbEnExec == NULL){
+            log_debug(kernel->logger, "Desalojo por prioridad ignorado: CPU %d ya no tiene el proceso en EXEC", cpu->id_cpu);
+            break;
+        }
         log_info(kernel->logger,"## (<%d>) Prioridad: <%d> - Desalojado por cola más prioritaria por el proceso <%d> con prioridad <%d>",pcbEnExec->pid, pcbEnExec->prioridad, pcbOtroProceso->pid,pcbOtroProceso->prioridad);
         break;
     default:
@@ -344,7 +348,7 @@ void* monitorPrioridades(void* arg){
                 for(int i = 0; i < cantidad; i++) {
                     t_cpu_conectada* cpu = queue_pop(colaCPUs);
                     if(!cpu->libre ) {
-                        int prioridadActual = cpu->pidEjecutando;
+                        int prioridadActual = cpu->pcbEjecutando->prioridad;
                         int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
                         if(nuevaPrioridad != -1) {
                             t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);

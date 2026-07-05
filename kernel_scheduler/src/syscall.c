@@ -4,6 +4,8 @@ t_pcb* crear_PCB(char* path, int prioridad){
     t_pcb* pcbCreado = malloc(sizeof(t_pcb));
     pcbCreado->pid = pidParaAsignar;
     pcbCreado->prioridad = prioridad;
+    pcbCreado->prioridadBase = prioridad;
+    pcbCreado->mutexTomados = list_create();
     pcbCreado->path = strdup(path);
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
     pcbCreado->socketCPUEjecuta = -1;
@@ -104,57 +106,142 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
         int* pid_ptr = malloc(sizeof(int));
         *pid_ptr = pidSolicitaSyscall;
         queue_push(mutex->cola_bloqueados, pid_ptr);
+        int pidDuenio = mutex->pidAsignado;
         pthread_mutex_unlock(&mutex_diccionario);
 
-        // Usar pasarProcesoExecABlock para hacer la transición completa
+        // HERENCIA: si el que pide tiene mayor prioridad (numero MENOR) que el dueño, se la presta
+        t_pcb* pcbSolicitante = buscarPCBPorPID(pidSolicitaSyscall, colaEXEC, mutex_EXEC);
+        t_pcb* pcbDuenio = buscarPCBEnCualquierEstado(pidDuenio);
+        if(pcbSolicitante != NULL && pcbDuenio != NULL && pcbSolicitante->prioridad < pcbDuenio->prioridad){
+            log_debug(kernel->logger, "## (<%d>) Hereda prioridad <%d> del proceso <%d>", pidDuenio, pcbSolicitante->prioridad, pidSolicitaSyscall);
+            log_info(kernel->logger, "## <%d> Cambio de prioridad: <%d> - <%d>", pidDuenio, pcbDuenio->prioridad, pcbSolicitante->prioridad);
+            pcbDuenio->prioridad = pcbSolicitante->prioridad;
+        }        
         pasarProcesoExecABlock(pidSolicitaSyscall);
         liberarCPU(cpu);
     }
 }
 
-void liberarMutex(int pidLiberaMutex, char* nombreMutex){
+void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu){
     pthread_mutex_lock(&mutex_diccionario);
     t_mutex* mutex = dictionary_get(diccionario_mutex, nombreMutex);
 
     if(mutex == NULL) {
         pthread_mutex_unlock(&mutex_diccionario);
+        enviarPIDAcpu(pidLiberaMutex, cpu);
         return;
     }
+    t_pcb* pcbDuenioAnterior = NULL;
+    t_pcb* pcbADesbloquear = NULL;
+    bool huboCambioDeDuenio = false;
 
     if(mutex->bloqueado && mutex->pidAsignado == pidLiberaMutex){
         log_info(kernel->logger, "## (<%d>) Libera el Mutex <%s>", pidLiberaMutex, nombreMutex); 
-
+        
+        pcbDuenioAnterior = buscarPCBEnCualquierEstado(pidLiberaMutex);
+        if(pcbDuenioAnterior != NULL){
+            list_remove_element(pcbDuenioAnterior->mutexTomados, mutex);
+        }
         if(!queue_is_empty(mutex->cola_bloqueados)){
             int* proximo_pid_ptr = queue_pop(mutex->cola_bloqueados);
             int proximo_pid = *proximo_pid_ptr;
             free(proximo_pid_ptr);
 
             mutex->pidAsignado = proximo_pid;
-            pthread_mutex_unlock(&mutex_diccionario);
+            //pthread_mutex_unlock(&mutex_diccionario);
 
             t_pcb* pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK, mutex_BLOCK);
             if(pcbADesbloquear == NULL){
                 pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK_SUSP, mutex_BLOCK_SUSP);
-                if (pcbADesbloquear == NULL){
-                    log_error(kernel->logger,"ERROR, no se encontro el proceso de PID: %d",proximo_pid);
-                }else{
-                    pasarProcesoBlockSuspAReadySusp(pcbADesbloquear->pid);
-                }
-                
-            }else{
-                pasarProcesoBlockaReady(pcbADesbloquear->pid);
             }
+            if (pcbADesbloquear != NULL){
+                list_add(pcbADesbloquear->mutexTomados, mutex);
+            } else {
+                    log_error(kernel->logger,"ERROR, no se encontro el proceso de PID: %d",proximo_pid);
+            }
+            huboCambioDeDuenio = true;
         } else {
             // No hay nadie en la cola de espera, el mutex queda libre 
             mutex->bloqueado = false;
             mutex->pidAsignado = -1;
-            pthread_mutex_unlock(&mutex_diccionario);
         }
-    } else {
-        pthread_mutex_unlock(&mutex_diccionario);
     }
+    
+    pthread_mutex_unlock(&mutex_diccionario);
+    // Transiciones de estado
+    if(huboCambioDeDuenio && pcbADesbloquear != NULL){
+        if(pcbADesbloquear->estado == BLOCK_SUSP){
+            pasarProcesoBlockSuspAReadySusp(pcbADesbloquear->pid);
+        } else {
+            pasarProcesoBlockaReady(pcbADesbloquear->pid);
+        }
+    }
+
+    if(pcbDuenioAnterior != NULL){
+        recalcularPrioridad(pcbDuenioAnterior);
+    }
+
+    enviarPIDAcpu(pidLiberaMutex, cpu);
 }
 
+t_pcb* buscarPCBEnCualquierEstado(int pid){
+    t_pcb* pcb = buscarPCBPorPID(pid, colaEXEC, mutex_EXEC);
+    if(pcb != NULL) return pcb;
+
+    pcb = buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK);
+    if(pcb != NULL) return pcb;
+
+    pcb = buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP);
+    if(pcb != NULL) return pcb;
+
+    pcb = buscarPCBPorPID(pid, colaREADY_SUSP, mutex_READY_SUSP);
+    if(pcb != NULL) return pcb;
+
+    if(obtenerPlanificacion(kernel->planification_algorithm) == CMN){
+        for(int i = 0; i < kernel->cantidadColasMultinivel; i++){
+            pcb = buscarPCBPorPID(pid, colasREADY[i], mutex_READY[i]);
+            if(pcb != NULL) return pcb;
+        }
+    } else {
+        pcb = buscarPCBPorPID(pid, colasREADY[0], mutex_READY[0]);
+        if(pcb != NULL) return pcb;
+    }
+
+    return NULL;
+}
+
+void recalcularPrioridad(t_pcb* pcb){
+    pthread_mutex_lock(&mutex_diccionario);
+
+    int prioridadCalculada = pcb->prioridadBase;
+
+    int cantidadMutex = list_size(pcb->mutexTomados);
+    for(int i = 0; i < cantidadMutex; i++){
+        t_mutex* m = list_get(pcb->mutexTomados, i);
+
+        t_queue* aux = queue_create();
+        while(!queue_is_empty(m->cola_bloqueados)){
+            int* pid_ptr = queue_pop(m->cola_bloqueados);
+            t_pcb* pcbEsperando = buscarPCBEnCualquierEstado(*pid_ptr);
+            if(pcbEsperando != NULL && pcbEsperando->prioridad < prioridadCalculada){
+                prioridadCalculada = pcbEsperando->prioridad;
+            }
+            queue_push(aux, pid_ptr);
+        }
+        while(!queue_is_empty(aux)){
+            queue_push(m->cola_bloqueados, queue_pop(aux));
+        }
+        queue_destroy(aux);
+    }
+
+    pthread_mutex_unlock(&mutex_diccionario);
+
+    if(pcb->prioridad != prioridadCalculada){
+        log_debug(kernel->logger, "## (<%d>) Prioridad efectiva pasa de <%d> a <%d> tras recalcular herencia", pcb->pid, pcb->prioridad, prioridadCalculada);
+        log_info(kernel->logger, "## <%d> Cambio de prioridad: <%d> - <%d>", pcb->pid, pcb->prioridad, prioridadCalculada);
+        pcb->prioridad = prioridadCalculada;
+    }
+}
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
 
     t_paquete* solicitud = crear_paquete(CREACION_DE_SEGMENTO, crear_buffer());

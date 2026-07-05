@@ -43,8 +43,7 @@ void* atender_cpu(void* arg){
             case MUTEX_UNLOCK:{
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>", pidSolicitaSyscall);
-                liberarMutex(pidSolicitaSyscall, nombreMutex);
-                // enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
+                liberarMutex(pidSolicitaSyscall, nombreMutex, cpu_emisora);
                 break;
             }
             case MEM_ALLOC: { // ANTE CREACION DE SEGMENTO OK  SE VUELVE A ENVIAR PID A EJECUTAR- AVERIGUAR BIEN ANTE COMPACTACION
@@ -97,8 +96,8 @@ void* atender_cpu(void* arg){
             }
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
-                finalizarProceso(pidSolicitaSyscall,EXIT_PROC);
-                liberarCPU(cpu_emisora);;                
+                liberarCPU(cpu_emisora); 
+                finalizarProceso(pidSolicitaSyscall,EXIT_PROC);              
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{

@@ -29,11 +29,13 @@ typedef enum{
 
 typedef struct{
     int pid;
-    int prioridad;
+    int prioridad; // prioridad que usa el planificador
+    int prioridadBase; //prioridad original del proceso, nunca se modificara
     char* path;
     t_estado estado;
     int socketCPUEjecuta;
     bool ejecutaPorRR;
+    t_list* mutexTomados; // Lista de mutex que el proceso tiene tomado ahora mismo
 } t_pcb;
 
 typedef struct {
@@ -236,9 +238,11 @@ void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
 void crearMutex(char* nombreMutex);
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu);
-void liberarMutex(int pidLiberaMutex, char* nombreMutex);
+void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu);
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
 void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
+t_pcb* buscarPCBEnCualquierEstado(int pid);
+void recalcularPrioridad(t_pcb* pcb);
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
 void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
