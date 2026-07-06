@@ -29,11 +29,13 @@ typedef enum{
 
 typedef struct{
     int pid;
-    int prioridad;
+    int prioridad; // prioridad que usa el planificador
+    int prioridadBase; //prioridad original del proceso, nunca se modificara
     char* path;
     t_estado estado;
     int socketCPUEjecuta;
     bool ejecutaPorRR;
+    t_list* mutexTomados; // Lista de mutex que el proceso tiene tomado ahora mismo
 } t_pcb;
 
 typedef struct {
@@ -52,6 +54,9 @@ typedef struct {
     int suspension_time;
     // bool procesoInicialCreado;
     int cantidadColasMultinivel;
+    bool noHayCompactacion;
+    bool noHayCorrupcion;
+    int pcbFinalizados;
 }t_kernel_scheduler;
 
 // Estructura para pasar datos a los hilos de atención
@@ -105,9 +110,7 @@ typedef struct {
 extern int pidParaAsignar;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
-extern bool noHayCompactacion;
 
-extern pthread_t hiloQuantum;
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
 
@@ -134,14 +137,16 @@ extern pthread_mutex_t mutex_CPU;
 extern sem_t sem_hayProcesosEnReady;
 extern sem_t sem_readyPrioridad;
 extern sem_t sem_hayCPUdisponible;
-extern sem_t sem_finSyscall;
-extern sem_t sem_hayMemoria;
+// extern sem_t sem_finSyscall;
+// extern sem_t sem_hayMemoria;
 extern sem_t* sem_hayIO;
+extern sem_t* sem_haySolicitudIO;
 extern sem_t sem_recibiLecuraDeIO;
 extern sem_t sem_recibiLecuraDeKM;
+extern sem_t sem_recibiEscrituraDeKM;
 // extern sem_procesoCreado;
 extern sem_t sem_suspension_ok;
-extern sem_t sem_desuspension_ok;
+// extern sem_t sem_desuspension_ok;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;
@@ -161,6 +166,14 @@ void inicializar_interfaces();
 void* atender_kernel_memory(void* arg);
 void pedirDesalojoPorCompactacion();
 void chequearCPUsDesalojadas();
+void solicitarDesuspenderProceso(int pid);
+void finalizarTodosLosProcesos();
+void pedirDesalojoPorCorrupcion(); // SE FINALIZA LOS EXEC
+void finalizarProcesosBlock();
+void finalizarProcesosBlockSusp();
+void finalizarProcesosNew();
+void finalizarProcesosReady();
+void finalizarProcesosReadySusp();
 
 // atencionCPU
 void* atender_cpu(void* arg);
@@ -201,15 +214,23 @@ void pasarProcesoBlockABlockSusp(int pid);
 void pasarProcesoBlockSuspAReadySusp(int pid);
 void pasarProcesoReadySuspAReady(int pid);
 
-void pasarProcesoExecAExit();
-void pasarProcesoReadyAExit();
-void pasarProcesoBlockAExit();
+void pasarProcesoExecAExit(); // finaliza por DESCONEXION_CPU
+void pasarProcesoReadyAExit();  //finaliza por CORRUPCION
+void pasarProcesoBlockAExit(); // finaliza por DESCONEXION_IO
 
 t_cpu_conectada* buscarCPUSegunPID(int pid);
 t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu);
 void* loop_corto_plazo(void* args);
 t_tipo_io buscarTipoIOPorSocket(int socket_io);
 void reencolarAlInicio(int pid);
+void inicializarHilos();
+void* atencionIOsleep(void* args);
+void* atencionIOstdIN(void* args);
+void* atencionIOstdOUT(void* args);
+void ordenarSuspReadySegunPrioridad();
+void* finalizarKernelScheduler(void* args);
+t_pcb* retiraSegunPID(int pid, t_queue* cola, pthread_mutex_t mutex);
+t_pcb* retiraSegunPIDdeREADY(int pid);
 
 // syscall
 t_pcb* crear_PCB(char* path, int prioridad);
@@ -217,9 +238,11 @@ void crearProceso(char* path, int prioridad);
 void enviarPathYPidKM(int pid, char* path);
 void crearMutex(char* nombreMutex);
 void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu);
-void liberarMutex(int pidLiberaMutex, char* nombreMutex);
+void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu);
 void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio);
 void liberarMemoria(int pidSolicitaSyscall, int idSegmento);
+t_pcb* buscarPCBEnCualquierEstado(int pid);
+void recalcularPrioridad(t_pcb* pcb);
 void manejar_sleep(int pid, int tiempo_ms, t_cpu_conectada* cpu);
 void manejar_stdin(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);
 void manejar_stdout(int pid, uint32_t dir_logica, uint32_t tamano, t_cpu_conectada* cpu);

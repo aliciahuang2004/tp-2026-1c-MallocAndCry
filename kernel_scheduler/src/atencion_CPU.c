@@ -43,11 +43,10 @@ void* atender_cpu(void* arg){
             case MUTEX_UNLOCK:{
                 char* nombreMutex = (char*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <MUTEX_UNLOCK>", pidSolicitaSyscall);
-                liberarMutex(pidSolicitaSyscall, nombreMutex);
-                // enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
+                liberarMutex(pidSolicitaSyscall, nombreMutex, cpu_emisora);
                 break;
             }
-            case MEM_ALLOC: {
+            case MEM_ALLOC: { // ANTE CREACION DE SEGMENTO OK  SE VUELVE A ENVIAR PID A EJECUTAR- AVERIGUAR BIEN ANTE COMPACTACION
                 int idSegmento = *(int*) list_get(paquete, 2);
                 int tamanio = *(int*) list_get(paquete, 3);
                 printf("PID=%d SEG=%d TAM=%d\n",pidSolicitaSyscall,idSegmento,tamanio);
@@ -67,10 +66,6 @@ void* atender_cpu(void* arg){
             case SLEEP:{
                 int tiempo_ms = *(int*) list_get(paquete, 2);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <SLEEP>", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 liberarCPU(cpu_emisora);
                 manejar_sleep(pidSolicitaSyscall, tiempo_ms, cpu_emisora);
                 break;
@@ -78,11 +73,7 @@ void* atender_cpu(void* arg){
             case STDIN:{
                 uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
+                log_info(kernel->logger, "## (<%d>) - Solicitó Syscall <STDIN> ", pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 manejar_stdin(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
@@ -91,10 +82,6 @@ void* atender_cpu(void* arg){
                 uint32_t dir_fisica = *(uint32_t*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t*) list_get(paquete, 3);
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <STDOUT>", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 liberarCPU(cpu_emisora);
                 manejar_stdout(pidSolicitaSyscall, dir_fisica, tamano, cpu_emisora);
                 break;
@@ -102,37 +89,25 @@ void* atender_cpu(void* arg){
             case INIT_PROC: {// NO BLOQUEA
                 char* path_script = (char*) list_get(paquete, 2);
                 int prioridad = *(int*) list_get(paquete, 3);
-                log_info(kernel->logger, "## PID: %d - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)",pidSolicitaSyscall, path_script, prioridad);
+                log_info(kernel->logger, "## (<%d>) - Solicitó Syscall: <INIT_PROC> %s (prioridad %d)",pidSolicitaSyscall, path_script, prioridad);
                 crearProceso(path_script, prioridad);
                 enviarPIDAcpu(pidSolicitaSyscall,cpu_emisora);
                 break;
             }
             case EXIT_PROC: {// NO BLOQUEA PERO DESALOJA PORQUE FINALIZA EL PROCESO
                 log_info(kernel->logger, "## (<%d>) - Solicitó syscall: <EXIT_PROC>", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
-                finalizarProceso(pidSolicitaSyscall,EXIT_PROC);
-                liberarCPU(cpu_emisora);;                
+                liberarCPU(cpu_emisora); 
+                finalizarProceso(pidSolicitaSyscall,EXIT_PROC);              
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por fin de quantum - Pasando el proceso a Ready...", cpu_emisora->id_cpu, pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_PRIORIDAD:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por proceso con prioridad más alta", cpu_emisora->id_cpu, pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
@@ -140,21 +115,19 @@ void* atender_cpu(void* arg){
             case PROCESO_DESALOJADO_COMPACTACION:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por compactacion", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 log_debug(kernel->logger, "[DEBUG-4] KS recibio respuesta compactacion de CPU, pid=%d", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 reencolarAlInicio(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
             }
-
+            case CORRUPCION_MEMORIA:{
+                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por corrupción de memoria", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                log_debug(kernel->logger, "[DEBUG-4] KS recibio respuesta compactacion de CPU, pid=%d", pidSolicitaSyscall);
+                finalizarProceso(pidSolicitaSyscall,CORRUPCION_MEMORIA);
+                liberarCPU(cpu_emisora);
+                break;
+            }
             case SEG_FAULT: { 
                 log_debug(kernel->logger, "## (<%d>) - Finaliza ejecucion por Segmentation Fault (SEG_FAULT)", pidSolicitaSyscall);
-                if(buscarPCBPorPID(pidSolicitaSyscall,colaEXEC,mutex_EXEC)->ejecutaPorRR){
-                    log_debug(kernel->logger,"Finalizar temporizador por liberacion de cpu");
-                    pthread_cancel(hiloQuantum);
-                }
                 finalizarProceso(pidSolicitaSyscall,SEG_FAULT);
                 liberarCPU(cpu_emisora);
                 break;

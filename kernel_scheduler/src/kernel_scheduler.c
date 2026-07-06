@@ -33,7 +33,9 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     while(kernel_scheduler->queues_algorithms[kernel_scheduler->cantidadColasMultinivel] != NULL) {
         kernel_scheduler->cantidadColasMultinivel++;
     }
-
+    kernel_scheduler->noHayCompactacion = true;
+    kernel_scheduler->noHayCorrupcion = true;
+    kernel_scheduler->pcbFinalizados = 0;
     log_debug(kernel_scheduler->logger, "El kernel scheduler se inicializo correctamente");
     
     return kernel_scheduler;
@@ -139,12 +141,6 @@ void* atender_cliente_scheduler(void* arg) {
                 pthread_create(&hilo_cpu, NULL, atender_cpu, socket_cpu_ptr);
                 pthread_detach(hilo_cpu);
 
-               /* if(!kernel->procesoInicialCreado){
-                    log_info(logger, "Creando proceso inicial...");
-                    crearProceso(pathInicial, 0);
-                    kernel->procesoInicialCreado = true; 
-                }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
-                
                 list_destroy_and_destroy_elements(paquete, free);
                 return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 break;
@@ -217,10 +213,12 @@ void inicializar_interfaces() {
     interfaces[IO_STDOUT].solicitudes = queue_create();
     
     sem_hayIO = malloc(3 * sizeof(sem_t));
+    sem_haySolicitudIO = malloc(3 * sizeof(sem_t));
 
     for (int i = 0; i < 3; i++) {
         pthread_mutex_init(&mutex_interfaces[i], NULL);
         sem_init(&sem_hayIO[i],0,0);
+        sem_init(&sem_haySolicitudIO[i],0,0);
     }
 
 }
