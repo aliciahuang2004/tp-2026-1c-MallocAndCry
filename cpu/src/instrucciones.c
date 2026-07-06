@@ -119,125 +119,117 @@ int obtener_socket_ms(t_cpu* cpu, int ms_id) {
     return socket_encontrado;
 }
 
-// MOV_IN:
+// --- MOV_IN ACTUALIZADO ---
 int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     uint32_t dir_logica = ctx->registros.SI;
-    uint32_t tamanio;
-
-    if (es_registro_8bits(registro_datos) == true) {
-        tamanio = 1;
-    } else {
-        tamanio = 4;
-    }
+    int tamanio = es_registro_8bits(registro_datos) ? 1 : 4;
 
     uint32_t dir_fisica = 0;
-    int ms_id = 0;
+    int ms_id = 0; // Lo devuelve la MMU pero ya no lo usamos (usamos la global)
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
-        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
-        return 0;
-    } 
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0;
     
-    int socket_ms = obtener_socket_ms(cpu, ms_id);
-    if (socket_ms == -1) return 0;
+    // Fragmentamos
+    t_list* fragmentos = fragmentar_acceso_memoria(cpu, dir_fisica, tamanio);
+    if (fragmentos == NULL) return 0; 
 
-    t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
-    agregar_a_paquete(paquete, &tamanio, sizeof(int));
-    enviar_paquete(paquete, socket_ms, cpu->logger);
-    eliminar_paquete(paquete);
+    // Buffer unificado temporal
+    void* buffer_lectura = malloc(tamanio);
+    memset(buffer_lectura, 0, tamanio);
 
-    t_list* respuesta = recibir_paquete(socket_ms);
-
-    if (respuesta == NULL) {
-        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_IN", ms_id);
-        desconectar_memory_stick(cpu, ms_id);
-        return 0; 
-    }
-
-    int cod_op = *(int*)list_get(respuesta, 0);
-    
-    if (cod_op == DATOS_LEIDOS) {
-        void* datos = list_get(respuesta, 1);
+    // Iteramos los envíos/recepciones
+    for (int i = 0; i < list_size(fragmentos); i++) {
+        t_fragmento_cpu* frag = list_get(fragmentos, i);
         
-        void* reg_ptr = obtener_registro(&(ctx->registros), registro_datos);
-        uint32_t valor_leido = 0;
+        t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+        agregar_a_paquete(paquete, &(frag->dir_local), sizeof(uint32_t));
+        agregar_a_paquete(paquete, &(frag->tamano), sizeof(int));
+        enviar_paquete(paquete, frag->socket_ms, cpu->logger);
+        eliminar_paquete(paquete);
 
-        if (tamanio == 1) {
-            *(uint8_t*)reg_ptr = *(uint8_t*)datos;
-            valor_leido = *(uint8_t*)datos;
-        } else {
-            *(uint32_t*)reg_ptr = *(uint32_t*)datos;
-            valor_leido = *(uint32_t*)datos;
+        t_list* respuesta = recibir_paquete(frag->socket_ms);
+        if (respuesta == NULL) {
+            log_error(cpu->logger, "Error de red con MS en MOV_IN");
+            free(buffer_lectura);
+            list_destroy_and_destroy_elements(fragmentos, free);
+            return 0; 
         }
-        
-        log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %u", 
-                 ctx->pid, dir_fisica, valor_leido);
+
+        int cod_op = *(int*)list_get(respuesta, 0);
+        if (cod_op == DATOS_LEIDOS) {
+            void* datos = list_get(respuesta, 1);
+            // Copiamos este pedacito en el offset correspondiente del buffer unificado
+            memcpy(buffer_lectura + frag->offset, datos, frag->tamano);
+        }
+        list_destroy_and_destroy_elements(respuesta, free);
+    }
+
+    // Asignación final al registro
+    void* reg_ptr = obtener_registro(&(ctx->registros), registro_datos);
+    uint32_t valor_leido = 0;
+
+    if (tamanio == 1) {
+        *(uint8_t*)reg_ptr = *(uint8_t*)buffer_lectura;
+        valor_leido = *(uint8_t*)buffer_lectura;
+    } else {
+        *(uint32_t*)reg_ptr = *(uint32_t*)buffer_lectura;
+        valor_leido = *(uint32_t*)buffer_lectura;
     }
     
-    list_destroy_and_destroy_elements(respuesta, free);
+    log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %u", 
+             ctx->pid, dir_fisica, valor_leido);
+    
+    free(buffer_lectura);
+    list_destroy_and_destroy_elements(fragmentos, free);
     return 1;
 }
 
-// MOV_OUT
+// --- MOV_OUT ACTUALIZADO ---
 int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     uint32_t dir_logica = ctx->registros.DI;
-    uint32_t tamanio;
-
-    if (es_registro_8bits(registro_datos) == true) {
-        tamanio = 1;
-    } else {
-        tamanio = 4;
-    }
+    int tamanio = es_registro_8bits(registro_datos) ? 1 : 4;
 
     uint32_t dir_fisica = 0;
     int ms_id = 0;
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
-        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
-        return 0;
-    }
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)) return 0;
     
-
-    int socket_ms = obtener_socket_ms(cpu, ms_id);
-    if (socket_ms == -1) return 0;
+    t_list* fragmentos = fragmentar_acceso_memoria(cpu, dir_fisica, tamanio);
+    if (fragmentos == NULL) return 0;
 
     uint32_t valor_a_escribir = leer_valor_registro(&(ctx->registros), registro_datos);
+    void* ptr_datos = &valor_a_escribir; // Funciona bien por el Little Endian de C
 
-    t_paquete* paquete = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
-    agregar_a_paquete(paquete, &tamanio, sizeof(int));
-    
-    if (tamanio == 1) {
-        uint8_t val8 = (uint8_t)valor_a_escribir;
-        agregar_a_paquete(paquete, &val8, 1);
-    } else {
-        agregar_a_paquete(paquete, &valor_a_escribir, 4);
+    for (int i = 0; i < list_size(fragmentos); i++) {
+        t_fragmento_cpu* frag = list_get(fragmentos, i);
+        
+        t_paquete* paquete = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+        agregar_a_paquete(paquete, &(frag->dir_local), sizeof(uint32_t));
+        agregar_a_paquete(paquete, &(frag->tamano), sizeof(int));
+        
+        // Sumamos el offset al puntero para mandar solo el pedacito de los datos
+        agregar_a_paquete(paquete, ptr_datos + frag->offset, frag->tamano);
+        
+        enviar_paquete(paquete, frag->socket_ms, cpu->logger);
+        eliminar_paquete(paquete);
+
+        t_list* respuesta = recibir_paquete(frag->socket_ms);
+        if (respuesta == NULL) {
+            log_error(cpu->logger, "Error de red con MS en MOV_OUT");
+            list_destroy_and_destroy_elements(fragmentos, free);
+            return 0;
+        }
+        list_destroy_and_destroy_elements(respuesta, free); // Asumimos IO_OK
     }
-    
-    enviar_paquete(paquete, socket_ms, cpu->logger);
-    eliminar_paquete(paquete);
 
-    t_list* respuesta = recibir_paquete(socket_ms);
+    log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", 
+             ctx->pid, dir_fisica, valor_a_escribir);
 
-    if (respuesta == NULL) {
-        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_OUT", ms_id);
-        desconectar_memory_stick(cpu, ms_id);
-        return 0;
-    }
-
-    int cod_op = *(int*)list_get(respuesta, 0);
-    
-    if (cod_op == IO_OK) {
-         log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", 
-                 ctx->pid, dir_fisica, valor_a_escribir);
-    }
-    
-    list_destroy_and_destroy_elements(respuesta, free);
+    list_destroy_and_destroy_elements(fragmentos, free);
     return 1;
 }
 
-// COPY_MEM
+// --- COPY_MEM ACTUALIZADO ---
 int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     uint32_t dir_logica_origen = ctx->registros.SI;
     uint32_t dir_logica_destino = ctx->registros.DI;
@@ -246,59 +238,56 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     uint32_t dir_fisica_origen = 0, dir_fisica_destino = 0;
     int ms_id_origen = 0, ms_id_destino = 0;
 
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) {
-        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
-        return 0;
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) return 0;
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) return 0;
+
+    // 1. Fragmentar y LEER del Origen
+    t_list* frag_origen = fragmentar_acceso_memoria(cpu, dir_fisica_origen, tamanio);
+    if (frag_origen == NULL) return 0;
+
+    void* buffer_copia = malloc(tamanio);
+    for (int i = 0; i < list_size(frag_origen); i++) {
+        t_fragmento_cpu* frag = list_get(frag_origen, i);
+        t_paquete* p_leer = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+        agregar_a_paquete(p_leer, &(frag->dir_local), sizeof(uint32_t));
+        agregar_a_paquete(p_leer, &(frag->tamano), sizeof(int));
+        enviar_paquete(p_leer, frag->socket_ms, cpu->logger);
+        eliminar_paquete(p_leer);
+
+        t_list* respuesta = recibir_paquete(frag->socket_ms);
+        if (!respuesta) { free(buffer_copia); list_destroy_and_destroy_elements(frag_origen, free); return 0; }
+        
+        int cod_op = *(int*)list_get(respuesta, 0);
+        if (cod_op == DATOS_LEIDOS) {
+            void* datos = list_get(respuesta, 1);
+            memcpy(buffer_copia + frag->offset, datos, frag->tamano);
+        }
+        list_destroy_and_destroy_elements(respuesta, free);
     }
-    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) {
-        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
-        return 0;
-    }
-
-    int socket_ms_origen = obtener_socket_ms(cpu, ms_id_origen);
-    int socket_ms_destino = obtener_socket_ms(cpu, ms_id_destino);
-
-    if (socket_ms_origen == -1 || socket_ms_destino == -1) return 0;
-
-    t_paquete* paquete_leer = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
-    agregar_a_paquete(paquete_leer, &dir_fisica_origen, sizeof(uint32_t));
-    agregar_a_paquete(paquete_leer, &tamanio, sizeof(int));
-    enviar_paquete(paquete_leer, socket_ms_origen, cpu->logger);
-    eliminar_paquete(paquete_leer);
-
-    t_list* respuesta_lectura = recibir_paquete(socket_ms_origen);
-
-    if (respuesta_lectura == NULL) {
-        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Origen %d en COPY_MEM", ms_id_origen);
-        desconectar_memory_stick(cpu, ms_id_origen);
-        return 0;
-    }
-
-    void* datos_leidos = list_get(respuesta_lectura, 1);
-    
     log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_origen);
+    list_destroy_and_destroy_elements(frag_origen, free);
 
-    t_paquete* paquete_escribir = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
-    agregar_a_paquete(paquete_escribir, &dir_fisica_destino, sizeof(uint32_t));
-    agregar_a_paquete(paquete_escribir, &tamanio, sizeof(int));
-    agregar_a_paquete(paquete_escribir, datos_leidos, tamanio);
-    enviar_paquete(paquete_escribir, socket_ms_destino, cpu->logger);
-    eliminar_paquete(paquete_escribir);
+    // 2. Fragmentar y ESCRIBIR en el Destino
+    t_list* frag_destino = fragmentar_acceso_memoria(cpu, dir_fisica_destino, tamanio);
+    if (frag_destino == NULL) { free(buffer_copia); return 0; }
 
-    t_list* respuesta_escritura = recibir_paquete(socket_ms_destino);
+    for (int i = 0; i < list_size(frag_destino); i++) {
+        t_fragmento_cpu* frag = list_get(frag_destino, i);
+        t_paquete* p_escribir = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+        agregar_a_paquete(p_escribir, &(frag->dir_local), sizeof(uint32_t));
+        agregar_a_paquete(p_escribir, &(frag->tamano), sizeof(int));
+        agregar_a_paquete(p_escribir, buffer_copia + frag->offset, frag->tamano);
+        enviar_paquete(p_escribir, frag->socket_ms, cpu->logger);
+        eliminar_paquete(p_escribir);
 
-    if (respuesta_escritura == NULL) {
-        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Destino %d en COPY_MEM", ms_id_destino);
-        list_destroy_and_destroy_elements(respuesta_lectura, free);
-        desconectar_memory_stick(cpu, ms_id_destino);
-        return 0;
+        t_list* respuesta = recibir_paquete(frag->socket_ms);
+        if (!respuesta) { free(buffer_copia); list_destroy_and_destroy_elements(frag_destino, free); return 0; }
+        list_destroy_and_destroy_elements(respuesta, free);
     }
-    
     log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_destino);
-
-    list_destroy_and_destroy_elements(respuesta_lectura, free);
-    list_destroy_and_destroy_elements(respuesta_escritura, free);
-
+    
+    list_destroy_and_destroy_elements(frag_destino, free);
+    free(buffer_copia);
     return 1;
 }
 
@@ -455,48 +444,46 @@ bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, ui
 
     return true;
 }
-/*
+
 t_list* fragmentar_acceso_memoria(t_cpu* cpu, uint32_t dir_fisica_global, int tamanio_total) {
     t_list* fragmentos = list_create();
     int bytes_restantes = tamanio_total;
     uint32_t dir_actual = dir_fisica_global;
     int offset = 0;
 
-    pthread_mutex_lock(&cpu->mutex_lista_ms); // Bloqueamos lectura
+    pthread_mutex_lock(&cpu->mutex_lista_ms);
 
-    while (bytes_restantes > 0) {
+    while (bytes_restantes > 0){
         t_ms_conectado* ms_encontrado = NULL;
-        
-        // 1. Buscamos en qué MS cae la dir_actual
-        for(int i = 0; i < list_size(cpu->sockets_memory_sticks); i++) {
+
+        for(int i=0; i<list_size(cpu->sockets_memory_sticks); i++) {
             t_ms_conectado* ms = list_get(cpu->sockets_memory_sticks, i);
-            if (dir_actual >= ms->base_global && dir_actual <= ms->limite_global) {
+            if(dir_actual >= ms->base_global && dir_actual <= ms->limite_global) {
                 ms_encontrado = ms;
                 break;
             }
         }
-
-        if (ms_encontrado == NULL) {
-            log_error(cpu->logger, "SEG_FAULT de Hardware: Dir %u fuera de límites de MS", dir_actual);
+        if(ms_encontrado == NULL) {
+            log_error(cpu->logger, "No se encontró un Memory Stick para la dirección física  %u", dir_actual);
             list_destroy_and_destroy_elements(fragmentos, free);
             pthread_mutex_unlock(&cpu->mutex_lista_ms);
             return NULL;
         }
 
-        // 2. Calculamos cuánto entra en este MS
-        uint32_t dir_local = dir_actual - ms_encontrado->base_global;
+        //calculo de cuando entra en el limite del memory stick
+        uint32_t dir_local= dir_actual - ms_encontrado->base_global;
         uint32_t espacio_disponible = (ms_encontrado->limite_global - ms_encontrado->base_global + 1) - dir_local;
         int bytes_a_operar = (bytes_restantes < espacio_disponible) ? bytes_restantes : espacio_disponible;
+    
+        // guardamos
+        t_fragmento_cpu* fragmento = malloc(sizeof(t_fragmento_cpu));
+        fragmento->socket_ms = ms_encontrado->socket;
+        fragmento->dir_local = dir_local;
+        fragmento->tamano = bytes_a_operar;
+        fragmento->offset = offset;
+        list_add(fragmentos, fragmento);
 
-        // 3. Guardamos el fragmento
-        t_fragmento_cpu* frag = malloc(sizeof(t_fragmento_cpu));
-        frag->socket_ms = ms_encontrado->socket;
-        frag->dir_local = dir_local;
-        frag->tamano = bytes_a_operar;
-        frag->offset = offset;
-        list_add(fragmentos, frag);
-
-        // 4. Avanzamos los contadores
+        // resto de bytes a operar
         bytes_restantes -= bytes_a_operar;
         dir_actual += bytes_a_operar;
         offset += bytes_a_operar;
@@ -504,5 +491,178 @@ t_list* fragmentar_acceso_memoria(t_cpu* cpu, uint32_t dir_fisica_global, int ta
 
     pthread_mutex_unlock(&cpu->mutex_lista_ms);
     return fragmentos;
+
 }
-    */
+
+
+/////////////////
+/*// MOV_IN:
+int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
+    uint32_t dir_logica = ctx->registros.SI;
+    uint32_t tamanio = es_registro_8bits(registro_datos) ? 1 : 4;
+
+    uint32_t dir_fisica = 0;
+    int ms_id = 0;
+
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    } 
+    
+    int socket_ms = obtener_socket_ms(cpu, ms_id);
+    if (socket_ms == -1) return 0;
+
+    t_paquete* paquete = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &tamanio, sizeof(int));
+    enviar_paquete(paquete, socket_ms, cpu->logger);
+    eliminar_paquete(paquete);
+
+    t_list* respuesta = recibir_paquete(socket_ms);
+
+    if (respuesta == NULL) {
+        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_IN", ms_id);
+        desconectar_memory_stick(cpu, ms_id);
+        return 0; 
+    }
+
+    int cod_op = *(int*)list_get(respuesta, 0);
+    
+    if (cod_op == DATOS_LEIDOS) {
+        void* datos = list_get(respuesta, 1);
+        
+        void* reg_ptr = obtener_registro(&(ctx->registros), registro_datos);
+        uint32_t valor_leido = 0;
+
+        if (tamanio == 1) {
+            *(uint8_t*)reg_ptr = *(uint8_t*)datos;
+            valor_leido = *(uint8_t*)datos;
+        } else {
+            *(uint32_t*)reg_ptr = *(uint32_t*)datos;
+            valor_leido = *(uint32_t*)datos;
+        }
+        
+        log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %u", 
+                 ctx->pid, dir_fisica, valor_leido);
+    }
+    
+    list_destroy_and_destroy_elements(respuesta, free);
+    return 1;
+}
+
+// MOV_OUT
+int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
+    uint32_t dir_logica = ctx->registros.DI;
+    uint32_t tamanio = es_registro_8bits(registro_datos) ? 1 : 4;
+
+    uint32_t dir_fisica = 0;
+    int ms_id = 0;
+
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica, tamanio, &dir_fisica, &ms_id)){
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
+    
+
+    int socket_ms = obtener_socket_ms(cpu, ms_id);
+    if (socket_ms == -1) return 0;
+
+    uint32_t valor_a_escribir = leer_valor_registro(&(ctx->registros), registro_datos);
+
+    t_paquete* paquete = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &tamanio, sizeof(int));
+    
+    if (tamanio == 1) {
+        uint8_t val8 = (uint8_t)valor_a_escribir;
+        agregar_a_paquete(paquete, &val8, 1);
+    } else {
+        agregar_a_paquete(paquete, &valor_a_escribir, 4);
+    }
+    
+    enviar_paquete(paquete, socket_ms, cpu->logger);
+    eliminar_paquete(paquete);
+
+    t_list* respuesta = recibir_paquete(socket_ms);
+
+    if (respuesta == NULL) {
+        log_error(cpu->logger, "Error de red: Se perdió la conexión con el Memory Stick %d durante MOV_OUT", ms_id);
+        desconectar_memory_stick(cpu, ms_id);
+        return 0;
+    }
+
+    int cod_op = *(int*)list_get(respuesta, 0);
+    
+    if (cod_op == IO_OK) {
+         log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", 
+                 ctx->pid, dir_fisica, valor_a_escribir);
+    }
+    
+    list_destroy_and_destroy_elements(respuesta, free);
+    return 1;
+}
+
+// COPY_MEM
+int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
+    uint32_t dir_logica_origen = ctx->registros.SI;
+    uint32_t dir_logica_destino = ctx->registros.DI;
+    uint32_t tamanio = leer_valor_registro(&(ctx->registros), registro_tamano);
+    
+    uint32_t dir_fisica_origen = 0, dir_fisica_destino = 0;
+    int ms_id_origen = 0, ms_id_destino = 0;
+
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) {
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
+    if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) {
+        log_error(cpu->logger, "SEG_FAULT PID %d excedió los límites de memoria.", ctx->pid);
+        return 0;
+    }
+
+    int socket_ms_origen = obtener_socket_ms(cpu, ms_id_origen);
+    int socket_ms_destino = obtener_socket_ms(cpu, ms_id_destino);
+
+    if (socket_ms_origen == -1 || socket_ms_destino == -1) return 0;
+
+    t_paquete* paquete_leer = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete_leer, &dir_fisica_origen, sizeof(uint32_t));
+    agregar_a_paquete(paquete_leer, &tamanio, sizeof(int));
+    enviar_paquete(paquete_leer, socket_ms_origen, cpu->logger);
+    eliminar_paquete(paquete_leer);
+
+    t_list* respuesta_lectura = recibir_paquete(socket_ms_origen);
+
+    if (respuesta_lectura == NULL) {
+        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Origen %d en COPY_MEM", ms_id_origen);
+        desconectar_memory_stick(cpu, ms_id_origen);
+        return 0;
+    }
+
+    void* datos_leidos = list_get(respuesta_lectura, 1);
+    
+    log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_origen);
+
+    t_paquete* paquete_escribir = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
+    agregar_a_paquete(paquete_escribir, &dir_fisica_destino, sizeof(uint32_t));
+    agregar_a_paquete(paquete_escribir, &tamanio, sizeof(int));
+    agregar_a_paquete(paquete_escribir, datos_leidos, tamanio);
+    enviar_paquete(paquete_escribir, socket_ms_destino, cpu->logger);
+    eliminar_paquete(paquete_escribir);
+
+    t_list* respuesta_escritura = recibir_paquete(socket_ms_destino);
+
+    if (respuesta_escritura == NULL) {
+        log_error(cpu->logger, "Error de red: Conexión perdida con el Memory Stick Destino %d en COPY_MEM", ms_id_destino);
+        list_destroy_and_destroy_elements(respuesta_lectura, free);
+        desconectar_memory_stick(cpu, ms_id_destino);
+        return 0;
+    }
+    
+    log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_destino);
+
+    list_destroy_and_destroy_elements(respuesta_lectura, free);
+    list_destroy_and_destroy_elements(respuesta_escritura, free);
+
+    return 1;
+} */
