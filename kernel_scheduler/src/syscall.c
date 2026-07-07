@@ -445,7 +445,7 @@ void finalizarProceso(int pid, op_code motivo){
 
     //ELIMINO EL PROCESO
     eliminarProceso(pid,motivo);
-        
+    sem_post(&sem_procesoFinalizado);
 }
 
 void eliminarProceso(int pid, op_code motivo){

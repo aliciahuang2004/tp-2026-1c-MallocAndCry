@@ -146,7 +146,7 @@ extern sem_t sem_recibiLecuraDeKM;
 extern sem_t sem_recibiEscrituraDeKM;
 // extern sem_procesoCreado;
 extern sem_t sem_suspension_ok;
-// extern sem_t sem_desuspension_ok;
+extern sem_t sem_procesoFinalizado;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;

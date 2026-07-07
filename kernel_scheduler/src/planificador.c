@@ -32,7 +32,7 @@ sem_t sem_recibiLecuraDeIO;
 sem_t sem_recibiLecuraDeKM;
 sem_t sem_recibiEscrituraDeKM;
 sem_t sem_suspension_ok;
-// sem_t sem_desuspension_ok;
+sem_t sem_procesoFinalizado;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -90,7 +90,7 @@ void inicializarSemaforos(){
     sem_init(&sem_recibiLecuraDeKM,0,0);
     sem_init(&sem_recibiEscrituraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
-    // sem_init(&sem_desuspension_ok, 0, 0);
+    sem_init(&sem_procesoFinalizado, 0, 0);
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
@@ -979,8 +979,9 @@ void ordenarSuspReadySegunPrioridad(){
 
 void* finalizarKernelScheduler(void* args){
     while(1){
+        sem_wait(&sem_procesoFinalizado);
         if (pidParaAsignar == (kernel->pcbFinalizados)){
-            log_debug(kernel->logger,"FINALIZAR KS - NO HAY MAS PROCESOS ");
+            log_debug(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
             return EXIT_SUCCESS;
         }
         
