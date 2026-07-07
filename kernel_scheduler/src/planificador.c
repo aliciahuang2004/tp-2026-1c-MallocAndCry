@@ -341,28 +341,53 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 void* monitorPrioridades(void* arg){
     while(1) {
         while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
+            t_pcb* pcbExecMenorPrioridad = NULL;
+            int nuevaPrioridad = -1;
             sem_wait(&sem_readyPrioridad);
             while(buscarCPULibre() == NULL){
-                pthread_mutex_lock(&mutex_CPU);
-                int cantidad = queue_size(colaCPUs);    
-                for(int i = 0; i < cantidad; i++) {
-                    t_cpu_conectada* cpu = queue_pop(colaCPUs);
-                    if(!cpu->libre ) {
-                        int prioridadActual = cpu->pcbEjecutando->prioridad;
-                        int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
-                        if(nuevaPrioridad != -1) {
-                            t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
-                            notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
-                        }
-                    }
-                    queue_push(colaCPUs,cpu);
-                }
-                pthread_mutex_unlock(&mutex_CPU);
+                pcbExecMenorPrioridad = buscarMenorPrioridad();
+                nuevaPrioridad = procesoMasPrioritario(pcbExecMenorPrioridad->prioridad);
+                break;
+            }
+            if(nuevaPrioridad != -1){
+                notificarDesalojo(buscarCPUSegunPID(pcbExecMenorPrioridad->pid),buscarPCBenReadyConPrioridad(nuevaPrioridad),PROCESO_DESALOJADO_PRIORIDAD);
             }
         }
     }
     return NULL;
 }
+
+t_pcb* buscarMenorPrioridad() {
+    pthread_mutex_lock(&mutex_EXEC);
+    if(queue_is_empty(colaEXEC)){
+        pthread_mutex_unlock(&mutex_EXEC);
+        log_error(kernel->logger,"No hay procesos en exec");
+        return NULL;
+    } 
+
+    t_queue* colaAux = queue_create();
+    t_pcb* pcbMenor = NULL;
+    int minPrioridad = 0;
+
+    while(!queue_is_empty(colaEXEC)) {
+        t_pcb* pcb = queue_pop(colaEXEC);
+        queue_push(colaAux, pcb);
+
+        if(pcb->prioridad > minPrioridad) {
+            minPrioridad = pcb->prioridad;
+            pcbMenor = pcb;
+        }
+    }
+
+    while(!queue_is_empty(colaAux)) {
+        queue_push(colaEXEC, queue_pop(colaAux));
+    }
+
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_EXEC);
+    return pcbMenor;
+}
+
 
 int procesoMasPrioritario(int prioridadActual){
     for(int i = 0; i < prioridadActual; i++) {

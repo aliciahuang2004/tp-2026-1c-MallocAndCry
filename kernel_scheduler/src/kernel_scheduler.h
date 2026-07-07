@@ -202,6 +202,7 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu);
 void* iniciarTemporizadorRR(void* arg);
 void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code motivo);
 void* monitorPrioridades(void* arg);
+t_pcb* buscarMenorPrioridad();
 int procesoMasPrioritario(int prioridadActual);
 t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex);
 t_pcb* buscarPCBenReadyConPrioridad(int prioridad);
