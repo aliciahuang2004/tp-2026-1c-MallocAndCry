@@ -219,13 +219,12 @@ t_pcb* elegirPorCMN(){
         pthread_mutex_lock(&mutex_READY[i]);
         if (!queue_is_empty(colasREADY[i])){
             pcbELegido = queue_pop(colasREADY[i]);
+            pthread_mutex_unlock(&mutex_READY[i]);
+            break;
         }
         pthread_mutex_unlock(&mutex_READY[i]);
     }
-    if (pcbELegido != NULL){
-        return pcbELegido;
-    }
-    return NULL;
+    return pcbELegido;
 }
 
 int colaDeProcesoEjecutaRR(int prioridad){
@@ -346,6 +345,9 @@ void* monitorPrioridades(void* arg){
             sem_wait(&sem_readyPrioridad);
             while(buscarCPULibre() == NULL){
                 pcbExecMenorPrioridad = buscarMenorPrioridad();
+                if(pcbExecMenorPrioridad == NULL){
+                    break;
+                }
                 nuevaPrioridad = procesoMasPrioritario(pcbExecMenorPrioridad->prioridad);
                 break;
             }
