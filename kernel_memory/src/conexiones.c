@@ -72,6 +72,7 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logge
         agregar_a_paquete(paquete, &resultado.base,sizeof(uint32_t));
         agregar_a_paquete(paquete, &resultado.limite,sizeof(uint32_t));
         enviar_paquete(paquete, cpu->socket, logger);
+        log_info(logger, "Antes de destruir paquete: ip='%s' puerto='%s'", ms_ip, ms_puerto);
         eliminar_paquete(paquete);
 
         log_info(logger, "  [%d/%d] Aviso enviado a CPU ID:%d socket:%d",i + 1, total, cpu->id, cpu->socket);
@@ -594,7 +595,7 @@ void* atender_conexion(void* arg) {
             }
             break;
         }
-            
+        
             case ELIMINACION_DE_SEGMENTO: 
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
@@ -640,7 +641,6 @@ void* atender_conexion(void* arg) {
              break;
             case ACTUALIZAR_CONTEXTO:
             {
-        
                 int pid = *(int*)list_get(paquete, 1);
                 t_registros registros_nuevos;
                 registros_nuevos.PC  = *(uint32_t*)list_get(paquete, 2);
@@ -654,19 +654,8 @@ void* atender_conexion(void* arg) {
                 registros_nuevos.EDX = *(uint32_t*)list_get(paquete, 10);
                 registros_nuevos.SI  = *(uint32_t*)list_get(paquete, 11);
                 registros_nuevos.DI  = *(uint32_t*)list_get(paquete, 12);
-                
-                //logs temporales solo para pruebas***********
-                log_info(logger, "## Contexto actualizado recibido - PID: %d", pid);
-                log_info(logger, "   PC=%u  AX=%u   BX=%u   CX=%u   DX=%u", 
-                    registros_nuevos.PC, registros_nuevos.AX, registros_nuevos.BX, 
-                    registros_nuevos.CX, registros_nuevos.DX);
-                log_info(logger, "   EAX=%u     EBX=%u    ECX=%u   EDX=%u   SI=%u   DI=%u",
-                    registros_nuevos.EAX, registros_nuevos.EBX, registros_nuevos.ECX,
-                    registros_nuevos.EDX, registros_nuevos.SI, registros_nuevos.DI);
-                //********************************************
-
-                actualizar_contexto(pid, &registros_nuevos);
-                log_info(logger, "Contexto actualizado - PID: %d", pid);
+                actualizar_contexto(pid, &registros_nuevos,logger);
+    
             }
             break;
             case CPUS_DESALOJADAS:

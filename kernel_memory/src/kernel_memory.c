@@ -13,6 +13,7 @@ pthread_mutex_t mutex_lista_ms = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_memoria_total = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ms_conexion = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_socket_swap = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_paths = PTHREAD_MUTEX_INITIALIZER;
 
 t_kernel_memory* iniciar_kernelMemory(char* argv){
 
