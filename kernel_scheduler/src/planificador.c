@@ -185,7 +185,7 @@ void pasarProcesoReadyAExec(){
     // ENVIAR A CPU
     enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
 
-    if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,mutex_EXEC)->ejecutaPorRR){
+    if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,&mutex_EXEC)->ejecutaPorRR){
         log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
         pthread_t hiloQuantum;
         pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
@@ -301,7 +301,7 @@ void* iniciarTemporizadorRR(void* arg){
     
     usleep(kernel->rr_quantum * 1000);
 
-    if(buscarPCBPorPID(pid, colaEXEC, mutex_EXEC) == cpu->pcbEjecutando){
+    if(buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC) == cpu->pcbEjecutando){
         log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
         notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     }
@@ -325,7 +325,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
         log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu->pidEjecutando);
         break;
     case PROCESO_DESALOJADO_PRIORIDAD:
-        t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,mutex_EXEC);
+        t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,&mutex_EXEC);
         if(pcbEnExec == NULL){
             log_debug(kernel->logger, "Desalojo por prioridad ignorado: CPU %d ya no tiene el proceso en EXEC", cpu->id_cpu);
             break;
@@ -400,12 +400,12 @@ int procesoMasPrioritario(int prioridadActual){
     return -1;
 }
 
-t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex){
+t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t* mutex){
     t_pcb* pcbEncontrada = NULL;
 
     t_queue* colaAux = queue_create();
     
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(mutex);
 
     while (!queue_is_empty(cola)){
         t_pcb* pcb = queue_pop(cola);
@@ -421,7 +421,7 @@ t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex){
     
     queue_destroy(colaAux);
     
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(mutex);
     
     return pcbEncontrada;
 
@@ -595,9 +595,7 @@ void pasarProcesoBlockaReady(int pid){
 
 void pasarProcesoBlockABlockSusp(int pid){
     t_pcb* pcb = NULL;
-    //SACO A BLOCK
     pthread_mutex_lock(&mutex_BLOCK);
-    
     int cantidad = queue_size(colaBLOCK);
     for(int i = 0; i < cantidad; i++){
         t_pcb* pcbBlock = queue_pop(colaBLOCK);
@@ -609,30 +607,42 @@ void pasarProcesoBlockABlockSusp(int pid){
     }
     pthread_mutex_unlock(&mutex_BLOCK);
 
-    if (pcb != NULL) {
-        log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
-
-        t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
-        agregar_a_paquete(paquete, &pid, sizeof(int));
-        enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
-        eliminar_paquete(paquete);
-
-        sem_wait(&sem_suspension_ok);
-
-        pcb->estado = BLOCK_SUSP;
-
-        //AGREGO SUSP BLOCK
-        pthread_mutex_lock(&mutex_BLOCK_SUSP);
-        queue_push(colaBLOCK_SUSP,pcb);
-        pthread_mutex_unlock(&mutex_BLOCK_SUSP);
-
-        log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
-
-
-    } else {
+    if (pcb == NULL) {
         log_error(kernel->logger, "Error: No se encontró el PID %d en la cola BLOCK", pid);
+        return;
     }
 
+    // Lo hacemos encontrable en BLOCK_SUSP ANTES de pedirle a KM que suspenda
+    // para que el PCB nunca deje de estar en alguna cola
+    pcb->estado = BLOCK_SUSP;
+    pcb->suspensionEnCurso = true;
+
+    pthread_mutex_lock(&mutex_BLOCK_SUSP);
+    queue_push(colaBLOCK_SUSP,pcb);
+    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+
+    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
+    log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
+
+    t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    enviarPaqueteAKM(paquete);
+    eliminar_paquete(paquete);
+
+    sem_wait(&sem_suspension_ok);
+
+    pthread_mutex_lock(&mutex_BLOCK_SUSP);
+    pcb->suspensionEnCurso = false;
+    bool ioQuedoPendiente = pcb->ioCompletadaEnTransito;
+    pcb->ioCompletadaEnTransito = false;
+    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+
+    if (ioQuedoPendiente) {
+        log_debug(kernel->logger, "## (<%d>) IO había finalizado durante la suspensión, disparando desuspensión diferida", pid);
+        pasarProcesoBlockSuspAReadySusp(pid);
+        solicitarDesuspenderProceso(pid);
+        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+    }
 }
 
 void pasarProcesoBlockSuspAReadySusp(int pid){

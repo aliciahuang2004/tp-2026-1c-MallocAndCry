@@ -9,6 +9,8 @@ t_pcb* crear_PCB(char* path, int prioridad){
     pcbCreado->path = strdup(path);
     pcbCreado->estado = NEW; //NO REQUIERO DE MEMORIA, LO CREO DIRECTAMENTE
     pcbCreado->socketCPUEjecuta = -1;
+    pcbCreado->suspensionEnCurso = false; 
+    pcbCreado->ioCompletadaEnTransito = false;
     switch (obtenerPlanificacion(kernel->planification_algorithm)){
     case FIFO:
         pcbCreado->ejecutaPorRR = false;
@@ -53,7 +55,7 @@ void enviarPathYPidKM(int pid, char* path){
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete, path, strlen(path) + 1);
 
-    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    int resultado = enviarPaqueteAKM(paquete);
 
     if (resultado != 0) {
         log_error(kernel->logger, "Error al enviar el Path a Kernel Memory");
@@ -110,7 +112,7 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
         pthread_mutex_unlock(&mutex_diccionario);
 
         // HERENCIA: si el que pide tiene mayor prioridad (numero MENOR) que el dueño, se la presta
-        t_pcb* pcbSolicitante = buscarPCBPorPID(pidSolicitaSyscall, colaEXEC, mutex_EXEC);
+        t_pcb* pcbSolicitante = buscarPCBPorPID(pidSolicitaSyscall, colaEXEC, &mutex_EXEC);
         t_pcb* pcbDuenio = buscarPCBEnCualquierEstado(pidDuenio);
         if(pcbSolicitante != NULL && pcbDuenio != NULL && pcbSolicitante->prioridad < pcbDuenio->prioridad){
             log_debug(kernel->logger, "## (<%d>) Hereda prioridad <%d> del proceso <%d>", pidDuenio, pcbSolicitante->prioridad, pidSolicitaSyscall);
@@ -150,9 +152,9 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu){
             mutex->pidAsignado = proximo_pid;
             //pthread_mutex_unlock(&mutex_diccionario);
 
-            t_pcb* pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK, mutex_BLOCK);
+            t_pcb* pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK, &mutex_BLOCK);
             if(pcbADesbloquear == NULL){
-                pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK_SUSP, mutex_BLOCK_SUSP);
+                pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
             }
             if (pcbADesbloquear != NULL){
                 list_add(pcbADesbloquear->mutexTomados, mutex);
@@ -185,25 +187,25 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu){
 }
 
 t_pcb* buscarPCBEnCualquierEstado(int pid){
-    t_pcb* pcb = buscarPCBPorPID(pid, colaEXEC, mutex_EXEC);
+    t_pcb* pcb = buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC);
     if(pcb != NULL) return pcb;
 
-    pcb = buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK);
+    pcb = buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK);
     if(pcb != NULL) return pcb;
 
-    pcb = buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP);
+    pcb = buscarPCBPorPID(pid, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
     if(pcb != NULL) return pcb;
 
-    pcb = buscarPCBPorPID(pid, colaREADY_SUSP, mutex_READY_SUSP);
+    pcb = buscarPCBPorPID(pid, colaREADY_SUSP, &mutex_READY_SUSP);
     if(pcb != NULL) return pcb;
 
     if(obtenerPlanificacion(kernel->planification_algorithm) == CMN){
         for(int i = 0; i < kernel->cantidadColasMultinivel; i++){
-            pcb = buscarPCBPorPID(pid, colasREADY[i], mutex_READY[i]);
+            pcb = buscarPCBPorPID(pid, colasREADY[i], &mutex_READY[i]);
             if(pcb != NULL) return pcb;
         }
     } else {
-        pcb = buscarPCBPorPID(pid, colasREADY[0], mutex_READY[0]);
+        pcb = buscarPCBPorPID(pid, colasREADY[0], &mutex_READY[0]);
         if(pcb != NULL) return pcb;
     }
 
@@ -250,7 +252,7 @@ void asignarMemoria(int pidSolicitaSyscall, int idSegmento, int tamanio){
     agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
     agregar_a_paquete(solicitud,&tamanio,sizeof(int));
     
-    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    enviarPaqueteAKM(solicitud);
     
     eliminar_paquete(solicitud);
 
@@ -265,7 +267,7 @@ void liberarMemoria(int pidSolicitaSyscall, int idSegmento){
     agregar_a_paquete(solicitud,&pidSolicitaSyscall,sizeof(int));
     agregar_a_paquete(solicitud,&idSegmento,sizeof(int));
     
-    enviar_paquete(solicitud,kernel->socket_kernel_memory,kernel->logger);
+    enviarPaqueteAKM(solicitud);
     
     eliminar_paquete(solicitud);
     
@@ -435,7 +437,7 @@ void finalizarProceso(int pid, op_code motivo){
 
     agregar_a_paquete(paquete, &pid, sizeof(int));
 
-    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    int resultado = enviarPaqueteAKM(paquete);
 
     if (resultado != 0) {
         log_error(kernel->logger, "Error al notificar a Kernel Memory para la finalizacion del proceso PID: %d", pid);
@@ -551,7 +553,7 @@ void enviarAKMSolicitudIO(t_solicitud_io* solicitud){
         agregar_a_paquete(paquete, &solicitud->tamanio, sizeof(uint32_t));
     }
 
-    enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    enviarPaqueteAKM(paquete);
 
     eliminar_paquete(paquete);
 
@@ -570,16 +572,25 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
     t_solicitud_io* ioSolicitud = retirarSolicitud(IO_STDIN, solicitud->pidSolicitaSyscall);
 
     log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", solicitud->pidSolicitaSyscall, socket_io);
-    if (buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK, mutex_BLOCK) == NULL) {
+    if (buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK, &mutex_BLOCK) == NULL) {
         log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", solicitud->pidSolicitaSyscall);
-        if (buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
+        t_pcb* pcbBlockSusp = buscarPCBPorPID(solicitud->pidSolicitaSyscall, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
+        if (pcbBlockSusp == NULL) {
             log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", solicitud->pidSolicitaSyscall);
         } else {
-            pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
-            solicitarDesuspenderProceso(solicitud->pidSolicitaSyscall);
-            log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", solicitud->pidSolicitaSyscall);
-            log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
-        }
+            pthread_mutex_lock(&mutex_BLOCK_SUSP);
+            if (pcbBlockSusp->suspensionEnCurso) {
+                pcbBlockSusp->ioCompletadaEnTransito = true;
+                pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+                log_debug(kernel->logger, "## (<%d>) IO (STDIN) finalizó pero la suspensión en KM sigue en curso, se difiere", solicitud->pidSolicitaSyscall);
+            } else {
+                pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+                pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
+                solicitarDesuspenderProceso(solicitud->pidSolicitaSyscall);
+                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+            }
+        }    log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+            
     } else {
         pasarProcesoBlockaReady(solicitud->pidSolicitaSyscall);
         log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", solicitud->pidSolicitaSyscall);

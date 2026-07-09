@@ -36,6 +36,8 @@ typedef struct{
     int socketCPUEjecuta;
     bool ejecutaPorRR;
     t_list* mutexTomados; // Lista de mutex que el proceso tiene tomado ahora mismo
+    bool suspensionEnCurso;        
+    bool ioCompletadaEnTransito;
 } t_pcb;
 
 typedef struct {
@@ -160,6 +162,8 @@ void conectar_con_kernel_memory();
 void esperar_conexiones();
 void* atender_cliente_scheduler(void* arg);
 void inicializar_interfaces();
+extern pthread_mutex_t mutex_socket_KM; //Necesitamos un mutex dedicado que serialice todos los envios al socket de KM
+int enviarPaqueteAKM(t_paquete* paquete);
 // void imprimir_lista_interfaces_io(t_log* logger);
 
 // atencionKM
@@ -204,7 +208,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 void* monitorPrioridades(void* arg);
 t_pcb* buscarMenorPrioridad();
 int procesoMasPrioritario(int prioridadActual);
-t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex);
+t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t* mutex);
 t_pcb* buscarPCBenReadyConPrioridad(int prioridad);
 void pasarProcesoExecAReady(int pid);
 void liberarCPU(t_cpu_conectada* cpu);

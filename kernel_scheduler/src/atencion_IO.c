@@ -50,11 +50,15 @@ void* atender_io(void* arg) {
                             log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
                         }
                             // Extraer de forma segura el PID que envió el módulo de I/O
-                        if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
+                        if (buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK) == NULL) {
                             log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
-                            if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
+                             t_pcb* pcbSuspendiendo = buscarPCBPorPID(pid, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
+                            if (pcbSuspendiendo == NULL) {
                                 log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
                                 break; // Salimos del case para evitar errores posteriores
+                            } else if (pcbSuspendiendo->suspensionEnCurso) {
+                                pcbSuspendiendo->ioCompletadaEnTransito = true;
+                                log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
                                 solicitarDesuspenderProceso(pid);
@@ -77,11 +81,15 @@ void* atender_io(void* arg) {
                             log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
                         }
                             // Extraer de forma segura el PID que envió el módulo de I/O
-                        if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
+                        if (buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK) == NULL) {
                             log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
-                            if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
+                            t_pcb* pcbSuspendiendo = buscarPCBPorPID(pid, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
+                            if (pcbSuspendiendo == NULL) {
                                 log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
                                 break; // Salimos del case para evitar errores posteriores
+                            } else if (pcbSuspendiendo->suspensionEnCurso) {
+                                pcbSuspendiendo->ioCompletadaEnTransito = true;
+                                log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
                                 solicitarDesuspenderProceso(pid);

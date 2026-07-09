@@ -1,7 +1,15 @@
 #include "kernel_scheduler.h"
 
 int idCPUParaAsignar = 0;
+pthread_mutex_t mutex_socket_KM = PTHREAD_MUTEX_INITIALIZER;
 
+int enviarPaqueteAKM(t_paquete* paquete) {
+    pthread_mutex_lock(&mutex_socket_KM);
+    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    pthread_mutex_unlock(&mutex_socket_KM);
+
+    return resultado;
+}
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     t_kernel_scheduler* kernel_scheduler = malloc(sizeof(t_kernel_scheduler));
 
@@ -55,7 +63,7 @@ void conectar_con_kernel_memory(){
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
 
-    enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    enviarPaqueteAKM(paquete);
 
     eliminar_paquete(paquete);
 

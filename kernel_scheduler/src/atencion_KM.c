@@ -86,7 +86,7 @@ void* atender_kernel_memory(void* arg) {
                 
                 t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
 
-                enviar_paquete(paquete,kernel->socket_kernel_memory,kernel->logger);
+                enviarPaqueteAKM(paquete);
             
                 eliminar_paquete(paquete);
                 log_info(kernel->logger, "## Inicio de compactación");
@@ -187,7 +187,7 @@ void solicitarDesuspenderProceso(int pid){
         agregar_a_paquete(paquete, &pid, sizeof(int));
     }
 
-    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    int resultado = enviarPaqueteAKM(paquete);
 
     if (resultado != 0) {
         log_error(kernel->logger, "Error al enviar pedido de desuspencion a Kernel Memory");
