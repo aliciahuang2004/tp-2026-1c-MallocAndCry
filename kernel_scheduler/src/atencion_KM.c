@@ -8,7 +8,8 @@ void* atender_kernel_memory(void* arg) {
 
         if (paquete == NULL) {
             log_error(kernel->logger, "KM Listener: KM se desconectó o error en socket");
-            break;
+            // deberiamos mandar a liberar todo y desconectar ks
+            exit(EXIT_FAILURE);
         }
 
         int cod_op = *(int*) list_get(paquete, 0);
@@ -73,8 +74,8 @@ void* atender_kernel_memory(void* arg) {
                 kernel->noHayCorrupcion = false; // para el planificador para desalojar todo
                 finalizarTodosLosProcesos();// TODO
                 log_debug(kernel->logger,"Todos los procesos fueron finalizados");
-                exit(0);
-                /* finalizar el Kernel Scheduler con motivo de Blue Screen of Death*/
+                log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER POR BLUE SCREEN OF DEATH");
+                exit(EXIT_FAILURE);
                 break;
             }
             case INICIAR_COMPACTACION:{

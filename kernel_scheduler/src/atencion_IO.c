@@ -11,13 +11,26 @@ void* atender_io(void* arg) {
         t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
         t_list* paquete = recibir_paquete(socket_io);
         if (!paquete) {
-            log_error(kernel->logger, "Error al recibir paquete de datos de IO");
+            switch (tipoIO){
+                case IO_SLEEP:
+                    log_error(kernel->logger, "Se desconecto IO SLEEP, en socket %d",socket_io);
+                    break;
+                case IO_STDIN:
+                    log_error(kernel->logger, "Se desconecto IO STDIN, en socket %d",socket_io);
+                    break;
+                case IO_STDOUT:
+                    log_error(kernel->logger, "Se desconecto IO STDOUT, en socket %d",socket_io);
+                    break;
+                default:
+                    break;
+            }
             pthread_mutex_lock(&mutex_interfaces[tipoIO]);
             if(interfaces[tipoIO].socket_interfaz == socket_io){
                 pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                 int pid = finalizoConexionIO(tipoIO);
-                finalizarProceso(pid,DESCONEXION_IO);
-            return NULL;
+                if(pid!=-1) finalizarProceso(pid,DESCONEXION_IO);
+                close(socket_io);
+                return NULL;
             }
             pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }

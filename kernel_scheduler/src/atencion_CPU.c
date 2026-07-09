@@ -11,13 +11,14 @@ void* atender_cpu(void* arg){
         t_list* paquete = recibir_paquete(socket_cpu);
         if (!paquete) {
             t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
+            log_error(kernel->logger, "Se desconecto CPU ID: %d - en socket: %d", cpu->id_cpu,socket_cpu);
             if(cpu != NULL){
-                finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
+                if(cpu->pidEjecutando != -1) finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
                 quitarCPU(cpu);
                 free(cpu);
+                close(socket_cpu);
                 return NULL;
             }
-            log_error(kernel->logger, "Error al recibir pedido de syscall");
         }
 
         int cod_op = *(int*) list_get(paquete, 0);
