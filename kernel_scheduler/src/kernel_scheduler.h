@@ -155,6 +155,7 @@ extern pthread_mutex_t mutex_diccionario;
 
 // extern t_list* lista_interfaces_io;
 // extern pthread_mutex_t mutex_lista_interfaces;
+extern sem_t sem_compactacionTerminada;
 
 // kernel_scheduler
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);

@@ -61,7 +61,7 @@ void* atender_io(void* arg) {
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(pid);
+                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }
@@ -92,7 +92,7 @@ void* atender_io(void* arg) {
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(pid);
+                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }

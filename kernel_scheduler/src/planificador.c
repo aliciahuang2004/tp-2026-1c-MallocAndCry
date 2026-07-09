@@ -40,7 +40,7 @@ pthread_mutex_t mutex_diccionario;
 // t_list* lista_interfaces_io;
 t_interfaz_conectada interfaces[3];
 pthread_mutex_t mutex_interfaces[3];
-
+sem_t sem_compactacionTerminada;
 void inicializarColas(){
     colaNEW = queue_create();
     if(strcmp(kernel->planification_algorithm,"CMN") == 0 ){
@@ -94,6 +94,7 @@ void inicializarSemaforos(){
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
+    sem_init(&sem_compactacionTerminada, 0, 0);
 
 }
 
@@ -298,14 +299,15 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
 void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
     int pid = cpu->pidEjecutando;
+    t_pcb* pcbOriginal = cpu->pcbEjecutando;
     
     usleep(kernel->rr_quantum * 1000);
 
-    if(buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC) == cpu->pcbEjecutando){
-        log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
+    t_pcb* pcbActual = buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC);
+
+    if(pcbActual != NULL && pcbActual == pcbOriginal && cpu->pcbEjecutando == pcbOriginal){
         notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     }
-    
     return NULL;
 }
 
@@ -355,6 +357,10 @@ void* monitorPrioridades(void* arg){
                 notificarDesalojo(buscarCPUSegunPID(pcbExecMenorPrioridad->pid),buscarPCBenReadyConPrioridad(nuevaPrioridad),PROCESO_DESALOJADO_PRIORIDAD);
             }
         }
+        if(!kernel->noHayCorrupcion){
+            return NULL;   // BSOD: este hilo ya no tiene sentido, termina limpio
+        }
+        sem_wait(&sem_compactacionTerminada);   // bloquea sin gastar CPU hasta que termine la compactación
     }
     return NULL;
 }
@@ -363,7 +369,7 @@ t_pcb* buscarMenorPrioridad() {
     pthread_mutex_lock(&mutex_EXEC);
     if(queue_is_empty(colaEXEC)){
         pthread_mutex_unlock(&mutex_EXEC);
-        log_error(kernel->logger,"No hay procesos en exec");
+        log_debug(kernel->logger,"No hay procesos en exec");
         return NULL;
     } 
 
@@ -1011,7 +1017,7 @@ void ordenarSuspReadySegunPrioridad(){
         }
     }
     pthread_mutex_unlock(&mutex_READY_SUSP);
-    list_destroy_and_destroy_elements(listaAux, free);
+    list_destroy(listaAux);
 }
 
 void* finalizarKernelScheduler(void* args){

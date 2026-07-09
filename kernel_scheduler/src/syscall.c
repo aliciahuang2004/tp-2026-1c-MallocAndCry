@@ -586,7 +586,7 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
             } else {
                 pthread_mutex_unlock(&mutex_BLOCK_SUSP);
                 pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
-                solicitarDesuspenderProceso(solicitud->pidSolicitaSyscall);
+                solicitarDesuspenderProceso(-1);
                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
             }
         }    log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);

@@ -96,6 +96,7 @@ void* atender_kernel_memory(void* arg) {
             case COMPACTACION_OK:{
                 log_debug(kernel->logger, "## KM informó fin de compactación");
                 kernel->noHayCompactacion = true; // reinicia planificador
+                sem_post(&sem_compactacionTerminada);   // despierta a monitorPrioridades (y a cualquier otro que espere lo mismo)
                 log_info(kernel->logger, "## Fin de compactación");
                 break;
             }
