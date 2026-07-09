@@ -19,18 +19,23 @@ int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     pthread_mutex_unlock(&mutex_lista_ms);
     return 1;
 }
-
-int guardar_ms_conexion(int id,char* ip,char* puerto){
+int guardar_ms_conexion(int id, char* ip, char* puerto) {
     t_ms_conexion* ms_conexion = malloc(sizeof(t_ms_conexion));
 
-    if (ms_conexion == NULL) {
+    if (ms_conexion == NULL)
+        return 0;
+
+    ms_conexion->id = id;
+    ms_conexion->ip = strdup(ip);
+    ms_conexion->puerto = strdup(puerto);
+
+    if (ms_conexion->ip == NULL || ms_conexion->puerto == NULL) {
+        free(ms_conexion->ip);
+        free(ms_conexion->puerto);
+        free(ms_conexion);
         return 0;
     }
 
-    memset(ms_conexion, 0, sizeof(t_ms_conexion));
-    ms_conexion->id = id;
-    ms_conexion->ip = ip;
-    ms_conexion->puerto = puerto;
     pthread_mutex_lock(&mutex_lista_ms_conexion);
     list_add(lista_ms_conexion, ms_conexion);
     pthread_mutex_unlock(&mutex_lista_ms_conexion);
@@ -72,8 +77,9 @@ void enviar_ms_a_cpu(int socket_cpu, t_log* logger) {
         agregar_a_paquete(paquete, ms_ip, strlen(ms_ip) + 1);
         agregar_a_paquete(paquete, &(ms_pos->base_global), sizeof(uint32_t));
         agregar_a_paquete(paquete, &(ms_pos->limite_global), sizeof(uint32_t));
-        
+        log_info(logger, "Antes de enviar a CPU: ip='%s' puerto='%s'", ms_ip, ms_puerto);
         enviar_paquete(paquete, socket_cpu, logger);
+        log_info(logger, "Enviando Memory Stick: Puerto:%s e IP:%s a la nueva CPU (Socket: %d)",ms_puerto,ms_ip, socket_cpu);
         eliminar_paquete(paquete);
 
         log_info(logger, "  [%d/%d] MS ID:%d enviado exitosamente a CPU", i + 1, total_ms, ms_pos->id);
