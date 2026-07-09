@@ -177,12 +177,19 @@ void solicitarDesuspenderProceso(int pid){
         //POR AVISO DE KM: libero memoria, se agrego un memory stick nuevo, o se compacto 
         ordenarSuspReadySegunPrioridad();
         pthread_mutex_lock(&mutex_READY_SUSP);
-        if(!queue_is_empty(colaREADY_SUSP)){
+        bool hayProcesoSuspendido = !queue_is_empty(colaREADY_SUSP);
+        int pidElegido = -1;
+        if(hayProcesoSuspendido){
             t_pcb* pcb = queue_peek(colaREADY_SUSP);
-            pthread_mutex_unlock(&mutex_READY_SUSP);
-            agregar_a_paquete(paquete, &pcb->pid, sizeof(int));
+            pidElegido = pcb->pid;
         }
         pthread_mutex_unlock(&mutex_READY_SUSP);
+
+        if(!hayProcesoSuspendido){
+            eliminar_paquete(paquete);
+            return; // no hay nadie para desuspender, no le mandamos nada a KM
+        }
+        agregar_a_paquete(paquete, &pidElegido, sizeof(int));
     }else{
         agregar_a_paquete(paquete, &pid, sizeof(int));
     }
