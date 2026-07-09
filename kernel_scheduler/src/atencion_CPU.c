@@ -17,7 +17,7 @@ void* atender_cpu(void* arg){
                 quitarCPU(cpu);
                 free(cpu);
                 close(socket_cpu);
-                return NULL;
+                pthread_exit(NULL);
             }
         }
 

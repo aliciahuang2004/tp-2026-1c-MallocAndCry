@@ -149,6 +149,7 @@ extern sem_t sem_recibiEscrituraDeKM;
 // extern sem_procesoCreado;
 extern sem_t sem_suspension_ok;
 extern sem_t sem_procesoFinalizado;
+extern sem_t sem_hayProcesosEnExec;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;
@@ -165,6 +166,10 @@ void inicializar_interfaces();
 extern pthread_mutex_t mutex_socket_KM; //Necesitamos un mutex dedicado que serialice todos los envios al socket de KM
 int enviarPaqueteAKM(t_paquete* paquete);
 // void imprimir_lista_interfaces_io(t_log* logger);
+void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler);
+void finalizarColas();
+void finalizarSemaforos();
+void finalizarInterfaces();
 
 // atencionKM
 void* atender_kernel_memory(void* arg);

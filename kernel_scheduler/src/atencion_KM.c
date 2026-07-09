@@ -9,6 +9,7 @@ void* atender_kernel_memory(void* arg) {
         if (paquete == NULL) {
             log_error(kernel->logger, "KM Listener: KM se desconectó o error en socket");
             // deberiamos mandar a liberar todo y desconectar ks
+            destruir_kernel_scheduler(kernel);
             exit(EXIT_FAILURE);
         }
 

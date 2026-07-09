@@ -274,3 +274,142 @@ void imprimir_lista_interfaces_io(t_log* logger) {
     pthread_mutex_unlock(&mutex_lista_interfaces);
 }
 */
+
+void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
+   if (!kernel_scheduler) return; // Verificar que el puntero no sea NULL antes de destruir
+
+   if (kernel_scheduler->logger) {
+       log_destroy(kernel_scheduler->logger);
+   }
+   if (kernel_scheduler->config) {
+       config_destroy(kernel_scheduler->config);
+   }
+   free(kernel_scheduler);
+
+}
+
+void liberarConexiones(){
+    // LIBERO IO
+    pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
+    close(interfaces[IO_SLEEP].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
+
+    pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
+    close(interfaces[IO_STDIN].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);    
+
+    pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
+    close(interfaces[IO_STDOUT].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
+
+    // LIBERO CPU
+    t_queue* colaAux = queue_create();
+    pthread_mutex_lock(&mutex_CPU);
+    while (!queue_is_empty(colaCPUs)){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        queue_push(colaAux,cpu);
+        close(cpu->socket_cliente);
+    }
+    while (!queue_is_empty(colaAux)){
+        queue_push(colaCPUs,queue_pop(colaAux));
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+
+    queue_destroy(colaAux);
+
+    //KM
+    close(kernel->socket_kernel_memory);
+
+}
+
+void finalizarColas(){
+    pthread_mutex_lock(&mutex_NEW);
+    queue_destroy_and_destroy_elements(colaNEW,NULL);
+    pthread_mutex_unlock(&mutex_NEW);
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+        case FIFO:
+        case RR:
+            pthread_mutex_lock(&mutex_READY[0]);
+            queue_destroy_and_destroy_elements(colasREADY[0],NULL);
+            pthread_mutex_unlock(&mutex_READY[0]);
+            break;
+        
+        case CMN:
+            for (int i = 0; i < kernel->cantidadColasMultinivel; i++){
+                pthread_mutex_lock(&mutex_READY[i]);
+                queue_destroy_and_destroy_elements(colasREADY[i],NULL);
+                pthread_mutex_unlock(&mutex_READY[i]);
+            }
+            break;
+    }
+    pthread_mutex_lock(&mutex_READY_SUSP);
+    queue_destroy_and_destroy_elements(colaREADY_SUSP,NULL);
+    pthread_mutex_unlock(&mutex_READY_SUSP);
+    pthread_mutex_lock(&mutex_EXEC);
+    queue_destroy_and_destroy_elements(colaEXEC,NULL);
+    pthread_mutex_unlock(&mutex_EXEC);
+    pthread_mutex_lock(&mutex_BLOCK);
+    queue_destroy_and_destroy_elements(colaBLOCK,NULL);
+    pthread_mutex_unlock(&mutex_BLOCK);
+    pthread_mutex_lock(&mutex_BLOCK_SUSP);
+    queue_destroy_and_destroy_elements(colaBLOCK_SUSP,NULL);
+    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+    pthread_mutex_lock(&mutex_EXIT);
+    queue_destroy_and_destroy_elements(colaEXIT,NULL);
+    pthread_mutex_unlock(&mutex_EXIT);
+    pthread_mutex_lock(&mutex_CPU);
+    queue_destroy_and_destroy_elements(colaCPUs,NULL);
+    pthread_mutex_unlock(&mutex_CPU);
+}
+
+void finalizarSemaforos(){
+    //MUTEX
+    pthread_mutex_destroy(&mutex_NEW);
+    if(obtenerPlanificacion(kernel->planification_algorithm) == CMN){
+        for (int i = 0; i < kernel->cantidadColasMultinivel; i++) {
+            pthread_mutex_destroy(&mutex_READY[i]);
+        }
+    }else{
+        pthread_mutex_destroy(&mutex_READY[0]);
+    }
+    pthread_mutex_destroy(&mutex_READY_SUSP);
+    pthread_mutex_destroy(&mutex_EXEC);
+    pthread_mutex_destroy(&mutex_BLOCK);
+    pthread_mutex_destroy(&mutex_BLOCK_SUSP);
+    pthread_mutex_destroy(&mutex_EXIT);
+
+    //SEMAFOROS
+    sem_destroy(&sem_hayCPUdisponible); // CPU se conecta o liberamos
+    // sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
+    sem_destroy(&sem_hayProcesosEnReady);
+    sem_destroy(&sem_readyPrioridad);
+    sem_destroy(&sem_recibiLecuraDeIO);
+    sem_destroy(&sem_recibiLecuraDeKM);
+    sem_destroy(&sem_recibiEscrituraDeKM);
+    sem_destroy(&sem_suspension_ok);
+    // sem_init(&sem_desuspension_ok, 0, 0);
+    sem_destroy(&sem_hayProcesosEnExec);
+
+    dictionary_destroy_and_destroy_elements(diccionario_mutex,NULL);
+    pthread_mutex_destroy(&mutex_diccionario);
+
+    //INTERFACES
+
+    for (int i = 0; i < 3; i++) {
+        pthread_mutex_destroy(&mutex_interfaces[i]);
+        sem_destroy(&sem_hayIO[i]);
+        sem_destroy(&sem_haySolicitudIO[i]);
+    }
+
+}
+void finalizarInterfaces(){
+    for (int i = 0; i < 3; i++) {
+        if (interfaces[i].solicitudes != NULL) {
+            while (!queue_is_empty(interfaces[i].solicitudes)) {
+                t_solicitud_io* elem = queue_pop(interfaces[i].solicitudes);
+                free(elem);
+            }
+            queue_destroy(interfaces[i].solicitudes);
+        }
+    }
+}

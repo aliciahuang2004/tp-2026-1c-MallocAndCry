@@ -30,7 +30,7 @@ void* atender_io(void* arg) {
                 int pid = finalizoConexionIO(tipoIO);
                 if(pid!=-1) finalizarProceso(pid,DESCONEXION_IO);
                 close(socket_io);
-                return NULL;
+                pthread_exit(NULL);;
             }
             pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }

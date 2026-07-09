@@ -28,8 +28,8 @@ int main(int argc, char* argv[]) {
     crearProceso(argv[2], 0);
 
     esperar_conexiones(); // DE CPU'S E IO'S
-    // destruir_kernel_scheduler(kernel_scheduler);
-    // liberarks(kernel_scheduler);
+    destruir_kernel_scheduler(kernel_scheduler);
+    
     //LIBERAR HILOS
     return 0;
 }

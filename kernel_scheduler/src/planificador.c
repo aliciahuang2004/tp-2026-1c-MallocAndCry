@@ -33,6 +33,7 @@ sem_t sem_recibiLecuraDeKM;
 sem_t sem_recibiEscrituraDeKM;
 sem_t sem_suspension_ok;
 sem_t sem_procesoFinalizado;
+sem_t sem_hayProcesosEnExec;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -91,6 +92,7 @@ void inicializarSemaforos(){
     sem_init(&sem_recibiEscrituraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
     sem_init(&sem_procesoFinalizado, 0, 0);
+    sem_init(&sem_hayProcesosEnExec,0,0);
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
@@ -191,6 +193,8 @@ void pasarProcesoReadyAExec(){
         pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
         pthread_detach(hiloQuantum);
     }
+
+    sem_post(&sem_hayProcesosEnExec);
 }
 
 t_pcb* elegirPorFIFO(){
@@ -281,8 +285,6 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
         log_error(kernel->logger, "No hay CPUs disponibles para procesar el PID %d", pid);
         return;
     }
-    
-    cpu->pidEjecutando = pid;
 
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(PROCESO_A_PROCESAR, buffer);
@@ -301,7 +303,7 @@ void* iniciarTemporizadorRR(void* arg){
     
     usleep(kernel->rr_quantum * 1000);
 
-    if(buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC) == cpu->pcbEjecutando){
+    if(pid == cpu->pidEjecutando){
         log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
         notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     }
@@ -344,6 +346,7 @@ void* monitorPrioridades(void* arg){
             int nuevaPrioridad = -1;
             sem_wait(&sem_readyPrioridad);
             while(buscarCPULibre() == NULL){
+                sem_wait(&sem_hayProcesosEnExec);
                 pcbExecMenorPrioridad = buscarMenorPrioridad();
                 if(pcbExecMenorPrioridad == NULL){
                     break;
@@ -1019,7 +1022,12 @@ void* finalizarKernelScheduler(void* args){
         sem_wait(&sem_procesoFinalizado);
         if (pidParaAsignar == (kernel->pcbFinalizados)){
             log_debug(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
-            return EXIT_SUCCESS;
+            liberarConexiones();
+            finalizarColas();
+            finalizarSemaforos();
+            finalizarInterfaces();
+            destruir_kernel_scheduler(kernel);
+            exit(EXIT_SUCCESS);
         }
         
     }
