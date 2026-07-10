@@ -65,12 +65,12 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logge
     if (mejor != NULL) {
         log_debug(logger, "ALGORITMO BEST FIT eligió hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
     } else {
-        log_info(logger, "BEST FIT no encontro hueco");
+        log_warning(logger, "BEST FIT no encontro hueco");
         if (total_huecos >= tamano) {
             log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
             avisar_compactacion(km,logger);
         } else {
-            log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
+            log_warning(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
         }
     }
     return mejor;
@@ -93,12 +93,12 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
     if (peor != NULL) {
         log_debug(logger, "ALGORITMO WORST FIT eligió hueco con Base:%u Tamaño:%u", peor->base, peor->tamano);
     } else {
-        log_info(logger, "WORST FIT no encontro hueco");
+        log_warning(logger, "WORST FIT no encontro hueco");
         if (total_huecos >= tamano) {
             log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
             avisar_compactacion(km,logger);
         } else {
-            log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
+            log_warning(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
             //ver "qué hacer" cuando no hay espacio disponible (SEGUN  ISSUE NO VA A PASAR QUE NO HAYA ESPACIO DISPONIBLE PARA CREAR UN SEGMENTO)
         }
     }
@@ -110,15 +110,15 @@ void vaciar_lista_de_huecos(t_log* logger) {
     pthread_mutex_lock(&mutex_huecos);
     list_clean_and_destroy_elements(lista_huecos_libres, free);
     pthread_mutex_unlock(&mutex_huecos);
-    log_info(logger, "[COMPACTACIÓN] Lista de huecos liberada y vaciada por completo.");
+    log_debug(logger, "[COMPACTACIÓN] Lista de huecos liberada y vaciada por completo para compactar.");
 }
 
 void loguear_huecos(t_log* logger)
 {
-    log_info(logger, "----- LISTA DE HUECOS -----");
+    log_debug(logger, "----- LISTA DE HUECOS -----");
     for(int i = 0; i < list_size(lista_huecos_libres); i++)
     {
         t_hueco* hueco = list_get(lista_huecos_libres, i);
-        log_info(logger,"Hueco[%d] Base:%u Limite:%u Tamaño:%u",i,hueco->base,hueco->limite,hueco->tamano);
+        log_debug(logger,"Hueco[%d] Base:%u Limite:%u Tamaño:%u",i,hueco->base,hueco->limite,hueco->tamano);
     }
 } 

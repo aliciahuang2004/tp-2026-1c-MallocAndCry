@@ -103,6 +103,6 @@ int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
 
     list_destroy(lista_ordenada);
 
-    log_info(logger, "== [COMPACTACIÓN] Proceso finalizado de forma exitosa ==");
+    log_debug(logger, "== [COMPACTACIÓN] Proceso finalizado de forma exitosa ==");
     return 1;
 }

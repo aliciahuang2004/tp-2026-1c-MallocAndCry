@@ -113,7 +113,7 @@ void destruir_elemento_diccionario(void* elemento) {
 void destruir_kernel_memory(t_kernel_memory* km) {
     if (!km) return;
 
-    log_info(km->logger, "Iniciando limpieza absoluta de Kernel Memory por SIGINT...");
+    log_debug(km->logger, "Iniciando limpieza absoluta de Kernel Memory por SIGINT...");
 
     limpiar_lista_ms_conexiones(); 
 

@@ -60,7 +60,7 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logge
     pthread_mutex_lock(&mutex_cpus_conectadas);
 
     int total = list_size(cpus_conectadas);
-    log_info(logger, "Avisando nuevo MS ID:%d a %d CPUs conectadas", ms_id, total);
+    log_debug(logger, "Avisando nuevo MS ID:%d a %d CPUs conectadas", ms_id, total);
 
     for(int i = 0; i < total; i++) {
         t_cpu* cpu = list_get(cpus_conectadas, i);
@@ -72,10 +72,10 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logge
         agregar_a_paquete(paquete, &resultado.base,sizeof(uint32_t));
         agregar_a_paquete(paquete, &resultado.limite,sizeof(uint32_t));
         enviar_paquete(paquete, cpu->socket, logger);
-        log_info(logger, "Antes de destruir paquete: ip='%s' puerto='%s'", ms_ip, ms_puerto);
+        log_debug(logger, "Antes de destruir paquete: ip='%s' puerto='%s'", ms_ip, ms_puerto);
         eliminar_paquete(paquete);
 
-        log_info(logger, "  [%d/%d] Aviso enviado a CPU ID:%d socket:%d",i + 1, total, cpu->id, cpu->socket);
+        log_debug(logger, "  [%d/%d] Aviso enviado a CPU ID:%d socket:%d",i + 1, total, cpu->id, cpu->socket);
     }
     pthread_mutex_unlock(&mutex_cpus_conectadas);
 }
@@ -87,7 +87,7 @@ void* atender_conexion(void* arg) {
     t_log* logger = datos->logger;
     t_kernel_memory* km = datos->km;
 
-    log_info(logger, "Nuevo hilo atendiendo conexión en socket %d", socket_cliente);
+    log_debug(logger, "Nuevo hilo atendiendo conexión en socket %d", socket_cliente);
 
     bool es_cpu = false;
     
@@ -107,7 +107,7 @@ void* atender_conexion(void* arg) {
             case CPU_HANDSHAKE:
                 es_cpu = true;
                 int cpu_id = *(int *)list_get(paquete, 1);
-                log_info(logger, "[Socket %d] Conexión con CPU ID:%d exitosa", socket_cliente,cpu_id);
+                log_debug(logger, "[Socket %d] Conexión con CPU ID:%d exitosa", socket_cliente,cpu_id);
             
                 agregar_cpu_conectada(cpu_id, socket_cliente);
                 //enviar datos de los ms ya conectados antes que esta cpu
@@ -126,7 +126,7 @@ void* atender_conexion(void* arg) {
                 char* ms_puerto = (char*) list_get(paquete, 3);
                 char* ms_ip = (char*)list_get(paquete, 4);
 
-                log_info(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
+                log_debug(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
 
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
 
@@ -148,7 +148,7 @@ void* atender_conexion(void* arg) {
                 avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,r); 
 
                 pthread_mutex_lock(&mutex_memoria_total);
-                log_info(logger, "Memoria total disponible: %u bytes", memoria_total);
+                log_debug(logger, "Memoria total disponible: %u bytes", memoria_total);
                 pthread_mutex_unlock(&mutex_memoria_total);
                 free(datos);
                 list_destroy_and_destroy_elements(paquete, free);
@@ -163,7 +163,7 @@ void* atender_conexion(void* arg) {
                  break; 
 
             case SWAP_HANDSHAKE: 
-                log_info(logger, "[Socket %d] Operación SWAP recibida", socket_cliente);
+                log_debug(logger, "[Socket %d] Operación SWAP recibida", socket_cliente);
                 // CODIGO SWAP
                 break;
 
@@ -374,7 +374,7 @@ void* atender_conexion(void* arg) {
                 
                 t_list* tabla_segmentos = proceso->contexto->tabla_segmentos;
                 pthread_mutex_unlock(&mutex_procesos); // Liberamos para que las CPUs sigan respondiendo FETCH
-                
+                log_info(logger,"PID %d tiene %d segmentos",pid_a_suspender,list_size(tabla_segmentos));
                 for (int i = 0; i < list_size(tabla_segmentos); i++) {
                     pthread_mutex_lock(&mutex_procesos);
                     t_segmento* seg = list_get(tabla_segmentos, i);
@@ -632,6 +632,7 @@ void* atender_conexion(void* arg) {
                     eliminar_paquete(resp);
 
                 } else {
+                    //cuando no hay ms conectados por lo que no se pudo crear el segmento
                     t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_ERROR, crear_buffer());
                     agregar_a_paquete(resp,&pid_recibido, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);

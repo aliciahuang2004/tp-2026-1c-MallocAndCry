@@ -31,6 +31,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
     t_hueco* hueco = buscar_hueco(tamano,km,logger);
 
     if(hueco == NULL) {
+        //cuando no hay memoria disponible porque no hay ms conectados viene acá
         pthread_mutex_unlock(&mutex_huecos);
         return -1;
     }

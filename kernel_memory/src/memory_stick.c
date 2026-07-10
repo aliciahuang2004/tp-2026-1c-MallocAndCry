@@ -48,7 +48,7 @@ void enviar_ms_a_cpu(int socket_cpu, t_log* logger) {
     pthread_mutex_lock(&mutex_lista_ms_conexion);
 
     int total_ms = list_size(lista_dir_global_ms);
-    log_info(logger, "Enviando %d Memory Sticks ya conectados a la nueva CPU (Socket: %d)", total_ms, socket_cpu);
+    log_debug(logger, "Enviando %d Memory Sticks ya conectados a la nueva CPU (Socket: %d)", total_ms, socket_cpu);
 
     for (int i = 0; i < total_ms; i++) {
         t_ms_pos* ms_pos = list_get(lista_dir_global_ms, i);
@@ -77,12 +77,12 @@ void enviar_ms_a_cpu(int socket_cpu, t_log* logger) {
         agregar_a_paquete(paquete, ms_ip, strlen(ms_ip) + 1);
         agregar_a_paquete(paquete, &(ms_pos->base_global), sizeof(uint32_t));
         agregar_a_paquete(paquete, &(ms_pos->limite_global), sizeof(uint32_t));
-        log_info(logger, "Antes de enviar a CPU: ip='%s' puerto='%s'", ms_ip, ms_puerto);
+        log_debug(logger, "Antes de enviar a CPU: ip='%s' puerto='%s'", ms_ip, ms_puerto);
         enviar_paquete(paquete, socket_cpu, logger);
-        log_info(logger, "Enviando Memory Stick: Puerto:%s e IP:%s a la nueva CPU (Socket: %d)",ms_puerto,ms_ip, socket_cpu);
+        log_debug(logger, "Enviando Memory Stick: Puerto:%s e IP:%s a la nueva CPU (Socket: %d)",ms_puerto,ms_ip, socket_cpu);
         eliminar_paquete(paquete);
 
-        log_info(logger, "  [%d/%d] MS ID:%d enviado exitosamente a CPU", i + 1, total_ms, ms_pos->id);
+        log_debug(logger, "  [%d/%d] MS ID:%d enviado exitosamente a CPU", i + 1, total_ms, ms_pos->id);
     }
 
     pthread_mutex_unlock(&mutex_lista_ms_conexion);
@@ -125,7 +125,7 @@ void agregar_posicion_ms(t_resultado_hueco r,int ms_id,t_log* logger){
     pthread_mutex_lock(&mutex_lista_dir_global_ms);
     list_add(lista_dir_global_ms, ms_pos);
     //****************log temp************
-    log_info(logger, "=== Lista de Memory Sticks (%d en total) ===", list_size(lista_dir_global_ms));
+    log_debug(logger, "=== Lista de Memory Sticks (%d en total) ===", list_size(lista_dir_global_ms));
     for(int i = 0; i < list_size(lista_dir_global_ms); i++) {
         t_ms_pos *ms = list_get(lista_dir_global_ms, i);
         log_info(logger, "  [%d] MS ID:%d | base global:%u | limite global:%u",
