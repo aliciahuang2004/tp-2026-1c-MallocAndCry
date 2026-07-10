@@ -63,11 +63,11 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logge
     }
 
     if (mejor != NULL) {
-        log_info(logger, "ALGORITMO BEST FIT eligió hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
+        log_debug(logger, "ALGORITMO BEST FIT eligió hueco Base:%u Tamaño:%u", mejor->base, mejor->tamano);
     } else {
         log_info(logger, "BEST FIT no encontro hueco");
         if (total_huecos >= tamano) {
-            log_info(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
+            log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
             avisar_compactacion(km,logger);
         } else {
             log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
@@ -91,11 +91,11 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
     }
 
     if (peor != NULL) {
-        log_info(logger, "ALGORITMO WORST FIT eligió hueco con Base:%u Tamaño:%u", peor->base, peor->tamano);
+        log_debug(logger, "ALGORITMO WORST FIT eligió hueco con Base:%u Tamaño:%u", peor->base, peor->tamano);
     } else {
         log_info(logger, "WORST FIT no encontro hueco");
         if (total_huecos >= tamano) {
-            log_info(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
+            log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
             avisar_compactacion(km,logger);
         } else {
             log_info(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);

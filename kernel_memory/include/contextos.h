@@ -9,7 +9,7 @@
 
 t_registros* crear_registros();
 t_contexto* crear_contexto();
-void actualizar_contexto(int pid, t_registros* registros_nuevos);
+void actualizar_contexto(int pid, t_registros* registros_nuevos,t_log* logger);
 t_registros* solicitud_contexto(int pid, t_list** tabla_out);
 
 #endif

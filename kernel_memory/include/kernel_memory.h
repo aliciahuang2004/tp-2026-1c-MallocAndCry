@@ -80,6 +80,8 @@ extern pthread_mutex_t mutex_lista_ms_conexion;
 
 extern pthread_mutex_t mutex_socket_swap;
 
+extern pthread_mutex_t mutex_paths;
+
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 int recibir_operacion(int socket_cliente);

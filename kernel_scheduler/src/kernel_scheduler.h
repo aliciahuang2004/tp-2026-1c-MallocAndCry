@@ -156,6 +156,7 @@ extern pthread_mutex_t mutex_diccionario;
 
 // extern t_list* lista_interfaces_io;
 // extern pthread_mutex_t mutex_lista_interfaces;
+extern sem_t sem_compactacionTerminada;
 
 // kernel_scheduler
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config);
@@ -167,6 +168,7 @@ extern pthread_mutex_t mutex_socket_KM; //Necesitamos un mutex dedicado que seri
 int enviarPaqueteAKM(t_paquete* paquete);
 // void imprimir_lista_interfaces_io(t_log* logger);
 void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler);
+void liberarConexiones();
 void finalizarColas();
 void finalizarSemaforos();
 void finalizarInterfaces();

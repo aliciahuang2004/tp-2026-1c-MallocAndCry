@@ -8,7 +8,10 @@ void* atender_kernel_memory(void* arg) {
 
         if (paquete == NULL) {
             log_error(kernel->logger, "KM Listener: KM se desconectó o error en socket");
-            // deberiamos mandar a liberar todo y desconectar ks
+            liberarConexiones();
+            finalizarColas();
+            finalizarSemaforos();
+            finalizarInterfaces();
             destruir_kernel_scheduler(kernel);
             exit(EXIT_FAILURE);
         }
@@ -76,6 +79,11 @@ void* atender_kernel_memory(void* arg) {
                 finalizarTodosLosProcesos();// TODO
                 log_debug(kernel->logger,"Todos los procesos fueron finalizados");
                 log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER POR BLUE SCREEN OF DEATH");
+                liberarConexiones();
+                finalizarColas();
+                finalizarSemaforos();
+                finalizarInterfaces();
+                destruir_kernel_scheduler(kernel);
                 exit(EXIT_FAILURE);
                 break;
             }
@@ -98,6 +106,7 @@ void* atender_kernel_memory(void* arg) {
             case COMPACTACION_OK:{
                 log_debug(kernel->logger, "## KM informó fin de compactación");
                 kernel->noHayCompactacion = true; // reinicia planificador
+                sem_post(&sem_compactacionTerminada);   // despierta a monitorPrioridades (y a cualquier otro que espere lo mismo)
                 log_info(kernel->logger, "## Fin de compactación");
                 break;
             }

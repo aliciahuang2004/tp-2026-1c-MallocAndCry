@@ -16,7 +16,7 @@ void* atender_cpu(void* arg){
                 if(cpu->pidEjecutando != -1) finalizarProceso(cpu->pidEjecutando,DESCONEXION_CPU);
                 quitarCPU(cpu);
                 free(cpu);
-                close(socket_cpu);
+                liberar_conexion(socket_cpu);
                 pthread_exit(NULL);
             }
         }

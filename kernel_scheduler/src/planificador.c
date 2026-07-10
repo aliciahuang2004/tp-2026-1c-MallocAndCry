@@ -41,7 +41,7 @@ pthread_mutex_t mutex_diccionario;
 // t_list* lista_interfaces_io;
 t_interfaz_conectada interfaces[3];
 pthread_mutex_t mutex_interfaces[3];
-
+sem_t sem_compactacionTerminada;
 void inicializarColas(){
     colaNEW = queue_create();
     if(strcmp(kernel->planification_algorithm,"CMN") == 0 ){
@@ -96,6 +96,7 @@ void inicializarSemaforos(){
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
+    sem_init(&sem_compactacionTerminada, 0, 0);
 
 }
 
@@ -300,14 +301,15 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
 void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
     int pid = cpu->pidEjecutando;
+    t_pcb* pcbOriginal = cpu->pcbEjecutando;
     
     usleep(kernel->rr_quantum * 1000);
 
-    if(pid == cpu->pidEjecutando){
-        log_debug(kernel->logger,"Finalizo el temporizador, notificando desalojo a cpu ID: %d", cpu-> id_cpu);
+    t_pcb* pcbActual = buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC);
+
+    if(pcbActual != NULL && pcbActual == pcbOriginal && cpu->pcbEjecutando == pcbOriginal){
         notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
     }
-    
     return NULL;
 }
 
@@ -358,6 +360,10 @@ void* monitorPrioridades(void* arg){
                 notificarDesalojo(buscarCPUSegunPID(pcbExecMenorPrioridad->pid),buscarPCBenReadyConPrioridad(nuevaPrioridad),PROCESO_DESALOJADO_PRIORIDAD);
             }
         }
+        if(!kernel->noHayCorrupcion){
+            return NULL;   // BSOD: este hilo ya no tiene sentido, termina limpio
+        }
+        sem_wait(&sem_compactacionTerminada);   // bloquea sin gastar CPU hasta que termine la compactación
     }
     return NULL;
 }
@@ -366,7 +372,7 @@ t_pcb* buscarMenorPrioridad() {
     pthread_mutex_lock(&mutex_EXEC);
     if(queue_is_empty(colaEXEC)){
         pthread_mutex_unlock(&mutex_EXEC);
-        log_error(kernel->logger,"No hay procesos en exec");
+        log_debug(kernel->logger,"No hay procesos en exec");
         return NULL;
     } 
 
@@ -722,48 +728,13 @@ void pasarProcesoReadySuspAReady(int pid){
 }
 
 void pasarProcesoExecAExit(){
-    //SACO DE EXEC
-    // pthread_mutex_lock(&mutex_EXEC);
-    
-    // int cantidad = queue_size(colaEXEC);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbEjecuta = queue_pop(colaEXEC);
-    //     if (pcb == NULL && pcbEjecuta->pid == pid){
-    //         pcb = pcbEjecuta;
-    //     }else{
-    //         queue_push(colaEXEC,pcbEjecuta);
-    //     }        
-    // }
-    // pthread_mutex_unlock(&mutex_EXEC);
+    //sf o desconexion cpu, syscall exit
 }
 void pasarProcesoReadyAExit(){
-    //SACO DE READY
-    // pthread_mutex_lock(&mutex_READY);
-    
-    // int cantidad = queue_size(colaREADY);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbReady = queue_pop(colaREADY);
-    //     if (pcb == NULL && pcbReady->pid == pid){
-    //         pcb = pcbReady;
-    //     }else{
-    //         queue_push(colaREADY,pcbReady);
-    //     }        
-    // }
-    // pthread_mutex_unlock(&mutex_READY);
+    //corrupcion de memoria
 }
 void pasarProcesoBlockAExit(){
-    //SACO DE BLOCK
-    // pthread_mutex_lock(&mutex_BLOCK);    
-    // int cantidad = queue_size(colaBLOCK);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbBlock = queue_pop(colaBLOCK);
-    //     if (pcb == NULL && pcbBlock->pid == pid){
-    //         pcb = pcbBlock;
-    //     }else{
-    //         queue_push(colaBLOCK,pcbBlock);
-    //     }
-    // }
-    // pthread_mutex_unlock(&mutex_BLOCK);
+    //desconexion de io
 }
 
 t_cpu_conectada* buscarCPUSegunPID(int pid){
@@ -1014,14 +985,14 @@ void ordenarSuspReadySegunPrioridad(){
         }
     }
     pthread_mutex_unlock(&mutex_READY_SUSP);
-    list_destroy_and_destroy_elements(listaAux, free);
+    list_destroy(listaAux);
 }
 
 void* finalizarKernelScheduler(void* args){
     while(1){
         sem_wait(&sem_procesoFinalizado);
         if (pidParaAsignar == (kernel->pcbFinalizados)){
-            log_debug(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
+            log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
             liberarConexiones();
             finalizarColas();
             finalizarSemaforos();

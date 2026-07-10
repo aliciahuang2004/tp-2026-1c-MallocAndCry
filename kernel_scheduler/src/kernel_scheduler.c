@@ -178,7 +178,7 @@ void* atender_cliente_scheduler(void* arg) {
                 }else{
                     pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                     log_error(kernel->logger, "ERROR: Tipo %s, ya conectado en socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
-                    close(socket_cliente);
+                    liberar_conexion(socket_cliente);
                     return NULL ;
                 }
                 
@@ -291,34 +291,33 @@ void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
 void liberarConexiones(){
     // LIBERO IO
     pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
-    close(interfaces[IO_SLEEP].socket_interfaz);
+    liberar_conexion(interfaces[IO_SLEEP].socket_interfaz);
     pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
 
     pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
-    close(interfaces[IO_STDIN].socket_interfaz);
+    liberar_conexion(interfaces[IO_STDIN].socket_interfaz);
     pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);    
 
     pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
-    close(interfaces[IO_STDOUT].socket_interfaz);
+    liberar_conexion(interfaces[IO_STDOUT].socket_interfaz);
     pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
 
     // LIBERO CPU
     t_queue* colaAux = queue_create();
     pthread_mutex_lock(&mutex_CPU);
-    while (!queue_is_empty(colaCPUs)){
+    while (!queue_is_empty(colaCPUs)) {
         t_cpu_conectada* cpu = queue_pop(colaCPUs);
-        queue_push(colaAux,cpu);
-        close(cpu->socket_cliente);
+        liberar_conexion(cpu->socket_cliente);
+        queue_push(colaAux, cpu);
     }
-    while (!queue_is_empty(colaAux)){
-        queue_push(colaCPUs,queue_pop(colaAux));
+    while (!queue_is_empty(colaAux)) {
+        queue_push(colaCPUs, queue_pop(colaAux));
     }
     pthread_mutex_unlock(&mutex_CPU);
-
     queue_destroy(colaAux);
 
     //KM
-    close(kernel->socket_kernel_memory);
+    liberar_conexion(kernel->socket_kernel_memory);
 
 }
 
@@ -358,7 +357,11 @@ void finalizarColas(){
     queue_destroy_and_destroy_elements(colaEXIT,NULL);
     pthread_mutex_unlock(&mutex_EXIT);
     pthread_mutex_lock(&mutex_CPU);
-    queue_destroy_and_destroy_elements(colaCPUs,NULL);
+    //queue_destroy_and_destroy_elements(colaCPUs, NULL); DA SF VER PORQUE, PORQUE EL HAY UNA CPU Y NO ES DIRECCION INVALIDA
+    for(int i = 0; i < queue_size(colaCPUs); i++){
+        free(queue_pop(colaCPUs));
+    }
+    queue_destroy(colaCPUs);
     pthread_mutex_unlock(&mutex_CPU);
 }
 

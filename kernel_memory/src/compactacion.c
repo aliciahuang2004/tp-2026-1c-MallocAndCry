@@ -5,16 +5,8 @@
 #include "memory_stick.h"
 #include "conexiones.h"
 
-/*
-recalcular_huecos();
-*/
-/*
-cuando detecto compactacion inmediatamente dejo de recibir peticiones y espero a ks?
-ó sigo ejecutando hasta que ks envie "CPUS_DESALOJADAS" y recién allí dejo de recibir peticiones para compactar?
-*/
-
 void avisar_compactacion(t_kernel_memory* km, t_log* logger) {
-    log_info(logger, "## Solicitando compactación al Kernel Scheduler");
+    log_debug(logger, "## Solicitando compactación al Kernel Scheduler");
     t_paquete* aviso = crear_paquete(INICIAR_COMPACTACION, crear_buffer());
     enviar_paquete(aviso, km->socket_kernel_scheduler, logger);
     eliminar_paquete(aviso);
@@ -48,19 +40,19 @@ t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
 
     list_destroy(lista_contextos_temp);
 
-    log_info(logger, "[COMPACTACIÓN] Segmentos totales cargados: %d", list_size(lista_segmentos_temp));
+    log_debug(logger, "[COMPACTACIÓN] Segmentos totales cargados: %d", list_size(lista_segmentos_temp));
 
 
     if (list_size(lista_segmentos_temp) > 1) {
         list_sort(lista_segmentos_temp, ordenar_por_base_global);
-        log_info(logger, "[COMPACTACIÓN] Lista de segmentos ordenada con éxito.");
+        log_debug(logger, "[COMPACTACIÓN] Lista de segmentos ordenada con éxito.");
     }
 
     return lista_segmentos_temp;
 }
 int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
-    log_info(logger, "== [COMPACTACIÓN] Solicitud de compactación recibida ==");
-
+    log_debug(logger, "== [COMPACTACIÓN] Solicitud de compactación recibida ==");
+    usleep(km->compaction_delay * 1000); 
     t_list* lista_ordenada = obtener_lista_temp_ord(list_create(), logger);
 
     uint32_t proxima_base_libre = 0;
@@ -102,7 +94,7 @@ int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
     uint32_t tamano_gran_hueco = memoria_total - proxima_base_libre;
 
     if (tamano_gran_hueco > 0) {
-        log_info(logger, "[COMPACTACIÓN] Creando el gran hueco libre. Base: %u | Tamaño: %u bytes",proxima_base_libre, tamano_gran_hueco);
+        log_debug(logger, "[COMPACTACIÓN] Creando el gran hueco libre. Base: %u | Tamaño: %u bytes",proxima_base_libre, tamano_gran_hueco);
                  
         agregar_hueco_libre(proxima_base_libre, tamano_gran_hueco);
     } else {
@@ -110,6 +102,7 @@ int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
     }
 
     list_destroy(lista_ordenada);
+
     log_info(logger, "== [COMPACTACIÓN] Proceso finalizado de forma exitosa ==");
     return 1;
 }

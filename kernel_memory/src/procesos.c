@@ -57,9 +57,11 @@ t_proceso* buscar_proceso(int pid) {
 int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
 
     pthread_mutex_lock(&mutex_procesos);
+    pthread_mutex_lock(&mutex_paths);
     t_proceso* proceso = buscar_proceso(pid);
     if (proceso == NULL) {
         pthread_mutex_unlock(&mutex_procesos);
+        pthread_mutex_unlock(&mutex_paths);
         log_error(logger, "Proceso PID:%d no encontrado", pid);
         return -1;
     }
@@ -82,7 +84,7 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
     sprintf(pid_str, "%d", pid);
     dictionary_remove_and_destroy(procesos, pid_str, free);
 
-    pthread_mutex_unlock(&mutex_procesos);
+    
 
     char pid_str_path[20];
     sprintf(pid_str_path, "%d", pid);
@@ -93,6 +95,8 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
         uint32_t tamano_real = (limites[i] - bases[i]) + 1;
         agregar_hueco_libre(bases[i],tamano_real);
     }
+    pthread_mutex_unlock(&mutex_procesos);
+    pthread_mutex_unlock(&mutex_paths);
     //***************************logs temporales*********************************
     log_info(logger, "## [VERIFICACIÓN] Iniciando auditoría de liberación para PID: %d", pid);
         pthread_mutex_lock(&mutex_procesos);
@@ -112,6 +116,5 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
         loguear_huecos(logger); 
         log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
         //***************************+logs temporales*****************************
-        //log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
     return 1;
 }

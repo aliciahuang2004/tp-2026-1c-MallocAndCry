@@ -29,8 +29,8 @@ void* atender_io(void* arg) {
                 pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                 int pid = finalizoConexionIO(tipoIO);
                 if(pid!=-1) finalizarProceso(pid,DESCONEXION_IO);
-                close(socket_io);
-                pthread_exit(NULL);;
+                liberar_conexion(socket_io);
+                pthread_exit(NULL);
             }
             pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }
@@ -74,7 +74,7 @@ void* atender_io(void* arg) {
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(pid);
+                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }
@@ -105,7 +105,7 @@ void* atender_io(void* arg) {
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
                                 pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(pid);
+                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
                             }
