@@ -11,7 +11,7 @@ void loguear_segmentos_proceso(t_proceso* proceso, t_log* logger) {//para probar
     for(int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
         t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
 
-        log_info(logger,"ID SEG:%d BASE:%u LIMITE:%u",seg->id_segmento,seg->base_global,seg->limite_global);
+        log_info(logger,"ID SEG:%d BASE:%u LIMITE:%u TAMAÑO:%u",seg->id_segmento,seg->base_global,seg->limite_global,seg->tamanio);
     }
 }
 
@@ -28,7 +28,7 @@ void loguear_tabla_segmentos(t_list* tabla,t_log* logger)
 int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_kernel_memory* km) {
     pthread_mutex_lock(&mutex_huecos);
 
-    t_hueco* hueco = buscar_hueco(tamano,km,logger);
+    t_hueco* hueco = buscar_hueco(tamano,km,logger);//deberia modificar esta funcion para cuando memoria=0,retorne null,se envie CREACION_DE_SEG_ERROR_SIN_MEMORIA?
 
     if(hueco == NULL) {
         //cuando no hay memoria disponible porque no hay ms conectados viene acá
@@ -54,6 +54,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
     segmento->id_segmento = id_segmento;
     segmento->base_global = base_segmento;
+    segmento->tamanio = tamano;
     segmento->limite_global = base_segmento + tamano - 1;
     segmento->memory_stick_id = -1;//VER SI ESTE DATO ES NECESARIO TENERLO ACÁ
     segmento->en_swap = false;

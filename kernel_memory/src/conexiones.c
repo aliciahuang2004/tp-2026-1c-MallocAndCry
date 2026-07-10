@@ -632,7 +632,7 @@ void* atender_conexion(void* arg) {
                     eliminar_paquete(resp);
 
                 } else {
-                    //cuando no hay ms conectados por lo que no se pudo crear el segmento
+                    //cuando no hay ms conectados por lo que no se pudo crear el segmento?
                     t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_ERROR, crear_buffer());
                     agregar_a_paquete(resp,&pid_recibido, sizeof(int));
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
@@ -662,6 +662,7 @@ void* atender_conexion(void* arg) {
             case CPUS_DESALOJADAS:
             {
                 int rta = iniciar_compactacion(logger,km);
+                usleep(km->compaction_delay * 1000); 
                  if(rta == 1) {
                     t_paquete* resp = crear_paquete(COMPACTACION_OK, crear_buffer());
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);

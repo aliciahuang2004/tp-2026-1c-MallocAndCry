@@ -18,7 +18,7 @@ bool ordenar_por_base_global(void* a, void* b) {
 
     return seg_a->base_global < seg_b->base_global;
 }
-
+/*
 t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
     
     pthread_mutex_lock(&mutex_tabla_contextos);
@@ -37,8 +37,28 @@ t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
             list_add(lista_segmentos_temp, seg);
         }
     }
+*/
+    t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
+    // 1. Acceder al diccionario de procesos (Fuente de verdad)
+    pthread_mutex_lock(&mutex_procesos);
+    t_list* lista_procesos = dictionary_elements(procesos); 
+    pthread_mutex_unlock(&mutex_procesos);
 
-    list_destroy(lista_contextos_temp);
+    for (int i = 0; i < list_size(lista_procesos); i++) {
+        t_proceso* proceso = list_get(lista_procesos, i);
+        
+        // 2. Acceder a la tabla de segmentos a través del contexto del proceso
+        t_list* tabla_seg = proceso->contexto->tabla_segmentos;
+
+        for (int j = 0; j < list_size(tabla_seg); j++) {
+            t_segmento* seg = list_get(tabla_seg, j);
+
+            if (!seg->en_swap) {
+                list_add(lista_segmentos_temp, seg);
+            }
+        }
+    }
+    list_destroy(lista_procesos);
 
     log_debug(logger, "[COMPACTACIÓN] Segmentos totales cargados: %d", list_size(lista_segmentos_temp));
 
@@ -50,9 +70,46 @@ t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
 
     return lista_segmentos_temp;
 }
+
+void loguear_tablas_segmentos(t_log* logger)
+{
+    pthread_mutex_lock(&mutex_procesos);
+
+    t_list* claves = dictionary_keys(procesos);
+
+    for (int i = 0; i < list_size(claves); i++) {
+
+        char* key = list_get(claves, i);
+        t_proceso* proceso = dictionary_get(procesos, key);
+
+        log_info(logger, "===== PID %d =====", proceso->pid);
+
+        t_list* tabla = proceso->contexto->tabla_segmentos;
+
+        for (int j = 0; j < list_size(tabla); j++) {
+
+            t_segmento* seg = list_get(tabla, j);
+
+            log_info(logger,
+                "SEG %d | Base:%u | Limite:%u | Tamaño:%u | Swap:%s",
+                seg->id_segmento,
+                seg->base_global,
+                seg->limite_global,
+                seg->tamanio,
+                seg->en_swap ? "SI" : "NO");
+        }
+    }
+
+    list_destroy(claves);
+    pthread_mutex_unlock(&mutex_procesos);
+}
+
 int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
-    log_debug(logger, "== [COMPACTACIÓN] Solicitud de compactación recibida ==");
-    usleep(km->compaction_delay * 1000); 
+    log_debug(logger, "== [COMPACTACIÓN] Solicitud de inicio de compactación recibida ==");
+    log_debug(logger, "=== ANTES DE COMPACTAR ===");
+    loguear_tablas_segmentos(logger);
+    loguear_huecos(logger);
+    //usleep(km->compaction_delay * 1000); 
     t_list* lista_ordenada = obtener_lista_temp_ord(list_create(), logger);
 
     uint32_t proxima_base_libre = 0;
@@ -104,5 +161,9 @@ int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
     list_destroy(lista_ordenada);
 
     log_debug(logger, "== [COMPACTACIÓN] Proceso finalizado de forma exitosa ==");
+    log_debug(logger, "=== DESPUÉS DE COMPACTAR ===");
+    loguear_tablas_segmentos(logger);
+    loguear_huecos(logger);
+    //usleep(km->compaction_delay * 1000); 
     return 1;
 }

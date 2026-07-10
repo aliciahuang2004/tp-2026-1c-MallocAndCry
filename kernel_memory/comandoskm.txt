@@ -21,6 +21,7 @@ MEMORY_DELAY=1500
 comandos:
 ./bin/kernel_memory kernel_memory.config
 ./bin/kernel_scheduler kernel_scheduler.config PLANI_PRE_0.prc
+./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc 
 ./bin/io io.config SLEEP
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
