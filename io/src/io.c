@@ -74,7 +74,7 @@ void enviar_handshake(t_io* io){
 
     enviar_paquete(paquete, io->socket_kernel_scheduler, io->logger);
     eliminar_paquete(paquete);
-    log_info(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
+    log_debug(io->logger, "HANSHAKE A KERNEL Scheduler ENVIADO");
 }
 
 

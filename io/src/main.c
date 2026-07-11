@@ -25,7 +25,6 @@ int main(int argc, char* argv[]) {
     }
 
     enviar_handshake(io);
-    log_info(io->logger, "## Conectado a Kernel Scheduler");
     
     while(1) {
         recibir_y_ejecutar_tarea(io, tipo_modulo);

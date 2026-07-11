@@ -656,7 +656,6 @@ void pasarProcesoBlockABlockSusp(int pid){
         log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
         pasarProcesoBlockSuspAReadySusp(pid);
         solicitarDesuspenderProceso(pid);
-        
     }
 }
 
@@ -795,10 +794,17 @@ void* loop_corto_plazo(void* args) {
     log_debug(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
     
     while(1) {
-        while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             sem_wait(&sem_hayCPUdisponible);
             sem_wait(&sem_hayProcesosEnReady);
+
+        if(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             pasarProcesoReadyAExec();
+        } else {
+           
+            //esperamos a que termine la compactación/corrupción
+            sem_post(&sem_hayCPUdisponible);
+            sem_post(&sem_hayProcesosEnReady);
+            sem_wait(&sem_compactacionTerminada);
         }
     }
     return NULL;

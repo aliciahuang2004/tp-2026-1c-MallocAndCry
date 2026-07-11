@@ -99,7 +99,7 @@ void enviar_confirmacion_ks(int socket_ks, int pid, void* datos_respuesta, uint3
     // Enviar paquete
     int resultado = enviar_paquete(paquete, socket_ks, logger);
     if (resultado == 0) {
-        log_info(logger, "Enviando confirmación IO_OK para PID %d al socket %d", pid, socket_ks);
+        log_debug(logger, "Enviando confirmación IO_OK para PID %d al socket %d", pid, socket_ks);
     } else {
         log_error(logger, "Error al enviar IO_OK para PID %d al socket %d", pid, socket_ks);
     }
