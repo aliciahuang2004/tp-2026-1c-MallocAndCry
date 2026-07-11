@@ -26,7 +26,7 @@ comandos:
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
 ./bin/swap swap.config 
-./bin/cpu cpu1.config 1
+./bin/cpu cpu.config 1
 ./bin/memory_stick ms1.config 256 1
 
 para (((PRUEBA PLANIFICACION CORTO PLAZO)))----

@@ -82,7 +82,7 @@ void loguear_tablas_segmentos(t_log* logger)
         char* key = list_get(claves, i);
         t_proceso* proceso = dictionary_get(procesos, key);
 
-        log_info(logger, "===== PID %d =====", proceso->pid);
+        log_debug(logger, "===== PID %d =====", proceso->pid);
 
         t_list* tabla = proceso->contexto->tabla_segmentos;
 
@@ -90,7 +90,7 @@ void loguear_tablas_segmentos(t_log* logger)
 
             t_segmento* seg = list_get(tabla, j);
 
-            log_info(logger,
+            log_debug(logger,
                 "SEG %d | Base:%u | Limite:%u | Tamaño:%u | Swap:%s",
                 seg->id_segmento,
                 seg->base_global,

@@ -89,7 +89,7 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
     char pid_str_path[20];
     sprintf(pid_str_path, "%d", pid);
     dictionary_remove_and_destroy(km->paths_por_pid, pid_str_path, free);
-    log_info(logger, "Path eliminado para PID:%d", pid);
+    log_debug(logger, "Path eliminado para PID:%d", pid);
 
     for (int i = 0; i < cant_segmentos; i++) {
         uint32_t tamano_real = (limites[i] - bases[i]) + 1;
@@ -98,23 +98,23 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
     pthread_mutex_unlock(&mutex_procesos);
     pthread_mutex_unlock(&mutex_paths);
     //***************************logs temporales*********************************
-    log_info(logger, "## [VERIFICACIÓN] Iniciando auditoría de liberación para PID: %d", pid);
+    log_debug(logger, "## [VERIFICACIÓN] Iniciando auditoría de liberación para PID: %d", pid);
         pthread_mutex_lock(&mutex_procesos);
         t_proceso* proceso_fantasma = buscar_proceso(pid); 
         pthread_mutex_unlock(&mutex_procesos);
 
         if (proceso_fantasma == NULL) {
-            log_info(logger, "   [OK] Diccionario 'procesos': El PID %d fue removido exitosamente.", pid);
+            log_debug(logger, "   [OK] Diccionario 'procesos': El PID %d fue removido exitosamente.", pid);
         } else {
             log_error(logger, "   [ALERTA] El PID %d sigue figurando en el diccionario de procesos. Puntero: %p", pid, (void*)proceso_fantasma);
         }
         if (!dictionary_has_key(km->paths_por_pid, pid_str_path)) {
-            log_info(logger, "   [OK] Diccionario 'paths_por_pid': Removido correctamente.");
+            log_debug(logger, "   [OK] Diccionario 'paths_por_pid': Removido correctamente.");
         } else {
             log_error(logger, "   [ALERTA] El path para el PID %d sigue existiendo en km->paths_por_pid.", pid);
         }
         loguear_huecos(logger); 
-        log_info(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
+        log_debug(logger, "Proceso eliminado PID:%d - %d segmentos liberados", pid, cant_segmentos);
         //***************************+logs temporales*****************************
     return 1;
 }

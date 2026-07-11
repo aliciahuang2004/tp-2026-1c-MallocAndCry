@@ -1,5 +1,6 @@
 #include "kernel_memory.h"
 #include "conexiones.h"
+#include "estructuras.h"
 #include <signal.h>
 #include <unistd.h>
 

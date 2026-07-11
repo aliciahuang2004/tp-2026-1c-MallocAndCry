@@ -6,12 +6,12 @@
 
 void loguear_segmentos_proceso(t_proceso* proceso, t_log* logger) {//para probar
 
-    log_info(logger,"----- SEGMENTOS DE PID %d -----",proceso->pid);
+    log_debug(logger,"----- SEGMENTOS DE PID %d -----",proceso->pid);
 
     for(int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
         t_segmento* seg = list_get(proceso->contexto->tabla_segmentos, i);
 
-        log_info(logger,"ID SEG:%d BASE:%u LIMITE:%u TAMAÑO:%u",seg->id_segmento,seg->base_global,seg->limite_global,seg->tamanio);
+        log_debug(logger,"ID SEG:%d BASE:%u LIMITE:%u TAMAÑO:%u",seg->id_segmento,seg->base_global,seg->limite_global,seg->tamanio);
     }
 }
 
@@ -62,7 +62,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
     list_add(proceso->contexto->tabla_segmentos, segmento);
     pthread_mutex_unlock(&mutex_procesos);
-    log_info(logger,"Segmento creado para PID:%d ID SEG:%d BASE:%u LIMITE:%u",pid,id_segmento,segmento->base_global,segmento->limite_global);//para probar
+    log_info(logger," ## PID: <%d> - Segmento creado <%d> - Tamaño: <%u> ",pid,id_segmento,segmento->tamanio);
     //loguear_tabla_segmentos(proceso->contexto->tabla_segmentos,logger);
     loguear_segmentos_proceso(proceso, logger);//para probar
 
@@ -106,7 +106,7 @@ int eliminar_segmento(int pid, int id_segmento, t_log* logger) {
 
     agregar_hueco_libre(base,tamano_real);
 
-    log_info(logger, "Segmento eliminado PID:%d SEG:%d BASE:%u LIMITE:%u", pid, id_segmento, base, limite);
+    log_debug(logger, "Segmento eliminado PID:%d SEG:%d BASE:%u LIMITE:%u", pid, id_segmento, base, limite);
 
     return 1;
 }

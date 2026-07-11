@@ -18,5 +18,5 @@ int buscar_socket_ms_por_id(int ms_id);
 void* enviar_fragmentos_lectura(t_list *lista_fragmentos, uint32_t tamano, t_log *logger,t_kernel_memory* km);
 int guardar_ms_conexion(int id,char* ip,char* puerto);
 void enviar_ms_a_cpu(int socket_cpu, t_log* logger);
-
+t_ms_info* buscar_ms_por_id(int ms_id);
 #endif 

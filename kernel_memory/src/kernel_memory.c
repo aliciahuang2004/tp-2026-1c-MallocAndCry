@@ -1,6 +1,6 @@
 #include "kernel_memory.h"
 #include "procesos.h"
-
+#include "estructuras.h"
 t_list* lista_ms;
 t_list* lista_dir_global_ms;
 t_list* cpus_conectadas;

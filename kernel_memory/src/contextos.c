@@ -77,14 +77,14 @@ void actualizar_contexto(int pid, t_registros* registros_nuevos, t_log* logger) 
         t_proceso* proceso = dictionary_get(procesos, pid_str);
     if (proceso != NULL) {
         memcpy(&proceso->contexto->registros, registros_nuevos, sizeof(t_registros));
-                log_info(logger, "## Contexto actualizado recibido - PID: %d", pid);
-        log_info(logger, "   PC=%u  AX=%u   BX=%u   CX=%u   DX=%u", 
+                log_debug(logger, "## Contexto actualizado recibido - PID: %d", pid);
+        log_debug(logger, "   PC=%u  AX=%u   BX=%u   CX=%u   DX=%u", 
             registros_nuevos->PC, registros_nuevos->AX, registros_nuevos->BX, 
             registros_nuevos->CX, registros_nuevos->DX);
-        log_info(logger, "   EAX=%u     EBX=%u    ECX=%u   EDX=%u   SI=%u   DI=%u",
+        log_debug(logger, "   EAX=%u     EBX=%u    ECX=%u   EDX=%u   SI=%u   DI=%u",
             registros_nuevos->EAX, registros_nuevos->EBX, registros_nuevos->ECX,
             registros_nuevos->EDX, registros_nuevos->SI, registros_nuevos->DI);
-        log_info(logger, "Contexto actualizado - PID: %d", pid);
+        log_debug(logger, "Contexto actualizado - PID: %d", pid);
     } else {
         // Si no existe, es un paquete tardío de una CPU 
         log_warning(logger, "Intento de actualizar PID %d, pero no existe. Paquete descartado.", pid);

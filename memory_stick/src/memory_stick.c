@@ -117,6 +117,8 @@ void procesar_lectura(t_memory_stick* ms, int socket_cliente, t_list* paquete) {
     pthread_mutex_unlock(&(ms->mutex_mem));
 
     t_paquete* paquete_respuesta = crear_paquete(DATOS_LEIDOS, crear_buffer());
+    // Agregamos primero el tamaño como un entero
+    agregar_a_paquete(paquete_respuesta, &tamanio, sizeof(int));
     agregar_a_paquete(paquete_respuesta, datos_leidos, tamanio);
     enviar_paquete(paquete_respuesta, socket_cliente, ms->logger);
     

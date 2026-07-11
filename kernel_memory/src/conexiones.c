@@ -90,17 +90,27 @@ void* atender_conexion(void* arg) {
     log_debug(logger, "Nuevo hilo atendiendo conexión en socket %d", socket_cliente);
 
     bool es_cpu = false;
-    
-    while (1) {
+          while (1) {
+            t_list* paquete = recibir_paquete(socket_cliente);
+            
+            if (!paquete) { // Detección instantánea de desconexión
+                log_error(logger, "Cliente desconectado en socket %d", socket_cliente);
+                
+                t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
+                if (ms != NULL) {
+                    manejar_desconexion_memory_stick(ms, km, logger);
+                    
+                    // Notificamos error a TODOS los hilos que esperaban a este MS
+                    pthread_mutex_lock(&ms->mutex_socket);
+                    ms->ultimo_codigo_op = ERROR_CONEXION_MS; 
+                    ms->respuesta_lista = true;
+                    pthread_cond_broadcast(&ms->cond_respuesta); // BROADCAST es mejor aquí
+                    pthread_mutex_unlock(&ms->mutex_socket);
+                }
+                break; 
+            }
 
-    
-        t_list* paquete = recibir_paquete(socket_cliente);
-        
-        if (!paquete) {
-            log_error(logger, "Error al recibir paquete o cliente desconectado en socket %d.", socket_cliente);
-            break; // Salimos del bucle si el cliente se cae
-        }
-
+              
         int codigo_operacion = *(int*) list_get(paquete, 0);
 
         switch (codigo_operacion) {
@@ -108,9 +118,9 @@ void* atender_conexion(void* arg) {
                 es_cpu = true;
                 int cpu_id = *(int *)list_get(paquete, 1);
                 log_debug(logger, "[Socket %d] Conexión con CPU ID:%d exitosa", socket_cliente,cpu_id);
-            
+                log_info(logger," ## CPU <%d> Conectada ",cpu_id);
                 agregar_cpu_conectada(cpu_id, socket_cliente);
-                //enviar datos de los ms ya conectados antes que esta cpu
+                //envia los datos de los ms ya conectados antes que esta cpu
                 enviar_ms_a_cpu(socket_cliente,logger);
                 t_paquete *respuesta = crear_paquete(SEG_MAX_SIZE, crear_buffer());
                 agregar_a_paquete(respuesta, &km->segment_max_size, sizeof(int));
@@ -127,6 +137,7 @@ void* atender_conexion(void* arg) {
                 char* ms_ip = (char*)list_get(paquete, 4);
 
                 log_debug(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
+                log_info(logger," ## Memory Stick de <%d> bytes Conectada ",ms_tamano);
 
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
 
@@ -149,15 +160,20 @@ void* atender_conexion(void* arg) {
 
                 pthread_mutex_lock(&mutex_memoria_total);
                 log_debug(logger, "Memoria total disponible: %u bytes", memoria_total);
+                uint32_t copia_memoria_total = memoria_total;
                 pthread_mutex_unlock(&mutex_memoria_total);
-                free(datos);
-                list_destroy_and_destroy_elements(paquete, free);
-                return NULL;
-                       
+
+                //AVISO A KS QUE HAY MAS MEMORIA DISPONIBLE:
+                t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
+                agregar_a_paquete(respuesta,&copia_memoria_total,sizeof(uint32_t));
+                enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
+                eliminar_paquete(respuesta);
+                 break;                      
             }
 
             case KERNEL_SCHEDULER_HANDSHAKE:
-                log_info(logger, "[Socket %d] Conexión con KERNEL SCHEDULER exitosa", socket_cliente);
+            
+                log_info(logger, " ##  Kernel Scheduler Conectado  -  FD del socekt : <%d> ", socket_cliente);
                 km->socket_kernel_scheduler = socket_cliente;
                 // CODIGO KERNEL SCHEDULER
                  break; 
@@ -191,7 +207,7 @@ void* atender_conexion(void* arg) {
                 enviar_paquete(error, socket_cliente, logger);
                 eliminar_paquete(error);
                 }
-                log_info(logger, "## Creación de Proceso - PID: %d", pid_nuevo); 
+                log_info(logger, " ## PID: <%d> - Proceso Creado ", pid_nuevo); 
                 break;
             }
 
@@ -259,7 +275,7 @@ void* atender_conexion(void* arg) {
 
                     free(regs);
                     list_destroy_and_destroy_elements(tabla_segmentos, free);
-                    log_info(logger, "Contexto enviado - PID:%d | Segmentos:%d", pid_solicitado, cant_segmentos);
+                    log_debug(logger, "Contexto enviado - PID:%d | Segmentos:%d", pid_solicitado, cant_segmentos);
                 } else {
                     log_error(logger, "No se encontró contexto para PID %d", pid_solicitado);
                     t_paquete* error = crear_paquete(CONTEXT_ERROR, crear_buffer());
@@ -286,6 +302,7 @@ void* atender_conexion(void* arg) {
                 } else {
                     log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
                 }
+                log_info(logger," ## PID: - <%d> - <Escritura> - Dir. Física: <%u> - Tamaño: <%u> ",pid_recibido,direccion_fisica_global,tamano_contenido);
                 t_paquete* confirmacion = crear_paquete(ESCRITURA_DE_DATOS_OK, crear_buffer());
                 agregar_a_paquete(confirmacion, &pid_recibido, sizeof(int));
                 enviar_paquete(confirmacion, km->socket_kernel_scheduler, logger);
@@ -301,11 +318,11 @@ void* atender_conexion(void* arg) {
                 t_list* lista_fragmentos_temp = calcular_dir_local_ms(direccion_fisica_global,tamano,logger);
   
                 if (lista_fragmentos_temp != NULL) {
-                //ms me retorna lo leido acá,envío lo leido a ks acá ó si ms se desconecta se detecta acá y tambien envia aviso a ks-
+             
                 void* contenido_leido_completo = enviar_fragmentos_lectura(lista_fragmentos_temp, tamano, logger,km);
 
                 if (contenido_leido_completo != NULL) {
-                    
+                    log_info(logger," ## PID: - <%d> - <Lectura> - Dir. Física: <%u> - Tamaño: <%u> ",pid_recibido,direccion_fisica_global,tamano);
                     t_paquete* respuesta_final = crear_paquete(RTA_LECTURA, crear_buffer());
                     agregar_a_paquete(respuesta_final, &pid_recibido, sizeof(int));
                     agregar_a_paquete(respuesta_final,contenido_leido_completo,tamano);
@@ -326,7 +343,7 @@ void* atender_conexion(void* arg) {
             case FINALIZAR_PROCESO: 
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
-                int respuesta = eliminar_proceso(pid_recibido,km,logger);
+                eliminar_proceso(pid_recibido,km,logger);
             /*DESCOMENTAR CUANDO KS ESPERE ESTE PROTOCOLO*******
                 if(respuesta == 1) {
                    t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
@@ -660,7 +677,7 @@ void* atender_conexion(void* arg) {
             }
             break;
             case CPUS_DESALOJADAS:
-            {
+            {//deberia agregar dos mutex lock de procesos en todo este case? para evitar que cpu me solicite ctx o me envie ctx
                 int rta = iniciar_compactacion(logger,km);
                 usleep(km->compaction_delay * 1000); 
                  if(rta == 1) {
@@ -676,6 +693,43 @@ void* atender_conexion(void* arg) {
                 
             }
             break;
+            case IO_OK: {//agrego para que hilo dispatcher de ms maneje la comunicacion entre los hilos de km y los ms conectados
+                log_debug(logger, "Dispatcher: Recibido IO_OK del socket %d", socket_cliente);
+                
+                // Identificamos a qué MS pertenece este socket
+                t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
+                
+                pthread_mutex_lock(&ms->mutex_socket);
+                ms->ultimo_codigo_op = IO_OK;
+                ms->respuesta_lista = true;
+                pthread_cond_signal(&ms->cond_respuesta); // Despertamos al hilo que ejecutó enviar_fragmentos
+                pthread_mutex_unlock(&ms->mutex_socket);
+                break;
+            }
+            case DATOS_LEIDOS: {
+                log_debug(logger, "Dispatcher: Recibidos datos de lectura del socket %d", socket_cliente);
+
+                t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
+                if (ms == NULL) break;
+
+                pthread_mutex_lock(&ms->mutex_socket);
+
+                int tamano_recibido = *(int*) list_get(paquete, 1);
+                void* datos_en_paquete = list_get(paquete, 2);
+
+                ms->buffer_respuesta = malloc(tamano_recibido);
+                if (ms->buffer_respuesta != NULL) {
+                    memcpy(ms->buffer_respuesta, datos_en_paquete, tamano_recibido);
+                    ms->ultimo_codigo_op = DATOS_LEIDOS;
+                } else {
+                    ms->ultimo_codigo_op = ERROR_CONEXION_MS;
+                }
+
+                ms->respuesta_lista = true;
+                pthread_cond_signal(&ms->cond_respuesta); // Despertamos a enviar_fragmentos_lectura
+                pthread_mutex_unlock(&ms->mutex_socket);
+                break;
+            }
              case ERROR_OPERACION://ms lo envia cuando falla stdin o stdout 
             {   //no deberia ir aca?
                 //qué hago si falla? creo que no se considera en las pruebas

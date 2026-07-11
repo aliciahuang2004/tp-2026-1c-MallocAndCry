@@ -92,7 +92,8 @@ typedef enum{
     SUSPENSION_OK,
     LECTURA_SWAP,
     ESCRITURA_SWAP,
-    DESUSPENSION_OK
+    DESUSPENSION_OK,
+    ERROR_CONEXION_MS
 }op_code;
 
 #endif /* PROTOCOLO_H_ */
