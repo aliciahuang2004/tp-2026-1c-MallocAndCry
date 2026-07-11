@@ -326,7 +326,8 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
     switch (motivo){
     case PROCESO_DESALOJADO_QUANTUM:
-        log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu->pidEjecutando);
+        // el log ahora se hace cuando se confirma el desalojo
+        //log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu->pidEjecutando); 
         break;
     case PROCESO_DESALOJADO_PRIORIDAD:
         t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,&mutex_EXEC);
@@ -787,12 +788,19 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
 
 void* loop_corto_plazo(void* args) {
     log_debug(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
-    
+
     while(1) {
-        while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
-            sem_wait(&sem_hayCPUdisponible);
-            sem_wait(&sem_hayProcesosEnReady);
+        sem_wait(&sem_hayCPUdisponible);
+        sem_wait(&sem_hayProcesosEnReady);
+
+        if(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             pasarProcesoReadyAExec();
+        } else {
+           
+            //esperamos a que termine la compactación/corrupción
+            sem_post(&sem_hayCPUdisponible);
+            sem_post(&sem_hayProcesosEnReady);
+            sem_wait(&sem_compactacionTerminada);
         }
     }
     return NULL;

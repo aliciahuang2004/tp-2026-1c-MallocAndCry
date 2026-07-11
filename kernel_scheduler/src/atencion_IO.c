@@ -47,9 +47,9 @@ void* atender_io(void* arg) {
                         pthread_mutex_lock(&mutex_interfaces[tipoIO]);
                         t_solicitud_io* solicitudSTDIN = queue_peek(interfaces[tipoIO].solicitudes);
                         if(solicitudSTDIN->pidSolicitaSyscall == pid){
-                            solicitudSTDIN->leido = strdup(lecturaIO);
-                            log_debug(kernel->logger, "STDIN envia '%s' para PID: %d", lecturaIO, pid);
-                            pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
+                        solicitudSTDIN->leido = malloc(solicitudSTDIN->tamanio);  
+                        memcpy(solicitudSTDIN->leido, lecturaIO, solicitudSTDIN->tamanio);                          
+                        log_debug(kernel->logger, "STDIN recibió %u bytes para PID: %d", solicitudSTDIN->tamanio, pid);                            pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                         }
                         pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                         sem_post(&sem_recibiLecuraDeIO);

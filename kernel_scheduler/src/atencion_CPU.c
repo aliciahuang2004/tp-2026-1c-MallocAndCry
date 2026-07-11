@@ -102,6 +102,7 @@ void* atender_cpu(void* arg){
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
+                log_info(kernel->logger, "## (<%d>) - Desalojado por fin de quantum", pidSolicitaSyscall);
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por fin de quantum - Pasando el proceso a Ready...", cpu_emisora->id_cpu, pidSolicitaSyscall);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
