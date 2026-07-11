@@ -149,7 +149,8 @@ extern sem_t sem_recibiEscrituraDeKM;
 // extern sem_procesoCreado;
 extern sem_t sem_suspension_ok;
 extern sem_t sem_procesoFinalizado;
-extern sem_t sem_hayProcesosEnExec;
+// extern sem_t sem_hayProcesosEnExec;
+extern sem_t sem_procesoDesalojadoPrioridad;
 
 extern t_dictionary* diccionario_mutex;
 extern pthread_mutex_t mutex_diccionario;

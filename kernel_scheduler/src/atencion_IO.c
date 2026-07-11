@@ -73,15 +73,17 @@ void* atender_io(void* arg) {
                                 pcbSuspendiendo->ioCompletadaEnTransito = true;
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
-                                pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+                                pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(-1);
+                                
                             }
                         } else {
-                            pasarProcesoBlockaReady(pid);
                             log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
                             log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
+                            pasarProcesoBlockaReady(pid);
+                            
                         }
                         free(solicitud);
                         liberarIO(tipoIO);
@@ -104,15 +106,15 @@ void* atender_io(void* arg) {
                                 pcbSuspendiendo->ioCompletadaEnTransito = true;
                                 log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
                             } else {
-                                pasarProcesoBlockSuspAReadySusp(pid);
-                                solicitarDesuspenderProceso(-1);
                                 log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
                                 log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+                                pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(-1);
                             }
                         } else {
-                            pasarProcesoBlockaReady(pid);
                             log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
                             log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
+                            pasarProcesoBlockaReady(pid);
                         }
                         liberarIO(tipoIO);
                         break;

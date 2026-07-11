@@ -391,7 +391,8 @@ void finalizarSemaforos(){
     sem_destroy(&sem_recibiEscrituraDeKM);
     sem_destroy(&sem_suspension_ok);
     // sem_init(&sem_desuspension_ok, 0, 0);
-    sem_destroy(&sem_hayProcesosEnExec);
+    // sem_destroy(&sem_hayProcesosEnExec);
+    sem_destroy(&sem_procesoDesalojadoPrioridad);
 
     dictionary_destroy_and_destroy_elements(diccionario_mutex,NULL);
     pthread_mutex_destroy(&mutex_diccionario);

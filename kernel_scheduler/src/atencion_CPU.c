@@ -102,13 +102,14 @@ void* atender_cpu(void* arg){
                 break;
             }
             case PROCESO_DESALOJADO_QUANTUM:{
-                log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por fin de quantum - Pasando el proceso a Ready...", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu_emisora->pidEjecutando);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;
             }
             case PROCESO_DESALOJADO_PRIORIDAD:{
                 log_debug(kernel->logger, "CPU: %d - Desalojo al PID: %d - Por proceso con prioridad más alta", cpu_emisora->id_cpu, pidSolicitaSyscall);
+                sem_post(&sem_procesoDesalojadoPrioridad);
                 pasarProcesoExecAReady(pidSolicitaSyscall);
                 liberarCPU(cpu_emisora);
                 break;

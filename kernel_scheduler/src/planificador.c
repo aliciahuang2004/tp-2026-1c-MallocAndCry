@@ -33,7 +33,8 @@ sem_t sem_recibiLecuraDeKM;
 sem_t sem_recibiEscrituraDeKM;
 sem_t sem_suspension_ok;
 sem_t sem_procesoFinalizado;
-sem_t sem_hayProcesosEnExec;
+// sem_t sem_hayProcesosEnExec;
+sem_t sem_procesoDesalojadoPrioridad;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -92,7 +93,8 @@ void inicializarSemaforos(){
     sem_init(&sem_recibiEscrituraDeKM,0,0);
     sem_init(&sem_suspension_ok, 0, 0);
     sem_init(&sem_procesoFinalizado, 0, 0);
-    sem_init(&sem_hayProcesosEnExec,0,0);
+    // sem_init(&sem_hayProcesosEnExec,0,0);
+    sem_init(&sem_procesoDesalojadoPrioridad,0,0);
 
     diccionario_mutex = dictionary_create();
     pthread_mutex_init(&mutex_diccionario, NULL);
@@ -195,7 +197,7 @@ void pasarProcesoReadyAExec(){
         pthread_detach(hiloQuantum);
     }
 
-    sem_post(&sem_hayProcesosEnExec);
+    // sem_post(&sem_hayProcesosEnExec);
 }
 
 t_pcb* elegirPorFIFO(){
@@ -326,7 +328,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
     switch (motivo){
     case PROCESO_DESALOJADO_QUANTUM:
-        log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu->pidEjecutando);
+        log_debug(kernel->logger, "Notificando desalojo por fin de quantum a cpu:%d - ejecutando pid:%d", cpu->id_cpu,cpu->pidEjecutando);
         break;
     case PROCESO_DESALOJADO_PRIORIDAD:
         t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,&mutex_EXEC);
@@ -334,6 +336,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
             log_debug(kernel->logger, "Desalojo por prioridad ignorado: CPU %d ya no tiene el proceso en EXEC", cpu->id_cpu);
             break;
         }
+        sem_wait(&sem_procesoDesalojadoPrioridad);
         log_info(kernel->logger,"## (<%d>) Prioridad: <%d> - Desalojado por cola más prioritaria por el proceso <%d> con prioridad <%d>",pcbEnExec->pid, pcbEnExec->prioridad, pcbOtroProceso->pid,pcbOtroProceso->prioridad);
         break;
     default:
@@ -348,7 +351,7 @@ void* monitorPrioridades(void* arg){
             int nuevaPrioridad = -1;
             sem_wait(&sem_readyPrioridad);
             while(buscarCPULibre() == NULL){
-                sem_wait(&sem_hayProcesosEnExec);
+                // sem_wait(&sem_hayProcesosEnExec);
                 pcbExecMenorPrioridad = buscarMenorPrioridad();
                 if(pcbExecMenorPrioridad == NULL){
                     break;
@@ -382,12 +385,11 @@ t_pcb* buscarMenorPrioridad() {
 
     while(!queue_is_empty(colaEXEC)) {
         t_pcb* pcb = queue_pop(colaEXEC);
-        queue_push(colaAux, pcb);
-
         if(pcb->prioridad > minPrioridad) {
             minPrioridad = pcb->prioridad;
             pcbMenor = pcb;
         }
+        queue_push(colaAux, pcb);
     }
 
     while(!queue_is_empty(colaAux)) {
@@ -402,9 +404,12 @@ t_pcb* buscarMenorPrioridad() {
 
 int procesoMasPrioritario(int prioridadActual){
     for(int i = 0; i < prioridadActual; i++) {
+        pthread_mutex_lock(&mutex_READY[i]);
         if(!queue_is_empty(colasREADY[i])) {
+            pthread_mutex_unlock(&mutex_READY[i]);
             return i;
         }
+        pthread_mutex_unlock(&mutex_READY[i]);
     }
     return -1;
 }
@@ -648,9 +653,10 @@ void pasarProcesoBlockABlockSusp(int pid){
 
     if (ioQuedoPendiente) {
         log_debug(kernel->logger, "## (<%d>) IO había finalizado durante la suspensión, disparando desuspensión diferida", pid);
+        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
         pasarProcesoBlockSuspAReadySusp(pid);
         solicitarDesuspenderProceso(pid);
-        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+        
     }
 }
 

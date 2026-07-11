@@ -585,16 +585,16 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
                 log_debug(kernel->logger, "## (<%d>) IO (STDIN) finalizó pero la suspensión en KM sigue en curso, se difiere", solicitud->pidSolicitaSyscall);
             } else {
                 pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
                 pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
                 solicitarDesuspenderProceso(-1);
-                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
             }
-        }    log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+        }    // VER PORQUE REPITE ESTA LINEA: log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
             
     } else {
-        pasarProcesoBlockaReady(solicitud->pidSolicitaSyscall);
         log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", solicitud->pidSolicitaSyscall);
         log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", solicitud->pidSolicitaSyscall);
+        pasarProcesoBlockaReady(solicitud->pidSolicitaSyscall);
     }
     free(ioSolicitud);
 }
