@@ -40,15 +40,15 @@ void consumir_hueco(t_hueco* hueco, uint32_t tamano) {//revisar que hace esta fu
 
 }
 
-t_hueco* buscar_hueco(uint32_t tamano,t_kernel_memory* km,t_log* logger) {
+t_hueco* buscar_hueco(uint32_t tamano,t_kernel_memory* km,t_log* logger,int pid, int id_segmento) {
 
     if(strcmp(km->allocation_strategy, "BEST") == 0)
-        return buscar_hueco_best_fit(tamano,km,logger);
+        return buscar_hueco_best_fit(tamano,km,logger,pid,id_segmento);
 
-    return buscar_hueco_worst_fit(tamano,km,logger);
+    return buscar_hueco_worst_fit(tamano,km,logger,pid,id_segmento);
 }
 
-t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logger) {
+t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logger,int pid, int id_segmento) {
     t_hueco* mejor = NULL;
     uint32_t total_huecos = 0;
 
@@ -68,7 +68,7 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logge
         log_warning(logger, "BEST FIT no encontro hueco");
         if (total_huecos >= tamano) {
             log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
-            avisar_compactacion(km,logger);
+            Avisar_Compactacion_Ks(km,logger,tamano,pid,id_segmento);
         } else {
             log_warning(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
         }
@@ -76,7 +76,7 @@ t_hueco* buscar_hueco_best_fit(uint32_t tamano,t_kernel_memory* km, t_log* logge
     return mejor;
 }
 
-t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logger) {
+t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logger,int pid, int id_segmento) {
     t_hueco* peor = NULL;
     uint32_t total_huecos = 0;
 
@@ -96,7 +96,7 @@ t_hueco* buscar_hueco_worst_fit(uint32_t tamano,t_kernel_memory* km ,t_log* logg
         log_warning(logger, "WORST FIT no encontro hueco");
         if (total_huecos >= tamano) {
             log_debug(logger, "Hay %u bytes libres no contiguos - Se requiere compactación", total_huecos);
-            avisar_compactacion(km,logger);
+            Avisar_Compactacion_Ks(km,logger,tamano,pid,id_segmento);
         } else {
             log_warning(logger, "No hay memoria suficiente. Disponible: %u bytes, Requerido: %u bytes", total_huecos, tamano);
             //ver "qué hacer" cuando no hay espacio disponible (SEGUN  ISSUE NO VA A PASAR QUE NO HAYA ESPACIO DISPONIBLE PARA CREAR UN SEGMENTO)

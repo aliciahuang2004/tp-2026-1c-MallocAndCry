@@ -4,14 +4,23 @@
 #include "huecos.h"
 #include "memory_stick.h"
 #include "conexiones.h"
-
+#include "segmentos.h"
+//queda para ver desuspension de procesos en case DESUSPENSION_DE_PROCESO
 void avisar_compactacion(t_kernel_memory* km, t_log* logger) {
     log_debug(logger, "## Solicitando compactación al Kernel Scheduler");
     t_paquete* aviso = crear_paquete(INICIAR_COMPACTACION, crear_buffer());
     enviar_paquete(aviso, km->socket_kernel_scheduler, logger);
     eliminar_paquete(aviso);
 }
-
+void Avisar_Compactacion_Ks(t_kernel_memory* km, t_log* logger,uint32_t tamano,int pid, int id_segmento) {
+    log_debug(logger, "## Solicitando compactación al Kernel Scheduler");
+    t_paquete* aviso = crear_paquete(INICIAR_COMPACTACION, crear_buffer());
+    agregar_a_paquete(aviso, &pid, sizeof(int));
+    agregar_a_paquete(aviso, &id_segmento, sizeof(int));
+    agregar_a_paquete(aviso, &tamano, sizeof(uint32_t));
+    enviar_paquete(aviso, km->socket_kernel_scheduler, logger);
+    eliminar_paquete(aviso);
+}
 bool ordenar_por_base_global(void* a, void* b) {
     t_segmento* seg_a = (t_segmento*)a;
     t_segmento* seg_b = (t_segmento*)b;
@@ -104,7 +113,7 @@ void loguear_tablas_segmentos(t_log* logger)
     pthread_mutex_unlock(&mutex_procesos);
 }
 
-int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
+int iniciar_compactacion(t_log* logger,t_kernel_memory* km,int pid, int id_segmento, uint32_t tamano) {
     log_debug(logger, "== [COMPACTACIÓN] Solicitud de inicio de compactación recibida ==");
     log_debug(logger, "=== ANTES DE COMPACTAR ===");
     loguear_tablas_segmentos(logger);
@@ -159,7 +168,8 @@ int iniciar_compactacion(t_log* logger,t_kernel_memory* km) {
     }
 
     list_destroy(lista_ordenada);
-
+    //en caso de compactar es con el objetivo de crear el segmento sino ni se compactaría
+    crear_segmento(pid, id_segmento,tamano,logger,km);
     log_debug(logger, "== [COMPACTACIÓN] Proceso finalizado de forma exitosa ==");
     log_debug(logger, "=== DESPUÉS DE COMPACTAR ===");
     loguear_tablas_segmentos(logger);

@@ -28,7 +28,7 @@ void loguear_tabla_segmentos(t_list* tabla,t_log* logger)
 int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_kernel_memory* km) {
     pthread_mutex_lock(&mutex_huecos);
 
-    t_hueco* hueco = buscar_hueco(tamano,km,logger);//deberia modificar esta funcion para cuando memoria=0,retorne null,se envie CREACION_DE_SEG_ERROR_SIN_MEMORIA?
+    t_hueco* hueco = buscar_hueco(tamano,km,logger,pid,id_segmento);//deberia modificar esta funcion para cuando memoria=0,retorne null,se envie CREACION_DE_SEG_ERROR_SIN_MEMORIA?
 
     if(hueco == NULL) {
         //cuando no hay memoria disponible porque no hay ms conectados viene acá

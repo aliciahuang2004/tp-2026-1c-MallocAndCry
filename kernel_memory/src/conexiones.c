@@ -520,7 +520,7 @@ void* atender_conexion(void* arg) {
                     
                     if(en_swap) {
                         pthread_mutex_lock(&mutex_huecos);
-                        t_hueco* hueco = buscar_hueco(tam_seg, km, logger);
+                        t_hueco* hueco = buscar_hueco(tam_seg, km, logger,pid_a_desuspender,pid_a_desuspender);//momentaneo
                         
                         if(hueco == NULL) {
                             necesita_compactar = true;
@@ -596,7 +596,7 @@ void* atender_conexion(void* arg) {
                 }
                 
                 if (necesita_compactar) {
-                    avisar_compactacion(km, logger);
+                    avisar_compactacion(km, logger);//acá avisa para decir que no puede desuspender? porque para desuspender no hay que compactar,simplemente se desuspende si no implica compactacion
                 } else {
                     pthread_mutex_lock(&mutex_procesos);
                     proceso->suspendido = false;
@@ -678,7 +678,10 @@ void* atender_conexion(void* arg) {
             break;
             case CPUS_DESALOJADAS:
             {//deberia agregar dos mutex lock de procesos en todo este case? para evitar que cpu me solicite ctx o me envie ctx
-                int rta = iniciar_compactacion(logger,km);
+                int pid = *(int*) list_get(paquete, 1);
+                int id_seg = *(int*) list_get(paquete, 2);
+                uint32_t tamano = *(uint32_t *)list_get(paquete, 3);
+                int rta = iniciar_compactacion(logger,km,pid,id_seg,tamano);
                 usleep(km->compaction_delay * 1000); 
                  if(rta == 1) {
                     t_paquete* resp = crear_paquete(COMPACTACION_OK, crear_buffer());

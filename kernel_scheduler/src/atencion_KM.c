@@ -89,13 +89,17 @@ void* atender_kernel_memory(void* arg) {
             }
             case INICIAR_COMPACTACION:{
                 log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento");
-                
+                int pid = *(int*) list_get(paquete, 1);
+                int id_seg = *(int*) list_get(paquete, 2);
+                uint32_t tamano = *(uint32_t *)list_get(paquete, 3);
                 kernel->noHayCompactacion = false; // para el planificador
                 pedirDesalojoPorCompactacion();
                 chequearCPUsDesalojadas();
                 
                 t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
-
+                agregar_a_paquete(paquete, &pid, sizeof(int));
+                agregar_a_paquete(paquete, &id_seg, sizeof(int));
+                agregar_a_paquete(paquete, &tamano, sizeof(uint32_t));
                 enviarPaqueteAKM(paquete);
             
                 eliminar_paquete(paquete);
