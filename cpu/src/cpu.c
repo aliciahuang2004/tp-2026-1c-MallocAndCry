@@ -256,9 +256,13 @@ void liberar_cpu(t_cpu *cpu)
         terminar_programa(cpu->logger, cpu->config);
     if (cpu->id)
         free(cpu->id);
-    if (cpu->sockets_memory_sticks)
-        list_destroy(cpu->sockets_memory_sticks);
+   if (cpu->sockets_memory_sticks)
+        list_destroy_and_destroy_elements(cpu->sockets_memory_sticks, free);
+        
     pthread_mutex_destroy(&cpu->mutex_lista_ms);
+    
+    sem_destroy(&sem_contexto_recibido);
+    sem_destroy(&sem_instruccion_recibida);
     free(cpu);
 }
 
@@ -323,9 +327,6 @@ t_contexto *solicitar_contexto(t_cpu *cpu, int pid)
     int id_cpu_int = atoi(cpu->id);
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete, &id_cpu_int, sizeof(int));
-
-    agregar_a_paquete(paquete, &pid, sizeof(int));
-    agregar_a_paquete(paquete, &cpu->id, sizeof(int)); //**********AGREGUÉ PARA QUE KM LOGUEE ID DE LA CPU QUE LE SOLICITÓ CTX
     enviar_paquete(paquete, cpu->socket_kernel_memory, cpu->logger);
     eliminar_paquete(paquete);
 
