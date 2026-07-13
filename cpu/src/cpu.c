@@ -272,7 +272,7 @@ void esperar_proceso(t_cpu *cpu)
 
         if (!paquete)
         {
-            log_error(cpu->logger, "Error al recibir paquete del Kernel Scheduler. Desconectado.");
+            log_error(cpu->logger, "Kernel Scheduler se desconectó.");
             break;
         }
         int cod_op = *(int *)list_get(paquete, 0); // el cod_op siempre va a estar en la posicion 0, devuelve un puntero void*, por eso el casteo a int* y luego se desreferencia para obtener el valor
@@ -397,7 +397,7 @@ void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
     {
 
         // FETCH
-        log_info(cpu->logger, "##PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+        log_info(cpu->logger, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
 
         char *cadena_leida = fetch_instruccion(cpu, contexto);
 
