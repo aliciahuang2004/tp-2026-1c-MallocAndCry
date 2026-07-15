@@ -39,6 +39,12 @@ typedef struct {
     t_kernel_memory* km;
 } t_hacerConnect;
 
+typedef struct {
+    uint32_t base;
+    uint32_t tamanio;
+    t_segmento* segmento;
+} t_reserva;
+
 //GLOBALES
 extern t_dictionary* procesos;
 
