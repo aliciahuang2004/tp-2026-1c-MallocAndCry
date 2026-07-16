@@ -578,6 +578,122 @@ void remover_cpu_conectada(int socket_cliente, t_log* logger) {
     pthread_mutex_unlock(&mutex_cpus_conectadas);
 }
 
+int buscar_bloques_libres_swap(int bloques_necesarios) {
+    int bloque_inicio = -1;
+    pthread_mutex_lock(&mutex_huecos); 
+    
+    for (int bit = 0; bit <= bitarray_get_max_bit(bitmap_swap) - bloques_necesarios; bit++) {
+        bool hay_espacio = true;
+        for (int b = 0; b < bloques_necesarios; b++) {
+            if (bitarray_test_bit(bitmap_swap, bit + b)) {
+                hay_espacio = false; 
+                break;
+            }
+        }
+        if (hay_espacio) { 
+            bloque_inicio = bit;
+            // marcar los bloques como ocupados
+            for(int b = 0; b < bloques_necesarios; b++) {
+                bitarray_set_bit(bitmap_swap, bloque_inicio + b);
+            }
+            break; 
+        }
+    }
+    pthread_mutex_unlock(&mutex_huecos);
+    return bloque_inicio;
+}
+
+bool escribir_segmento_en_swap(void* contenido, uint32_t tam_seg, int bloque_inicio, int bloques_necesarios, t_log* logger) {
+    int offset = 0;
+    bool exito = true;
+    
+    for (int b = 0; b < bloques_necesarios; b++) {
+        int bytes_restantes = tam_seg - offset;
+        int tamano_a_escribir;
+
+   if (bytes_restantes > swap_block_size) {
+    tamano_a_escribir = swap_block_size;
+   } else {
+    tamano_a_escribir = bytes_restantes;
+   }
+
+        t_paquete* p_swap = crear_paquete(ESCRITURA_SWAP, crear_buffer());
+        int bloque_actual = bloque_inicio + b;
+        agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
+        agregar_a_paquete(p_swap, contenido + offset, tamano_a_escribir);
+        
+        pthread_mutex_lock(&mutex_socket_swap);
+        if (enviar_paquete(p_swap, km_socket_swap, logger) == -1) {
+            pthread_mutex_unlock(&mutex_socket_swap);
+            eliminar_paquete(p_swap);
+            exito = false;
+            break;
+        }
+        eliminar_paquete(p_swap);
+        
+        t_list* resp_swap = recibir_paquete(km_socket_swap);
+        pthread_mutex_unlock(&mutex_socket_swap);
+        
+        if (resp_swap == NULL) {
+            exito = false;
+            break;
+        }
+        list_destroy_and_destroy_elements(resp_swap, free);
+        offset += tamano_a_escribir;
+    }
+    return exito;
+}
+
+void* leer_segmento_de_swap(int bloque_inicio, int bloques_necesarios, uint32_t tam_seg, t_log* logger) {
+    void* contenido_recuperado = malloc(tam_seg);
+    int offset = 0;
+    
+    for(int b = 0; b < bloques_necesarios; b++) {
+        int bytes_restantes = tam_seg - offset;
+        int tamano_a_leer;
+
+    if (bytes_restantes > swap_block_size) {
+    tamano_a_leer = swap_block_size;
+    } else {
+    tamano_a_leer = bytes_restantes;
+    }
+
+        t_paquete* p_swap = crear_paquete(LECTURA_SWAP, crear_buffer());
+        int bloque_actual = bloque_inicio + b;
+        agregar_a_paquete(p_swap, &bloque_actual, sizeof(int));
+        
+        pthread_mutex_lock(&mutex_socket_swap);
+        if (enviar_paquete(p_swap, km_socket_swap, logger) == -1) {
+            pthread_mutex_unlock(&mutex_socket_swap);
+            eliminar_paquete(p_swap);
+            free(contenido_recuperado);
+            return NULL;
+        }
+        eliminar_paquete(p_swap);
+        
+        t_list* resp_swap = recibir_paquete(km_socket_swap);
+        pthread_mutex_unlock(&mutex_socket_swap);
+        
+        if (resp_swap == NULL) {
+            free(contenido_recuperado);
+            return NULL;
+        }
+        
+        void* datos_recibidos = list_get(resp_swap, 1);
+        if (datos_recibidos != NULL) {
+            memcpy(contenido_recuperado + offset, datos_recibidos, tamano_a_leer);
+            
+            // Liberamos el bit en el bitmap para reutilizarlo
+            pthread_mutex_lock(&mutex_huecos);
+            bitarray_clean_bit(bitmap_swap, bloque_actual); 
+            pthread_mutex_unlock(&mutex_huecos);
+        }
+        list_destroy_and_destroy_elements(resp_swap, free);
+        offset += tamano_a_leer;
+    }
+    return contenido_recuperado;
+}
+
 int suspender_proceso_memoria(int pid, t_kernel_memory* km, t_log* logger) {
     pthread_mutex_lock(&mutex_procesos);
     t_proceso* proceso = buscar_proceso(pid);
