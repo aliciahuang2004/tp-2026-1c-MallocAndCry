@@ -21,7 +21,7 @@ MEMORY_DELAY=1500
 comandos:
 ./bin/kernel_memory kernel_memory.config
 ./bin/kernel_scheduler kernel_scheduler.config PLANI_PRE_0.prc
-./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc 
+./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc //compacta,deberia?
 ./bin/io io.config SLEEP
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
@@ -29,6 +29,8 @@ comandos:
 ./bin/cpu cpu.config 1
 ./bin/memory_stick ms1.config 256 1
 
+cuando se conecte un ms,expando el ultimo hueco con el tamaño de este nuevo ms
+si el ultimo hueco ya esta ocupado,el nuevo ms solo se convierte en un nuevo hueco 
 para (((PRUEBA PLANIFICACION CORTO PLAZO)))----
 
 kernel_scheduler :

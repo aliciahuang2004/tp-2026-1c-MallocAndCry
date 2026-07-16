@@ -153,19 +153,17 @@ void* atender_conexion(void* arg) {
                     break;
                 }
                 
-                t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);//acá obtengo base y limite global del ms
+                t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);
                 loguear_huecos(logger);
-                agregar_posicion_ms(r,ms_id,logger);//ACA GUARDA BASE Y LIMITE GLOBAL DE LOS MS,FALTA PROBAR.ACA KM BUSCA A QUÉ MS ENVIAR PETICION DE ESCRITURA,LECTURA
+                agregar_posicion_ms(r,ms_id,logger);
                 avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,r); 
 
                 pthread_mutex_lock(&mutex_memoria_total);
                 log_debug(logger, "Memoria total disponible: %u bytes", memoria_total);
-                uint32_t copia_memoria_total = memoria_total;
                 pthread_mutex_unlock(&mutex_memoria_total);
 
                 //AVISO A KS QUE HAY MAS MEMORIA DISPONIBLE:
                 t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
-                agregar_a_paquete(respuesta,&copia_memoria_total,sizeof(uint32_t));
                 enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
                 eliminar_paquete(respuesta);
                  break;                      
@@ -268,7 +266,7 @@ void* atender_conexion(void* arg) {
                         agregar_a_paquete(respuesta, &seg->id_segmento,    sizeof(int));
                         agregar_a_paquete(respuesta, &seg->base_global,    sizeof(uint32_t));
                         agregar_a_paquete(respuesta, &seg->limite_global,  sizeof(uint32_t));
-                        agregar_a_paquete(respuesta, &seg->memory_stick_id,sizeof(int));//sirve a cpu cuando ejecuta mov out ,mov in?
+                        agregar_a_paquete(respuesta, &seg->memory_stick_id,sizeof(int));
                     }
                     enviar_paquete(respuesta, socket_cliente, logger);
                     eliminar_paquete(respuesta);
@@ -344,20 +342,10 @@ void* atender_conexion(void* arg) {
             {
                 int pid_recibido = *(int *)list_get(paquete, 1);
                 eliminar_proceso(pid_recibido,km,logger);
-            /*DESCOMENTAR CUANDO KS ESPERE ESTE PROTOCOLO*******
-                if(respuesta == 1) {
-                   t_paquete* resp = crear_paquete(FIN_PROC_OK, crear_buffer());
-                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
-                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(resp);
 
-                } else {
-                    t_paquete* resp = crear_paquete(FIN_PROC_ERROR, crear_buffer());
-                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
-                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(resp);
-                }
-             */
+                t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
+                enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
+                eliminar_paquete(respuesta);
             }
             break;
 
@@ -422,11 +410,9 @@ void* atender_conexion(void* arg) {
                 int respuesta = eliminar_segmento(pid_recibido,id_seg_recibido,logger);
 
                 if(respuesta == 1) {
-                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_OK, crear_buffer());
-                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
-                    agregar_a_paquete(resp,&id_seg_recibido, sizeof(int));
-                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(resp);
+                t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
+                enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
+                eliminar_paquete(respuesta);
 
                 } else {
                     t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_ERROR, crear_buffer());
@@ -442,21 +428,13 @@ void* atender_conexion(void* arg) {
                 int id_seg_recibido = *(int *)list_get(paquete, 2);
                 uint32_t tamano_recibido = *(int *)list_get(paquete, 3);
 
-                int respuesta =  crear_segmento(pid_recibido, id_seg_recibido,tamano_recibido,logger,km); //EL TIPO DE DATO DE TAMAÑO DEBERIA SER INT O UINT32_T?
+                crear_segmento(pid_recibido, id_seg_recibido,tamano_recibido,logger,km);
 
-                if(respuesta == 1) {
-                    t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_OK, crear_buffer());
-                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
-                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(resp);
+                t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_OK, crear_buffer());
+                agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                eliminar_paquete(resp);
 
-                } else {
-                    //cuando no hay ms conectados por lo que no se pudo crear el segmento?
-                    t_paquete* resp = crear_paquete(CREACION_DE_SEGMENTO_ERROR, crear_buffer());
-                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
-                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
-                    eliminar_paquete(resp);
-                }
              }
              break;
             case ACTUALIZAR_CONTEXTO:
@@ -479,7 +457,7 @@ void* atender_conexion(void* arg) {
             }
             break;
             case CPUS_DESALOJADAS:
-            {//deberia agregar dos mutex lock de procesos en todo este case? para evitar que cpu me solicite ctx o me envie ctx
+            {
                 int pid = *(int*) list_get(paquete, 1);
                 int id_seg = *(int*) list_get(paquete, 2);
                 uint32_t tamano = *(uint32_t *)list_get(paquete, 3);
@@ -489,6 +467,10 @@ void* atender_conexion(void* arg) {
                     t_paquete* resp = crear_paquete(COMPACTACION_OK, crear_buffer());
                     enviar_paquete(resp, km->socket_kernel_scheduler, logger);
                     eliminar_paquete(resp);
+
+                    t_paquete *respuesta = crear_paquete(AUMENTO_DE_MEMORIA, crear_buffer());
+                    enviar_paquete(respuesta,km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(respuesta);
 
                 } else {
                     t_paquete* resp = crear_paquete(COMPACTACION_ERROR, crear_buffer());
@@ -535,9 +517,8 @@ void* atender_conexion(void* arg) {
                 pthread_mutex_unlock(&ms->mutex_socket);
                 break;
             }
-             case ERROR_OPERACION://ms lo envia cuando falla stdin o stdout 
-            {   //no deberia ir aca?
-                //qué hago si falla? creo que no se considera en las pruebas
+             case ERROR_OPERACION:
+            {  
                 log_info(logger, "[Socket %d] Error en operación de lectura/escritura en Memory Stick recibida", socket_cliente);
             }
             break;
