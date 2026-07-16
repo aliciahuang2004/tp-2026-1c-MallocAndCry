@@ -53,6 +53,7 @@ t_registros* solicitud_contexto(int pid, t_list** tabla_out)
     }
 
     t_registros* copia = malloc(sizeof(t_registros));
+    memset(copia, 0, sizeof(t_registros));
     memcpy(copia,&(proceso->contexto->registros),sizeof(t_registros));
 
     // Copiar la tabla de segmentos
@@ -60,6 +61,7 @@ t_registros* solicitud_contexto(int pid, t_list** tabla_out)
     for (int i = 0; i < list_size(proceso->contexto->tabla_segmentos); i++) {
         t_segmento* seg_original = list_get(proceso->contexto->tabla_segmentos, i);
         t_segmento* seg_copia    = malloc(sizeof(t_segmento));
+        memset(seg_copia, 0, sizeof(t_segmento));
         memcpy(seg_copia, seg_original, sizeof(t_segmento));
         list_add(tabla_copia, seg_copia);
     }

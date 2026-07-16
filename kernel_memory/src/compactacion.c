@@ -27,26 +27,7 @@ bool ordenar_por_base_global(void* a, void* b) {
 
     return seg_a->base_global < seg_b->base_global;
 }
-/*
-t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
-    
-    pthread_mutex_lock(&mutex_tabla_contextos);
-    t_list* lista_contextos_temp = dictionary_elements(tabla_contextos);
-    pthread_mutex_unlock(&mutex_tabla_contextos);
 
-    for (int i = 0; i < list_size(lista_contextos_temp); i++) {
-        t_contexto* contexto = list_get(lista_contextos_temp, i);
-
-        for (int j = 0; j < list_size(contexto->tabla_segmentos); j++) {
-            t_segmento* seg = list_get(contexto->tabla_segmentos, j);
-
-            if (seg->en_swap) {
-                continue;
-            }
-            list_add(lista_segmentos_temp, seg);
-        }
-    }
-*/
     t_list* obtener_lista_temp_ord(t_list* lista_segmentos_temp, t_log* logger) {
     // 1. Acceder al diccionario de procesos (Fuente de verdad)
     pthread_mutex_lock(&mutex_procesos);

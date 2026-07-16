@@ -51,7 +51,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
     }
 
     t_segmento* segmento = malloc(sizeof(t_segmento));
-
+    memset(segmento, 0, sizeof(t_segmento));
     segmento->id_segmento = id_segmento;
     segmento->base_global = base_segmento;
     segmento->tamanio = tamano;

@@ -11,7 +11,7 @@ t_resultado_hueco agregar_hueco_libre(uint32_t base, uint32_t tamano)
     t_hueco* hueco = malloc(sizeof(t_hueco));
     if(hueco == NULL)
         return resultado;
-
+    memset(hueco, 0, sizeof(t_hueco));
     hueco->base   = base;
     hueco->tamano = tamano;
     hueco->limite = base + tamano - 1;

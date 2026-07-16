@@ -157,7 +157,7 @@ int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
 
         int cod_op = *(int*)list_get(respuesta, 0);
         if (cod_op == DATOS_LEIDOS) {
-            void* datos = list_get(respuesta, 1);
+            void* datos = list_get(respuesta, 2);
             // Copiamos este pedacito en el offset correspondiente del buffer unificado
             memcpy(buffer_lectura + frag->offset, datos, frag->tamano);
         }

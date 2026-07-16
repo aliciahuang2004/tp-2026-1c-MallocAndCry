@@ -46,7 +46,7 @@ void agregar_cpu_conectada(int cpu_id, int socket_cliente)
     t_cpu* cpu = malloc(sizeof(t_cpu));
     if(cpu == NULL)
         return;
-
+    memset(cpu, 0, sizeof(t_cpu));
     cpu->id     = cpu_id;
     cpu->socket = socket_cliente;
 
@@ -415,6 +415,27 @@ void* atender_conexion(void* arg) {
             }
             break;
         }
+            case ELIMINACION_DE_SEGMENTO: 
+            {
+                int pid_recibido = *(int *)list_get(paquete, 1);
+                int id_seg_recibido = *(int *)list_get(paquete, 2);
+                int respuesta = eliminar_segmento(pid_recibido,id_seg_recibido,logger);
+
+                if(respuesta == 1) {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_OK, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    agregar_a_paquete(resp,&id_seg_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+
+                } else {
+                    t_paquete* resp = crear_paquete(ELIMINACION_DE_SEG_ERROR, crear_buffer());
+                    agregar_a_paquete(resp,&pid_recibido, sizeof(int));
+                    enviar_paquete(resp, km->socket_kernel_scheduler, logger);
+                    eliminar_paquete(resp);
+                }
+            }
+            break;
             case CREACION_DE_SEGMENTO: 
             {   
                 int pid_recibido = *(int *)list_get(paquete, 1);

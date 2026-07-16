@@ -47,6 +47,86 @@ COMPACTION_DELAY=30000
 
 memory_stick :
 MEMORY_DELAY=1500
+
+comandos:
+./bin/kernel_memory kernel_memory.config
+./bin/kernel_scheduler kernel_scheduler.config PCP.prc
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms1.config 256 1
+--------------------------------
+PARA "PRUEBA MEMORIA" 
+ primero con BEST (sin compactacion),luego segunda prueba con WORST (hay compactacion)
+
+kernel memory:
+SEGMENT_MAX_SIZE=128
+ALLOCATION_STRATEGY=BEST
+INSTRUCTION_DELAY=500
+COMPACTION_DELAY=30000
+
+kernel scheduler 
+LOG_LEVEL=INFO
+PLANIFICATION_ALGORITHM=RR
+RR_QUANTUM=1500
+QUEUE_PREEMPTION=TRUE
+SUSPENSION_TIMEOUT=35000
+
+
+comandos:
+./bin/kernel_memory kernel_memory.config
+./bin/kernel_scheduler kernel_scheduler.config PLANI_MEM.prc 
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 32 2
+./bin/memory_stick ms3.config 64 3
+./bin/memory_stick ms4.config 128 4
+---------------------
+ESCRITURA
+DF  - valor
+48  -  64
+16  -  65
+0  -  66
+112  - 67
+144 - 68
+208 - 69
+48  -  70
+LECTURA
+DF - VALOR
+16  - 65
+0  - 66
+112 - 67
+144 - 68
+208 - 69
+48 - 70
+----------------
+WORST
+escritura
+df  - valor
+48 -  65
+176 -  66
+192  - 67
+144 -  68
+32 -  69
+176 - 70
+----
+lectura 
+0 - 65
+64 - 66
+80 - 67
+112 - 68
+32 - 69
+176 - 70
+
+
+
+
 --------------------------------------------------------------------------------
 make clean && make
 
@@ -83,7 +163,7 @@ gdb --args ./bin/cpu cpu1.config 1
 
 ------------------------------------------------------------------------------km
 valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
-
+valgrind --leak-check=full --track-origins=yes ./bin/kernel_memory kernel_memory.config
 ./bin/kernel_memory kernel_memory.config 
 gdb --args ./bin/kernel_memory kernel_memory.config 
 run

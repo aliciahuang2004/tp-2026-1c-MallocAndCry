@@ -25,12 +25,13 @@ int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     pthread_mutex_unlock(&mutex_lista_ms);
     return 1;
 }
+
 int guardar_ms_conexion(int id, char* ip, char* puerto) {
     t_ms_conexion* ms_conexion = malloc(sizeof(t_ms_conexion));
 
     if (ms_conexion == NULL)
         return 0;
-
+    memset(ms_conexion, 0, sizeof(t_ms_conexion));
     ms_conexion->id = id;
     ms_conexion->ip = strdup(ip);
     ms_conexion->puerto = strdup(puerto);
@@ -218,6 +219,7 @@ t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, uint32_t tamano_conten
         }
 
         t_fragmento_memoria* frag = malloc(sizeof(t_fragmento_memoria));
+        memset(frag, 0, sizeof(t_fragmento_memoria)); 
         frag->ms_id = ms_encontrado->id;
         frag->dir_local = dir_local;
         frag->tamano = bytes_a_copiar;
@@ -289,7 +291,7 @@ void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total,
         log_error(logger, "Error: No se pudo asignar memoria para el buffer de lectura");
         return NULL;
     }
-
+    memset(buffer_completo, 0, tamano_total);
     int offset_armado = 0;
 
     for (int i = 0; i < list_size(lista_fragmentos); i++) {
