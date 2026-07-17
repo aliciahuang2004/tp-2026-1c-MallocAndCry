@@ -1,85 +1,39 @@
 PARA "PRUEBA BASE" :
-configuraciones:
-
-kernel_scheduler :
-LOG_LEVEL=INFO
-PLANIFICATION_ALGORITHM=CMN
-QUEUES_ALGORITHMS=[FIFO,RR,FIFO,RR]
-RR_QUANTUM=600
-QUEUE_PREEMPTION=TRUE
-SUSPENSION_TIMEOUT=60000
-
-kernel_memory :
-SEGMENT_MAX_SIZE=128
-ALLOCATION_STRATEGY=BEST
-INSTRUCTION_DELAY=250
-COMPACTION_DELAY=30000
-
-memory stick :
-MEMORY_DELAY=1500
 
 comandos:
-./bin/kernel_memory kernel_memory.config
-./bin/kernel_scheduler kernel_scheduler.config PLANI_PRE_0.prc
-./bin/kernel_scheduler kernel_scheduler.config MEMORIA_PRE_0.prc //compacta,deberia?
+./bin/kernel_memory km_pb.config
+./bin/kernel_scheduler ks_pb.config PLANI_PRE_0.prc
+./bin/kernel_scheduler ks_pb.config MEMORIA_PRE_0.prc //compacta,deberia?
 ./bin/io io.config SLEEP
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
 ./bin/swap swap.config 
 ./bin/cpu cpu.config 1
-./bin/memory_stick ms1.config 256 1
+./bin/memory_stick ms2.config 256 1
 
 cuando se conecte un ms,expando el ultimo hueco con el tamaño de este nuevo ms
 si el ultimo hueco ya esta ocupado,el nuevo ms solo se convierte en un nuevo hueco 
+
 para (((PRUEBA PLANIFICACION CORTO PLAZO)))----
 
-kernel_scheduler :
-LOG_LEVEL=INFO
-PLANIFICATION_ALGORITHM=CMN
-QUEUES_ALGORITHMS=[FIFO,RR,RR,RR]
-RR_QUANTUM=1500
-QUEUE_PREEMPTION=TRUE
-SUSPENSION_TIMEOUT=35000
-
-kernel_memory :
-SEGMENT_MAX_SIZE=256
-ALLOCATION_STRATEGY=BEST
-INSTRUCTION_DELAY=500
-COMPACTION_DELAY=30000
-
-memory_stick :
-MEMORY_DELAY=1500
 
 comandos:
-./bin/kernel_memory kernel_memory.config
-./bin/kernel_scheduler kernel_scheduler.config PCP.prc
+./bin/kernel_memory km_cp.config
+./bin/kernel_scheduler ks_pb.config PCP.prc
 ./bin/io io.config SLEEP
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
 ./bin/swap swap.config 
 ./bin/cpu cpu.config 1
-./bin/memory_stick ms1.config 256 1
+./bin/memory_stick ms2.config 256 1
 --------------------------------
 PARA "PRUEBA MEMORIA" 
  primero con BEST (sin compactacion),luego segunda prueba con WORST (hay compactacion)
 
-kernel memory:
-SEGMENT_MAX_SIZE=128
-ALLOCATION_STRATEGY=BEST
-INSTRUCTION_DELAY=500
-COMPACTION_DELAY=30000
-
-kernel scheduler 
-LOG_LEVEL=INFO
-PLANIFICATION_ALGORITHM=RR
-RR_QUANTUM=1500
-QUEUE_PREEMPTION=TRUE
-SUSPENSION_TIMEOUT=35000
-
-
 comandos:
-./bin/kernel_memory kernel_memory.config
-./bin/kernel_scheduler kernel_scheduler.config PLANI_MEM.prc 
+./bin/kernel_memory km_pmB.config
+./bin/kernel_memory km_pmW.config
+./bin/kernel_scheduler ks_mem.config PLANI_MEM.prc 
 ./bin/io io.config SLEEP
 ./bin/io io.config STDOUT
 ./bin/io io.config STDIN
@@ -90,48 +44,26 @@ comandos:
 ./bin/memory_stick ms3.config 64 3
 ./bin/memory_stick ms4.config 128 4
 ---------------------
-ESCRITURA
-DF  - valor
-48  -  64
-16  -  65
-0  -  66
-112  - 67
-144 - 68
-208 - 69
-48  -  70
-LECTURA
-DF - VALOR
-16  - 65
-0  - 66
-112 - 67
-144 - 68
-208 - 69
-48 - 70
-----------------
-WORST
-escritura
-df  - valor
-48 -  65
-176 -  66
-192  - 67
-144 -  68
-32 -  69
-176 - 70
-----
-lectura 
-0 - 65
-64 - 66
-80 - 67
-112 - 68
-32 - 69
-176 - 70
 
-
-
+-----------------------
+PARA PRUEBA MEDIANO PLAZO:
+(con modificaciones en PMP.prc y config de issue si funciona)
+comandos:
+./bin/kernel_memory kernel_memory.config
+./bin/kernel_scheduler kernel_scheduler.config PMP.prc 
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms5.config 16 1
+./bin/memory_stick ms2.config 16 2
+./bin/memory_stick ms3.config 32 3
+./bin/memory_stick ms4.config 64 4
 
 --------------------------------------------------------------------------------
 make clean && make
-
+rm -f */*.log */bin/*.log /tmp/tp_so_swapfile.bin
 killall -9 kernel_memory cpu kernel_scheduler memory_stick 2>/dev/null
 
 SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
@@ -166,6 +98,7 @@ gdb --args ./bin/cpu cpu1.config 1
 ------------------------------------------------------------------------------km
 valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
 valgrind --leak-check=full --track-origins=yes ./bin/kernel_memory kernel_memory.config
+valgrind --leak-check=full --show-leak-kinds=all ./bin/kernel_memory kernel_memory.config
 ./bin/kernel_memory kernel_memory.config 
 gdb --args ./bin/kernel_memory kernel_memory.config 
 run

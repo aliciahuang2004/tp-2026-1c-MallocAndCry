@@ -123,12 +123,13 @@ void manejar_desconexion_memory_stick(t_ms_info* ms, t_kernel_memory* km, t_log*
     eliminar_paquete(aviso);
 }
 
-void agregar_posicion_ms(t_resultado_hueco r,int ms_id,t_log* logger){
+void agregar_posicion_ms(uint32_t base,uint32_t tamano,int ms_id,t_log* logger){
     t_ms_pos* ms_pos = malloc(sizeof(t_ms_pos));
     memset(ms_pos, 0, sizeof(t_ms_pos));
+    uint32_t lim = base + tamano - 1 ;
     ms_pos->id = ms_id;
-    ms_pos->base_global = r.base;
-    ms_pos->limite_global = r.limite;
+    ms_pos->base_global = base;
+    ms_pos->limite_global = lim;
     pthread_mutex_lock(&mutex_lista_dir_global_ms);
     list_add(lista_dir_global_ms, ms_pos);
     //****************log temp************
