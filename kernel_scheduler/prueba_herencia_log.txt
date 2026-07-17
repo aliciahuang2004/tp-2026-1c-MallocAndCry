@@ -1,0 +1,491 @@
+[INFO] 20:56:56:139 KERNEL_SCHEDULER/(5616:5616): ## Conectado a Kernel Memory
+[INFO] 20:56:56:140 KERNEL_SCHEDULER/(5616:5616): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 20:56:56:141 KERNEL_SCHEDULER/(5616:5618): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:04:852 KERNEL_SCHEDULER/(5616:5634): ## CPU 1 Conectada
+[INFO] 20:57:04:854 KERNEL_SCHEDULER/(5616:5619): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:05:868 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó syscall: <MUTEX_CREATE>
+[INFO] 20:57:05:868 KERNEL_SCHEDULER/(5616:5635): ## Mutex MUTEX_1 creado correctamente
+[INFO] 20:57:06:380 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó syscall: <MUTEX_CREATE>
+[INFO] 20:57:06:380 KERNEL_SCHEDULER/(5616:5635): ## Mutex MUTEX_2 creado correctamente
+[INFO] 20:57:06:889 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó syscall: <MUTEX_CREATE>
+[INFO] 20:57:06:889 KERNEL_SCHEDULER/(5616:5635): ## Mutex MUTEX_3 creado correctamente
+[INFO] 20:57:08:413 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_1.prc (prioridad 5)
+[INFO] 20:57:08:414 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:08:419 KERNEL_SCHEDULER/(5616:5618): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:08:927 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_2.prc (prioridad 4)
+[INFO] 20:57:08:930 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:08:933 KERNEL_SCHEDULER/(5616:5618): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:09:443 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:09:445 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:09:447 KERNEL_SCHEDULER/(5616:5635): ## (<0>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:10:463 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:10:465 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:10:466 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:11:485 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:57:11:487 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Toma el Mutex <MUTEX_1>
+[INFO] 20:57:14:014 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:14:014 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:19:452 KERNEL_SCHEDULER/(5616:5633): ## (<0>) finalizó IO y pasa a READY
+[INFO] 20:57:19:452 KERNEL_SCHEDULER/(5616:5633): ## (<0>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:57:19:452 KERNEL_SCHEDULER/(5616:5619): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:19:961 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_3.prc (prioridad 3)
+[INFO] 20:57:19:961 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:19:965 KERNEL_SCHEDULER/(5616:5618): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:20:474 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_3.prc (prioridad 3)
+[INFO] 20:57:20:474 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:20:480 KERNEL_SCHEDULER/(5616:5618): ## (<4>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:20:987 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_3.prc (prioridad 3)
+[INFO] 20:57:20:987 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:20:990 KERNEL_SCHEDULER/(5616:5618): ## (<5>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:21:500 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_3.prc (prioridad 3)
+[INFO] 20:57:21:500 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:21:505 KERNEL_SCHEDULER/(5616:5618): ## (<6>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:22:009 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_3.prc (prioridad 3)
+[INFO] 20:57:22:009 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:22:011 KERNEL_SCHEDULER/(5616:5618): ## (<7>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:23:022 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_4.prc (prioridad 2)
+[INFO] 20:57:23:022 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:23:025 KERNEL_SCHEDULER/(5616:5618): ## (<8>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:24:544 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó Syscall: <INIT_PROC> PHP_5.prc (prioridad 1)
+[INFO] 20:57:24:544 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Se crea el proceso - Estado: NEW
+[INFO] 20:57:24:548 KERNEL_SCHEDULER/(5616:5618): ## (<9>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:57:25:055 KERNEL_SCHEDULER/(5616:5635): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 20:57:25:055 KERNEL_SCHEDULER/(5616:5635): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:57:25:055 KERNEL_SCHEDULER/(5616:5635): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 20:57:25:056 KERNEL_SCHEDULER/(5616:5619): ## (<9>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:26:067 KERNEL_SCHEDULER/(5616:5635): ## (<9>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:26:067 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:26:068 KERNEL_SCHEDULER/(5616:5619): ## (<8>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:27:085 KERNEL_SCHEDULER/(5616:5635): ## (<8>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:27:086 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:27:086 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:28:098 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:28:098 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:28:099 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:29:116 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:29:116 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:29:116 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:29:454 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:57:29:455 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:57:30:139 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:30:139 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:30:140 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:30:457 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 20:57:30:457 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:57:31:152 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:31:153 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:31:153 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:32:161 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:32:161 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:32:162 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:32:669 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:57:32:670 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Toma el Mutex <MUTEX_2>
+[INFO] 20:57:35:203 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:35:203 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:57:35:203 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:57:39:253 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 20:57:39:253 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:58:00:463 KERNEL_SCHEDULER/(5616:5633): ## (<9>) finalizó IO y pasa a READY
+[INFO] 20:58:00:463 KERNEL_SCHEDULER/(5616:5633): ## (<9>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:58:00:463 KERNEL_SCHEDULER/(5616:5619): ## (<9>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:58:00:977 KERNEL_SCHEDULER/(5616:5635): ## (<9>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:58:00:977 KERNEL_SCHEDULER/(5616:5635): ## <2> Cambio de prioridad: <4> - <1>
+[INFO] 20:58:00:977 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:58:20:471 KERNEL_SCHEDULER/(5616:5633): ## (<8>) finalizó IO y pasa a READY
+[INFO] 20:58:20:471 KERNEL_SCHEDULER/(5616:5633): ## (<8>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:58:20:471 KERNEL_SCHEDULER/(5616:5619): ## (<8>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:58:20:982 KERNEL_SCHEDULER/(5616:5635): ## (<8>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:58:20:982 KERNEL_SCHEDULER/(5616:5635): ## <1> Cambio de prioridad: <5> - <2>
+[INFO] 20:58:20:982 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:58:35:474 KERNEL_SCHEDULER/(5616:5633): ## (<3>) finalizó IO y pasa a READY
+[INFO] 20:58:35:475 KERNEL_SCHEDULER/(5616:5633): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:58:35:475 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:58:37:001 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:58:37:002 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Toma el Mutex <MUTEX_3>
+[INFO] 20:58:38:016 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <SLEEP>
+[INFO] 20:58:38:016 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:58:50:477 KERNEL_SCHEDULER/(5616:5633): ## (<4>) finalizó IO y pasa a READY
+[INFO] 20:58:50:478 KERNEL_SCHEDULER/(5616:5633): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:58:50:478 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:58:51:999 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:58:52:000 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:05:482 KERNEL_SCHEDULER/(5616:5633): ## (<5>) finalizó IO y pasa a READY
+[INFO] 20:59:05:482 KERNEL_SCHEDULER/(5616:5633): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:05:482 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:06:997 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:59:06:997 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:20:484 KERNEL_SCHEDULER/(5616:5633): ## (<6>) finalizó IO y pasa a READY
+[INFO] 20:59:20:484 KERNEL_SCHEDULER/(5616:5633): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:20:484 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:22:006 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 20:59:22:007 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:35:487 KERNEL_SCHEDULER/(5616:5633): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:59:35:487 KERNEL_SCHEDULER/(5616:5633): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:35:487 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:36:493 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:59:36:493 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:36:501 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:59:36:501 KERNEL_SCHEDULER/(5616:5620): ## (<7>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <2> con prioridad <1>
+[INFO] 20:59:36:501 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:37:495 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 20:59:37:495 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:38:504 KERNEL_SCHEDULER/(5616:5633): ## (<3>) finalizó IO y pasa a READY
+[INFO] 20:59:38:505 KERNEL_SCHEDULER/(5616:5633): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:40:545 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:59:40:545 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:40:546 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:41:549 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:59:41:549 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:41:558 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:59:41:558 KERNEL_SCHEDULER/(5616:5620): ## (<1>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <2> con prioridad <1>
+[INFO] 20:59:41:558 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:45:595 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:59:45:595 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:45:596 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:46:601 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:59:46:601 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:46:609 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:59:46:609 KERNEL_SCHEDULER/(5616:5620): ## (<1>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <2> con prioridad <1>
+[INFO] 20:59:46:609 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:50:652 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:59:50:652 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:50:653 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:51:656 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:59:51:656 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:51:666 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:59:51:666 KERNEL_SCHEDULER/(5616:5620): ## (<1>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <2> con prioridad <1>
+[INFO] 20:59:51:666 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:55:705 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 20:59:55:705 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:55:705 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:56:709 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 20:59:56:709 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:59:56:717 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 20:59:56:717 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:59:56:717 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:59:57:720 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 20:59:57:720 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:00:753 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:00:754 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:00:754 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:01:758 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:01:758 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:04:785 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:04:785 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:04:785 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:05:787 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:05:787 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:08:819 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:08:820 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:08:820 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:09:823 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:09:823 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:12:860 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:12:860 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:12:860 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:13:865 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:13:865 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:16:915 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:16:915 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:16:915 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:17:921 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:17:922 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:20:950 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:20:950 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:20:950 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:21:953 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:21:954 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:24:991 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:24:991 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:24:991 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:25:995 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:25:995 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:29:031 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:29:032 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:29:032 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:30:038 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:30:038 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:33:070 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:33:070 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:33:070 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:34:077 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:34:077 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:37:121 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:37:121 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:37:121 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:38:127 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:38:128 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:41:159 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:41:160 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:41:160 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:42:165 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:42:165 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:45:189 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:45:190 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:45:190 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:46:196 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:46:196 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:49:232 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:49:232 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:49:232 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:50:240 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:50:240 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:53:278 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:53:278 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:53:278 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:54:286 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:00:54:286 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:00:57:326 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:00:57:326 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:00:57:327 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:00:58:334 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:00:58:335 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:01:379 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:01:379 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:01:380 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:02:392 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:02:392 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:05:435 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:05:435 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:05:435 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:06:439 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:06:439 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:09:478 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:09:478 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:09:479 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:10:484 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:10:484 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:13:530 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:13:530 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:13:530 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:14:538 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:14:538 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:17:578 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:17:578 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:17:578 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:18:584 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:18:584 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:21:628 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:21:628 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:21:628 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:22:638 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:22:638 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:25:675 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:25:675 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:25:675 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:26:682 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:26:682 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:29:709 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:29:709 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:29:710 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:30:716 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:30:716 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:33:767 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:33:767 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:33:767 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:34:775 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:34:776 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:37:819 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:37:819 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:37:820 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:38:824 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:38:824 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:41:856 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:41:856 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:41:856 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:42:858 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:42:858 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:45:904 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:45:904 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:45:904 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:46:910 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:46:910 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:49:967 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:49:967 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:49:968 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:50:972 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:50:972 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:54:019 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:54:020 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:54:020 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:55:025 KERNEL_SCHEDULER/(5616:5633): ## (<2>) finalizó IO y pasa a READY
+[INFO] 21:01:55:026 KERNEL_SCHEDULER/(5616:5633): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:01:58:054 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:01:58:054 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:01:58:054 KERNEL_SCHEDULER/(5616:5619): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:01:59:063 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:01:59:063 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:00:590 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:00:590 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Libera el Mutex <MUTEX_2>
+[INFO] 21:02:00:590 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:00:590 KERNEL_SCHEDULER/(5616:5635): ## <2> Cambio de prioridad: <1> - <4>
+[INFO] 21:02:01:106 KERNEL_SCHEDULER/(5616:5635): ## (<2>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 21:02:01:106 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:02:01:106 KERNEL_SCHEDULER/(5616:5635): ## (<2>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 21:02:01:106 KERNEL_SCHEDULER/(5616:5619): ## (<9>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:02:129 KERNEL_SCHEDULER/(5616:5635): ## (<9>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:02:129 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Libera el Mutex <MUTEX_2>
+[INFO] 21:02:02:639 KERNEL_SCHEDULER/(5616:5635): ## (<9>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 21:02:02:639 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:02:640 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:02:02:641 KERNEL_SCHEDULER/(5616:5635): ## (<9>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 21:02:06:695 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:06:696 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:06:696 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:07:209 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:07:209 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:07:209 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:07:700 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:02:07:700 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:08:226 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:08:226 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:08:226 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:09:744 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:09:744 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:09:744 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:13:775 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:13:775 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:13:775 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:14:779 KERNEL_SCHEDULER/(5616:5633): ## (<1>) finalizó IO y pasa a READY
+[INFO] 21:02:14:779 KERNEL_SCHEDULER/(5616:5633): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:14:786 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:14:787 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:14:787 KERNEL_SCHEDULER/(5616:5619): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:15:789 KERNEL_SCHEDULER/(5616:5633): ## (<4>) finalizó IO y pasa a READY
+[INFO] 21:02:15:789 KERNEL_SCHEDULER/(5616:5633): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:17:317 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:17:317 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Libera el Mutex <MUTEX_1>
+[INFO] 21:02:17:318 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:17:318 KERNEL_SCHEDULER/(5616:5635): ## <1> Cambio de prioridad: <2> - <5>
+[INFO] 21:02:17:827 KERNEL_SCHEDULER/(5616:5635): ## (<1>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 21:02:17:827 KERNEL_SCHEDULER/(5616:5619): ## (<8>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:17:827 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:02:17:827 KERNEL_SCHEDULER/(5616:5635): ## (<1>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 21:02:18:841 KERNEL_SCHEDULER/(5616:5635): ## (<8>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:18:841 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Libera el Mutex <MUTEX_1>
+[INFO] 21:02:19:353 KERNEL_SCHEDULER/(5616:5635): ## (<8>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 21:02:19:353 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:19:354 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:02:19:355 KERNEL_SCHEDULER/(5616:5635): ## (<8>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 21:02:20:371 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:20:371 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:20:372 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:21:897 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:21:897 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:21:897 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:22:915 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:22:915 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:23:917 KERNEL_SCHEDULER/(5616:5633): ## (<5>) finalizó IO y pasa a READY
+[INFO] 21:02:23:917 KERNEL_SCHEDULER/(5616:5633): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:23:918 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:24:934 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:24:934 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:24:934 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:26:462 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:26:463 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:26:463 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:27:477 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:27:477 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:28:480 KERNEL_SCHEDULER/(5616:5633): ## (<6>) finalizó IO y pasa a READY
+[INFO] 21:02:28:480 KERNEL_SCHEDULER/(5616:5633): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:28:480 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:29:499 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:29:499 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:29:499 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:31:021 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:31:021 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:31:021 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:32:034 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:32:034 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:33:040 KERNEL_SCHEDULER/(5616:5633): ## (<7>) finalizó IO y pasa a READY
+[INFO] 21:02:33:040 KERNEL_SCHEDULER/(5616:5633): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:33:041 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:34:055 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:34:056 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:34:056 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:35:575 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:35:575 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:35:575 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:36:592 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:36:592 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:37:598 KERNEL_SCHEDULER/(5616:5633): ## (<3>) finalizó IO y pasa a READY
+[INFO] 21:02:37:598 KERNEL_SCHEDULER/(5616:5633): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:37:599 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:38:614 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:38:614 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:38:614 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:40:138 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:40:138 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:40:139 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:41:155 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:41:155 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:42:164 KERNEL_SCHEDULER/(5616:5633): ## (<4>) finalizó IO y pasa a READY
+[INFO] 21:02:42:164 KERNEL_SCHEDULER/(5616:5633): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:42:164 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:43:186 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:43:186 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:43:186 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:44:715 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:44:715 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:44:715 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:45:734 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:45:735 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:46:744 KERNEL_SCHEDULER/(5616:5633): ## (<5>) finalizó IO y pasa a READY
+[INFO] 21:02:46:744 KERNEL_SCHEDULER/(5616:5633): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:46:744 KERNEL_SCHEDULER/(5616:5619): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:47:756 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:47:756 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:47:756 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:49:270 KERNEL_SCHEDULER/(5616:5635): ## (<5>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:49:270 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:49:270 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:50:284 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:50:284 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:51:287 KERNEL_SCHEDULER/(5616:5633): ## (<6>) finalizó IO y pasa a READY
+[INFO] 21:02:51:287 KERNEL_SCHEDULER/(5616:5633): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:51:288 KERNEL_SCHEDULER/(5616:5619): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:52:295 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:52:296 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:52:296 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:53:812 KERNEL_SCHEDULER/(5616:5635): ## (<6>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:53:812 KERNEL_SCHEDULER/(5616:5635): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:53:812 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:54:826 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:54:826 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:55:837 KERNEL_SCHEDULER/(5616:5633): ## (<7>) finalizó IO y pasa a READY
+[INFO] 21:02:55:837 KERNEL_SCHEDULER/(5616:5633): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:55:837 KERNEL_SCHEDULER/(5616:5619): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:56:855 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:02:56:855 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Libera el Mutex <MUTEX_3>
+[INFO] 21:02:56:855 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:02:58:375 KERNEL_SCHEDULER/(5616:5635): ## (<7>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:02:58:375 KERNEL_SCHEDULER/(5616:5635): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:02:58:376 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:02:59:405 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <SLEEP>
+[INFO] 21:02:59:405 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:03:00:408 KERNEL_SCHEDULER/(5616:5633): ## (<3>) finalizó IO y pasa a READY
+[INFO] 21:03:00:409 KERNEL_SCHEDULER/(5616:5633): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:03:00:409 KERNEL_SCHEDULER/(5616:5619): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:03:01:427 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:03:01:427 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Libera el Mutex <MUTEX_3>
+[INFO] 21:03:01:427 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:03:02:956 KERNEL_SCHEDULER/(5616:5635): ## (<3>) - Solicitó syscall: <MUTEX_LOCK>
+[INFO] 21:03:02:956 KERNEL_SCHEDULER/(5616:5635): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:03:02:956 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:03:03:977 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <SLEEP>
+[INFO] 21:03:03:978 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 21:03:04:982 KERNEL_SCHEDULER/(5616:5633): ## (<4>) finalizó IO y pasa a READY
+[INFO] 21:03:04:982 KERNEL_SCHEDULER/(5616:5633): ## (<4>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 21:03:04:982 KERNEL_SCHEDULER/(5616:5619): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:03:06:008 KERNEL_SCHEDULER/(5616:5635): ## (<4>) - Solicitó syscall: <MUTEX_UNLOCK>
+[INFO] 21:03:06:008 KERNEL_SCHEDULER/(5616:5635): ## (<4>) Libera el Mutex <MUTEX_3>
+[INFO] 21:03:06:009 KERNEL_SCHEDULER/(5616:5635): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[ERROR] 21:03:06:408 KERNEL_SCHEDULER/(5616:5618): Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual
+[INFO] 21:03:06:408 KERNEL_SCHEDULER/(5616:5618): ## (<6>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:03:06:408 KERNEL_SCHEDULER/(5616:5618): ## (<6>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>
+[ERROR] 21:03:06:408 KERNEL_SCHEDULER/(5616:5618): Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual
+[INFO] 21:03:06:409 KERNEL_SCHEDULER/(5616:5618): ## (<7>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:03:06:409 KERNEL_SCHEDULER/(5616:5618): ## (<7>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>
+[ERROR] 21:03:06:409 KERNEL_SCHEDULER/(5616:5618): Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual
+[INFO] 21:03:06:409 KERNEL_SCHEDULER/(5616:5618): ## (<3>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:03:06:409 KERNEL_SCHEDULER/(5616:5618): ## (<3>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>

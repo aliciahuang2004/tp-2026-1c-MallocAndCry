@@ -1,0 +1,233 @@
+[INFO] 19:12:20:238 CPU/(2156:2156): ## CPU conectada a Kernel Scheduler en 127.0.0.1:9002
+[INFO] 19:12:20:239 CPU/(2156:2156): ## CPU conectada a Kernel Memory en 192.168.3.107:9001
+[INFO] 19:12:20:240 CPU/(2156:2156): ## CPU 1 inicializada y conectada exitosamente
+[INFO] 19:12:20:240 CPU/(2156:2156): CPU esperando procesos del Kernel Scheduler
+[INFO] 19:12:20:240 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 0
+[DEBUG] 19:12:20:240 CPU/(2156:2156): Solicitando contexto para PID 0 a Kernel Memory
+[INFO] 19:12:20:240 CPU/(2156:2159): Hilo de escucha de Kernel Memory iniciado.
+[INFO] 19:12:20:242 CPU/(2156:2159): Aviso de KM: Nuevo Memory Stick 1 disponible en 127.0.0.1:9003
+[ERROR] 19:12:20:242 CPU/(2156:2159): Error al conectar: Connection refused
+[INFO] 19:12:20:243 CPU/(2156:2159): Tamaño de segmento recibido: 128
+[DEBUG] 19:12:20:243 CPU/(2156:2156): Contexto recibido: PID=0, PC=0
+[INFO] 19:12:20:243 CPU/(2156:2156): Contexto recibido para PID 0
+[INFO] 19:12:20:243 CPU/(2156:2156): ## PID: 0 - FETCH - Program Counter: 0
+[INFO] 19:12:20:496 CPU/(2156:2156): ## PID: 0 - Ejecutando: INIT_PROC MEMORIA_PRE_3.prc 1
+[INFO] 19:12:20:497 CPU/(2156:2156): Delegando SYSCALL INIT_PROC al Kernel Scheduler
+[DEBUG] 19:12:20:497 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 0
+[DEBUG] 19:12:20:498 CPU/(2156:2156): Enviando paquete de SYSCALL INIT_PROC al Kernel Scheduler
+[INFO] 19:12:20:501 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 0
+[DEBUG] 19:12:20:501 CPU/(2156:2156): Solicitando contexto para PID 0 a Kernel Memory
+[DEBUG] 19:12:20:502 CPU/(2156:2156): Contexto recibido: PID=0, PC=1
+[INFO] 19:12:20:502 CPU/(2156:2156): Contexto recibido para PID 0
+[INFO] 19:12:20:502 CPU/(2156:2156): ## PID: 0 - FETCH - Program Counter: 1
+[INFO] 19:12:20:754 CPU/(2156:2156): ## PID: 0 - Ejecutando: SLEEP 10000
+[INFO] 19:12:20:755 CPU/(2156:2156): Delegando SYSCALL SLEEP al Kernel Scheduler
+[DEBUG] 19:12:20:755 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 0
+[DEBUG] 19:12:20:756 CPU/(2156:2156): Enviando paquete de SYSCALL SLEEP al Kernel Scheduler
+[INFO] 19:12:20:760 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 1
+[DEBUG] 19:12:20:760 CPU/(2156:2156): Solicitando contexto para PID 1 a Kernel Memory
+[DEBUG] 19:12:20:761 CPU/(2156:2156): Contexto recibido: PID=1, PC=0
+[INFO] 19:12:20:761 CPU/(2156:2156): Contexto recibido para PID 1
+[INFO] 19:12:20:761 CPU/(2156:2156): ## PID: 1 - FETCH - Program Counter: 0
+[INFO] 19:12:21:016 CPU/(2156:2156): ## PID: 1 - Ejecutando: SET EAX 0
+[DEBUG] 19:12:21:017 CPU/(2156:2156): Ejecutando SET: Asignando valor 0 al registro EAX
+[INFO] 19:12:21:017 CPU/(2156:2156): ## PID: 1 - FETCH - Program Counter: 1
+[INFO] 19:12:21:270 CPU/(2156:2156): ## PID: 1 - Ejecutando: SET DI 16
+[DEBUG] 19:12:21:270 CPU/(2156:2156): Ejecutando SET: Asignando valor 16 al registro DI
+[INFO] 19:12:21:271 CPU/(2156:2156): ## PID: 1 - FETCH - Program Counter: 2
+[INFO] 19:12:21:523 CPU/(2156:2156): ## PID: 1 - Ejecutando: MEM_ALLOC 0 16
+[INFO] 19:12:21:524 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:21:525 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 1
+[DEBUG] 19:12:21:526 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:21:530 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 1
+[DEBUG] 19:12:21:530 CPU/(2156:2156): Solicitando contexto para PID 1 a Kernel Memory
+[DEBUG] 19:12:21:531 CPU/(2156:2156): Contexto recibido: PID=1, PC=3
+[INFO] 19:12:21:531 CPU/(2156:2156): Contexto recibido para PID 1
+[INFO] 19:12:21:531 CPU/(2156:2156): ## PID: 1 - FETCH - Program Counter: 3
+[INFO] 19:12:21:784 CPU/(2156:2156): ## PID: 1 - Ejecutando: MOV_OUT EAX
+[ERROR] 19:12:21:784 CPU/(2156:2156): SEG_FAULT: Desplazamiento (16) + Tamaño (4) excede el límite (16) del Segmento 0
+[WARNING] 19:12:21:785 CPU/(2156:2156): Segmentation Fault detectado en PID 1. Abortando.
+[DEBUG] 19:12:21:785 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 1
+[INFO] 19:12:21:789 CPU/(2156:2156): Proceso 1 devuelto al Kernel Scheduler (Motivo: 47)
+[INFO] 19:12:30:761 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 0
+[DEBUG] 19:12:30:761 CPU/(2156:2156): Solicitando contexto para PID 0 a Kernel Memory
+[DEBUG] 19:12:30:763 CPU/(2156:2156): Contexto recibido: PID=0, PC=2
+[INFO] 19:12:30:763 CPU/(2156:2156): Contexto recibido para PID 0
+[INFO] 19:12:30:763 CPU/(2156:2156): ## PID: 0 - FETCH - Program Counter: 2
+[INFO] 19:12:31:016 CPU/(2156:2156): ## PID: 0 - Ejecutando: INIT_PROC MEMORIA_PRE_1.prc 2
+[INFO] 19:12:31:016 CPU/(2156:2156): Delegando SYSCALL INIT_PROC al Kernel Scheduler
+[DEBUG] 19:12:31:016 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 0
+[DEBUG] 19:12:31:016 CPU/(2156:2156): Enviando paquete de SYSCALL INIT_PROC al Kernel Scheduler
+[INFO] 19:12:31:017 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 0
+[DEBUG] 19:12:31:017 CPU/(2156:2156): Solicitando contexto para PID 0 a Kernel Memory
+[DEBUG] 19:12:31:020 CPU/(2156:2156): Contexto recibido: PID=0, PC=3
+[INFO] 19:12:31:020 CPU/(2156:2156): Contexto recibido para PID 0
+[INFO] 19:12:31:020 CPU/(2156:2156): ## PID: 0 - FETCH - Program Counter: 3
+[INFO] 19:12:31:274 CPU/(2156:2156): ## PID: 0 - Ejecutando: INIT_PROC MEMORIA_PRE_2.prc 2
+[INFO] 19:12:31:275 CPU/(2156:2156): Delegando SYSCALL INIT_PROC al Kernel Scheduler
+[DEBUG] 19:12:31:275 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 0
+[DEBUG] 19:12:31:277 CPU/(2156:2156): Enviando paquete de SYSCALL INIT_PROC al Kernel Scheduler
+[INFO] 19:12:31:282 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 0
+[DEBUG] 19:12:31:283 CPU/(2156:2156): Solicitando contexto para PID 0 a Kernel Memory
+[DEBUG] 19:12:31:285 CPU/(2156:2156): Contexto recibido: PID=0, PC=4
+[INFO] 19:12:31:285 CPU/(2156:2156): Contexto recibido para PID 0
+[INFO] 19:12:31:285 CPU/(2156:2156): ## PID: 0 - FETCH - Program Counter: 4
+[INFO] 19:12:31:538 CPU/(2156:2156): ## PID: 0 - Ejecutando: EXIT
+[INFO] 19:12:31:539 CPU/(2156:2156): Delegando SYSCALL EXIT al Kernel Scheduler
+[DEBUG] 19:12:31:540 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 0
+[DEBUG] 19:12:31:542 CPU/(2156:2156): Enviando paquete de SYSCALL EXIT al Kernel Scheduler
+[INFO] 19:12:31:546 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 2
+[DEBUG] 19:12:31:546 CPU/(2156:2156): Solicitando contexto para PID 2 a Kernel Memory
+[DEBUG] 19:12:31:548 CPU/(2156:2156): Contexto recibido: PID=2, PC=0
+[INFO] 19:12:31:548 CPU/(2156:2156): Contexto recibido para PID 2
+[INFO] 19:12:31:549 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 0
+[INFO] 19:12:31:801 CPU/(2156:2156): ## PID: 2 - Ejecutando: MEM_ALLOC 0 32
+[INFO] 19:12:31:802 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:31:802 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 2
+[DEBUG] 19:12:31:803 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:31:804 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 2
+[DEBUG] 19:12:31:804 CPU/(2156:2156): Solicitando contexto para PID 2 a Kernel Memory
+[DEBUG] 19:12:31:805 CPU/(2156:2156): Contexto recibido: PID=2, PC=1
+[INFO] 19:12:31:805 CPU/(2156:2156): Contexto recibido para PID 2
+[INFO] 19:12:31:805 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 1
+[INFO] 19:12:32:058 CPU/(2156:2156): ## PID: 2 - Ejecutando: MEM_ALLOC 1 32
+[INFO] 19:12:32:058 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:32:059 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 2
+[DEBUG] 19:12:32:059 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:32:062 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 2
+[DEBUG] 19:12:32:062 CPU/(2156:2156): Solicitando contexto para PID 2 a Kernel Memory
+[DEBUG] 19:12:32:064 CPU/(2156:2156): Contexto recibido: PID=2, PC=2
+[INFO] 19:12:32:064 CPU/(2156:2156): Contexto recibido para PID 2
+[INFO] 19:12:32:064 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 2
+[INFO] 19:12:32:316 CPU/(2156:2156): ## PID: 2 - Ejecutando: MEM_ALLOC 2 32
+[INFO] 19:12:32:317 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:32:317 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 2
+[DEBUG] 19:12:32:317 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:32:322 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 2
+[DEBUG] 19:12:32:322 CPU/(2156:2156): Solicitando contexto para PID 2 a Kernel Memory
+[DEBUG] 19:12:32:323 CPU/(2156:2156): Contexto recibido: PID=2, PC=3
+[INFO] 19:12:32:323 CPU/(2156:2156): Contexto recibido para PID 2
+[INFO] 19:12:32:323 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 3
+[INFO] 19:12:32:575 CPU/(2156:2156): ## PID: 2 - Ejecutando: MEM_ALLOC 3 32
+[INFO] 19:12:32:575 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:32:575 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 2
+[DEBUG] 19:12:32:576 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:32:579 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 2
+[DEBUG] 19:12:32:579 CPU/(2156:2156): Solicitando contexto para PID 2 a Kernel Memory
+[DEBUG] 19:12:32:581 CPU/(2156:2156): Contexto recibido: PID=2, PC=4
+[INFO] 19:12:32:581 CPU/(2156:2156): Contexto recibido para PID 2
+[INFO] 19:12:32:581 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 4
+[INFO] 19:12:32:834 CPU/(2156:2156): ## PID: 2 - Ejecutando: SET AX 10
+[DEBUG] 19:12:32:834 CPU/(2156:2156): Ejecutando SET: Asignando valor 10 al registro AX
+[INFO] 19:12:32:834 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 5
+[INFO] 19:12:33:087 CPU/(2156:2156): ## PID: 2 - Ejecutando: SET DI 0
+[DEBUG] 19:12:33:087 CPU/(2156:2156): Ejecutando SET: Asignando valor 0 al registro DI
+[INFO] 19:12:33:087 CPU/(2156:2156): ## PID: 2 - FETCH - Program Counter: 6
+[INFO] 19:12:33:342 CPU/(2156:2156): ## PID: 2 - Ejecutando: MOV_OUT AX
+[DEBUG] 19:12:33:343 CPU/(2156:2156): Traducción exitosa: Dir. Lógica 0 -> Dir. Física 16 (Segmento 0, Desplazamiento 0)
+[ERROR] 19:12:33:343 CPU/(2156:2156): No se encontró un Memory Stick para la dirección física  16
+[WARNING] 19:12:33:343 CPU/(2156:2156): Segmentation Fault detectado en PID 2. Abortando.
+[DEBUG] 19:12:33:343 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 2
+[INFO] 19:12:33:347 CPU/(2156:2156): Proceso 2 devuelto al Kernel Scheduler (Motivo: 47)
+[INFO] 19:12:33:348 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 3
+[DEBUG] 19:12:33:348 CPU/(2156:2156): Solicitando contexto para PID 3 a Kernel Memory
+[DEBUG] 19:12:33:350 CPU/(2156:2156): Contexto recibido: PID=3, PC=0
+[INFO] 19:12:33:350 CPU/(2156:2156): Contexto recibido para PID 3
+[INFO] 19:12:33:350 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 0
+[INFO] 19:12:33:603 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:33:603 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:33:604 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 1
+[INFO] 19:12:33:857 CPU/(2156:2156): ## PID: 3 - Ejecutando: MEM_ALLOC 0 64
+[INFO] 19:12:33:857 CPU/(2156:2156): Delegando SYSCALL MEM_ALLOC al Kernel Scheduler
+[DEBUG] 19:12:33:857 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 3
+[DEBUG] 19:12:33:858 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_ALLOC al Kernel Scheduler
+[INFO] 19:12:33:860 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 3
+[DEBUG] 19:12:33:860 CPU/(2156:2156): Solicitando contexto para PID 3 a Kernel Memory
+[DEBUG] 19:12:33:861 CPU/(2156:2156): Contexto recibido: PID=3, PC=2
+[INFO] 19:12:33:861 CPU/(2156:2156): Contexto recibido para PID 3
+[INFO] 19:12:33:862 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 2
+[INFO] 19:12:34:115 CPU/(2156:2156): ## PID: 3 - Ejecutando: SET AX 0
+[DEBUG] 19:12:34:115 CPU/(2156:2156): Ejecutando SET: Asignando valor 0 al registro AX
+[INFO] 19:12:34:116 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 3
+[INFO] 19:12:34:370 CPU/(2156:2156): ## PID: 3 - Ejecutando: SET BX 8
+[DEBUG] 19:12:34:371 CPU/(2156:2156): Ejecutando SET: Asignando valor 8 al registro BX
+[INFO] 19:12:34:371 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 4
+[INFO] 19:12:34:624 CPU/(2156:2156): ## PID: 3 - Ejecutando: STDIN AX BX
+[INFO] 19:12:34:624 CPU/(2156:2156): Delegando SYSCALL STDIN al Kernel Scheduler
+[DEBUG] 19:12:34:626 CPU/(2156:2156): Traducción exitosa: Dir. Lógica 0 -> Dir. Física 144 (Segmento 0, Desplazamiento 0)
+[DEBUG] 19:12:34:627 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 3
+[DEBUG] 19:12:34:627 CPU/(2156:2156): Enviando paquete de SYSCALL STDIN al Kernel Scheduler
+[INFO] 19:12:41:719 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 3
+[DEBUG] 19:12:41:719 CPU/(2156:2156): Solicitando contexto para PID 3 a Kernel Memory
+[DEBUG] 19:12:41:721 CPU/(2156:2156): Contexto recibido: PID=3, PC=5
+[INFO] 19:12:41:722 CPU/(2156:2156): Contexto recibido para PID 3
+[INFO] 19:12:41:722 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 5
+[INFO] 19:12:41:975 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:41:975 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:41:975 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 6
+[INFO] 19:12:42:228 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:42:228 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:42:228 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 7
+[INFO] 19:12:42:483 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:42:483 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:42:483 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 8
+[INFO] 19:12:42:737 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:42:737 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:42:738 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 9
+[INFO] 19:12:42:991 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:42:991 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:42:991 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 10
+[INFO] 19:12:43:244 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:43:244 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:43:244 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 11
+[INFO] 19:12:43:497 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:43:498 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:43:498 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 12
+[INFO] 19:12:43:751 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:43:751 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:43:751 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 13
+[INFO] 19:12:44:004 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:44:004 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:44:004 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 14
+[INFO] 19:12:44:256 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:44:256 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:44:256 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 15
+[INFO] 19:12:44:510 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:44:510 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:44:510 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 16
+[INFO] 19:12:44:764 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:44:764 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:44:764 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 17
+[INFO] 19:12:45:018 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:45:018 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:45:018 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 18
+[INFO] 19:12:45:273 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:45:273 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:45:274 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 19
+[INFO] 19:12:45:526 CPU/(2156:2156): ## PID: 3 - Ejecutando: NOOP
+[DEBUG] 19:12:45:526 CPU/(2156:2156): Ejecutando NOOP
+[INFO] 19:12:45:526 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 20
+[INFO] 19:12:45:780 CPU/(2156:2156): ## PID: 3 - Ejecutando: STDOUT AX BX
+[INFO] 19:12:45:781 CPU/(2156:2156): Delegando SYSCALL STDOUT al Kernel Scheduler
+[DEBUG] 19:12:45:781 CPU/(2156:2156): Traducción exitosa: Dir. Lógica 0 -> Dir. Física 144 (Segmento 0, Desplazamiento 0)
+[DEBUG] 19:12:45:781 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 3
+[DEBUG] 19:12:45:781 CPU/(2156:2156): Enviando paquete de SYSCALL STDOUT al Kernel Scheduler
+[INFO] 19:12:47:296 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 3
+[DEBUG] 19:12:47:296 CPU/(2156:2156): Solicitando contexto para PID 3 a Kernel Memory
+[DEBUG] 19:12:47:298 CPU/(2156:2156): Contexto recibido: PID=3, PC=21
+[INFO] 19:12:47:298 CPU/(2156:2156): Contexto recibido para PID 3
+[INFO] 19:12:47:298 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 21
+[INFO] 19:12:47:551 CPU/(2156:2156): ## PID: 3 - Ejecutando: MEM_FREE 0
+[INFO] 19:12:47:551 CPU/(2156:2156): Delegando SYSCALL MEM_FREE al Kernel Scheduler
+[DEBUG] 19:12:47:551 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 3
+[DEBUG] 19:12:47:551 CPU/(2156:2156): Enviando paquete de SYSCALL MEM_FREE al Kernel Scheduler
+[INFO] 19:12:47:553 CPU/(2156:2156): CPU recibió proceso a procesar con PID: 3
+[DEBUG] 19:12:47:553 CPU/(2156:2156): Solicitando contexto para PID 3 a Kernel Memory
+[DEBUG] 19:12:47:555 CPU/(2156:2156): Contexto recibido: PID=3, PC=22
+[INFO] 19:12:47:556 CPU/(2156:2156): Contexto recibido para PID 3
+[INFO] 19:12:47:556 CPU/(2156:2156): ## PID: 3 - FETCH - Program Counter: 22
+[INFO] 19:12:47:809 CPU/(2156:2156): ## PID: 3 - Ejecutando: EXIT
+[INFO] 19:12:47:810 CPU/(2156:2156): Delegando SYSCALL EXIT al Kernel Scheduler
+[DEBUG] 19:12:47:810 CPU/(2156:2156): Contexto actualizado enviado a Kernel Memory para PID 3
+[DEBUG] 19:12:47:811 CPU/(2156:2156): Enviando paquete de SYSCALL EXIT al Kernel Scheduler
+[ERROR] 19:12:47:818 CPU/(2156:2156): Kernel Scheduler se desconectó.

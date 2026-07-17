@@ -1,0 +1,260 @@
+[INFO] 18:19:25:193 KERNEL_SCHEDULER/(1707:1707): ## Conectado a Kernel Memory
+[INFO] 18:19:25:194 KERNEL_SCHEDULER/(1707:1707): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 18:19:25:198 KERNEL_SCHEDULER/(1707:1709): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:06:697 KERNEL_SCHEDULER/(1707:1722): ## CPU 1 Conectada
+[INFO] 18:21:06:697 KERNEL_SCHEDULER/(1707:1710): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:06:959 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_1.prc (prioridad 3)
+[INFO] 18:21:06:961 KERNEL_SCHEDULER/(1707:1723): ## (<1>) Se crea el proceso - Estado: NEW
+[INFO] 18:21:06:963 KERNEL_SCHEDULER/(1707:1709): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:07:223 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_1.prc (prioridad 3)
+[INFO] 18:21:07:224 KERNEL_SCHEDULER/(1707:1723): ## (<2>) Se crea el proceso - Estado: NEW
+[INFO] 18:21:07:228 KERNEL_SCHEDULER/(1707:1709): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:07:483 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_2.prc (prioridad 2)
+[INFO] 18:21:07:483 KERNEL_SCHEDULER/(1707:1723): ## (<3>) Se crea el proceso - Estado: NEW
+[INFO] 18:21:07:486 KERNEL_SCHEDULER/(1707:1709): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:07:740 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_2.prc (prioridad 2)
+[INFO] 18:21:07:741 KERNEL_SCHEDULER/(1707:1723): ## (<4>) Se crea el proceso - Estado: NEW
+[INFO] 18:21:07:745 KERNEL_SCHEDULER/(1707:1709): ## (<4>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:08:006 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_3.prc (prioridad 1)
+[INFO] 18:21:08:009 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Se crea el proceso - Estado: NEW
+[INFO] 18:21:08:010 KERNEL_SCHEDULER/(1707:1709): ## (<5>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:21:08:267 KERNEL_SCHEDULER/(1707:1723): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:21:08:268 KERNEL_SCHEDULER/(1707:1723): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:21:08:268 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:08:269 KERNEL_SCHEDULER/(1707:1723): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:21:09:037 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:09:039 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:09:039 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:09:801 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:09:802 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:09:803 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:10:571 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:10:571 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:10:572 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:11:085 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:21:11:086 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:21:11:086 KERNEL_SCHEDULER/(1707:1710): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:11:189 KERNEL_SCHEDULER/(1707:1720): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:21:11:190 KERNEL_SCHEDULER/(1707:1720): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:21:11:348 KERNEL_SCHEDULER/(1707:1723): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:11:348 KERNEL_SCHEDULER/(1707:1711): ## (<3>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:21:11:348 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:12:127 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:12:128 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:12:128 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:12:892 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:12:892 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:12:892 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:13:657 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:13:657 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:13:658 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:14:166 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:21:14:167 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:21:14:167 KERNEL_SCHEDULER/(1707:1710): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:14:269 KERNEL_SCHEDULER/(1707:1720): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:21:14:270 KERNEL_SCHEDULER/(1707:1720): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:21:14:428 KERNEL_SCHEDULER/(1707:1723): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:14:428 KERNEL_SCHEDULER/(1707:1711): ## (<4>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:21:14:429 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:15:201 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:15:202 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:15:204 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:15:968 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:15:968 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:15:969 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:16:738 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:16:739 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:16:740 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:17:259 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:21:17:260 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:21:17:260 KERNEL_SCHEDULER/(1707:1710): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:17:363 KERNEL_SCHEDULER/(1707:1720): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:21:17:364 KERNEL_SCHEDULER/(1707:1720): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:21:17:519 KERNEL_SCHEDULER/(1707:1723): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:17:519 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:17:519 KERNEL_SCHEDULER/(1707:1711): ## (<3>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:21:18:290 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:18:291 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:18:291 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:19:064 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:19:064 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:19:065 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:19:835 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:21:19:838 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:21:19:839 KERNEL_SCHEDULER/(1707:1710): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:20:351 KERNEL_SCHEDULER/(1707:1723): ## (<5>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:21:20:353 KERNEL_SCHEDULER/(1707:1710): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:20:355 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:21:20:355 KERNEL_SCHEDULER/(1707:1723): ## (<5>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:21:58:695 KERNEL_SCHEDULER/(1707:1723): ## (<4>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:21:58:696 KERNEL_SCHEDULER/(1707:1723): ## (<4>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:21:58:696 KERNEL_SCHEDULER/(1707:1710): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:21:58:697 KERNEL_SCHEDULER/(1707:1723): ## (<4>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:22:36:781 KERNEL_SCHEDULER/(1707:1723): ## (<3>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:22:36:781 KERNEL_SCHEDULER/(1707:1723): ## (<3>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:22:36:781 KERNEL_SCHEDULER/(1707:1710): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:22:36:781 KERNEL_SCHEDULER/(1707:1723): ## (<3>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:22:37:546 KERNEL_SCHEDULER/(1707:1723): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 18:22:37:547 KERNEL_SCHEDULER/(1707:1723): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:22:37:547 KERNEL_SCHEDULER/(1707:1710): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:22:38:313 KERNEL_SCHEDULER/(1707:1723): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 18:22:38:314 KERNEL_SCHEDULER/(1707:1723): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:22:57:549 KERNEL_SCHEDULER/(1707:1720): ## (<1>) finalizó IO y pasa a READY
+[INFO] 18:22:57:549 KERNEL_SCHEDULER/(1707:1720): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:22:57:549 KERNEL_SCHEDULER/(1707:1710): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:22:58:316 KERNEL_SCHEDULER/(1707:1723): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 18:22:58:317 KERNEL_SCHEDULER/(1707:1723): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:23:17:551 KERNEL_SCHEDULER/(1707:1720): ## (<2>) finalizó IO y pasa a READY
+[INFO] 18:23:17:552 KERNEL_SCHEDULER/(1707:1720): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:23:17:552 KERNEL_SCHEDULER/(1707:1710): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:23:18:319 KERNEL_SCHEDULER/(1707:1723): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 18:23:18:319 KERNEL_SCHEDULER/(1707:1723): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:23:37:550 KERNEL_SCHEDULER/(1707:1746): ## (<1>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 18:23:37:551 KERNEL_SCHEDULER/(1707:1746): ## (<1>) Iniciando traspaso a SWAP...
+[INFO] 18:23:37:554 KERNEL_SCHEDULER/(1707:1720): ## (<1>) finalizó IO y pasa a SUSP. READY
+[INFO] 18:23:37:555 KERNEL_SCHEDULER/(1707:1720): ## (<1>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 18:23:37:556 KERNEL_SCHEDULER/(1707:1709): ## (<1>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 18:23:37:556 KERNEL_SCHEDULER/(1707:1710): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:23:37:816 KERNEL_SCHEDULER/(1707:1723): ## (<1>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:23:37:816 KERNEL_SCHEDULER/(1707:1723): ## (<1>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:23:37:817 KERNEL_SCHEDULER/(1707:1723): ## (<1>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:23:38:316 KERNEL_SCHEDULER/(1707:1748): ## (<2>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 18:23:38:316 KERNEL_SCHEDULER/(1707:1748): ## (<2>) Iniciando traspaso a SWAP...
+[INFO] 18:23:57:558 KERNEL_SCHEDULER/(1707:1720): ## (<2>) finalizó IO y pasa a SUSP. READY
+[INFO] 18:23:57:558 KERNEL_SCHEDULER/(1707:1720): ## (<2>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 18:23:57:560 KERNEL_SCHEDULER/(1707:1709): ## (<2>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 18:23:57:560 KERNEL_SCHEDULER/(1707:1710): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:23:57:819 KERNEL_SCHEDULER/(1707:1723): ## (<2>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:23:57:820 KERNEL_SCHEDULER/(1707:1723): ## (<2>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:23:57:820 KERNEL_SCHEDULER/(1707:1723): ## (<2>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:23:57:820 KERNEL_SCHEDULER/(1707:1708): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS
+[INFO] 18:28:06:958 KERNEL_SCHEDULER/(1757:1757): ## Conectado a Kernel Memory
+[INFO] 18:28:06:959 KERNEL_SCHEDULER/(1757:1757): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:06:962 KERNEL_SCHEDULER/(1757:1759): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:11:493 KERNEL_SCHEDULER/(1757:1769): ## CPU 1 Conectada
+[INFO] 18:28:11:493 KERNEL_SCHEDULER/(1757:1760): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:11:753 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_1.prc (prioridad 3)
+[INFO] 18:28:11:755 KERNEL_SCHEDULER/(1757:1770): ## (<1>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:11:758 KERNEL_SCHEDULER/(1757:1759): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:12:013 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_1.prc (prioridad 3)
+[INFO] 18:28:12:013 KERNEL_SCHEDULER/(1757:1770): ## (<2>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:12:015 KERNEL_SCHEDULER/(1757:1759): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:12:271 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_2.prc (prioridad 2)
+[INFO] 18:28:12:272 KERNEL_SCHEDULER/(1757:1770): ## (<3>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:12:276 KERNEL_SCHEDULER/(1757:1759): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:12:529 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_2.prc (prioridad 2)
+[INFO] 18:28:12:529 KERNEL_SCHEDULER/(1757:1770): ## (<4>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:12:532 KERNEL_SCHEDULER/(1757:1759): ## (<4>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:12:788 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó Syscall: <INIT_PROC> PLANI_PRE_3.prc (prioridad 1)
+[INFO] 18:28:12:788 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Se crea el proceso - Estado: NEW
+[INFO] 18:28:12:790 KERNEL_SCHEDULER/(1757:1759): ## (<5>) Pasa del estado <NEW> al estado <READY>
+[INFO] 18:28:13:045 KERNEL_SCHEDULER/(1757:1770): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:28:13:045 KERNEL_SCHEDULER/(1757:1770): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:28:13:045 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:13:045 KERNEL_SCHEDULER/(1757:1770): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:28:13:807 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:13:807 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:13:808 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:14:572 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:14:572 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:14:573 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:15:341 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:15:342 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:15:342 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:15:855 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:28:15:856 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:28:15:856 KERNEL_SCHEDULER/(1757:1760): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:15:958 KERNEL_SCHEDULER/(1757:1767): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:28:15:958 KERNEL_SCHEDULER/(1757:1767): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:28:16:114 KERNEL_SCHEDULER/(1757:1770): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:16:114 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:16:114 KERNEL_SCHEDULER/(1757:1761): ## (<3>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:28:16:877 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:16:878 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:16:879 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:17:648 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:17:651 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:17:651 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:18:420 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:18:420 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:18:422 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:18:934 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:28:18:936 KERNEL_SCHEDULER/(1757:1760): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:18:937 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:28:19:038 KERNEL_SCHEDULER/(1757:1767): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:28:19:039 KERNEL_SCHEDULER/(1757:1767): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:28:19:195 KERNEL_SCHEDULER/(1757:1770): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:19:195 KERNEL_SCHEDULER/(1757:1761): ## (<4>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:28:19:196 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:19:970 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:19:970 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:19:970 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:20:736 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:20:737 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:20:738 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:21:505 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:21:506 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:21:506 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:22:021 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 18:28:22:022 KERNEL_SCHEDULER/(1757:1760): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:22:022 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:28:22:125 KERNEL_SCHEDULER/(1757:1767): ## (<5>) finalizó IO y pasa a READY
+[INFO] 18:28:22:126 KERNEL_SCHEDULER/(1757:1767): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:28:22:287 KERNEL_SCHEDULER/(1757:1770): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:22:287 KERNEL_SCHEDULER/(1757:1761): ## (<3>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <1>
+[INFO] 18:28:22:287 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:23:051 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:23:051 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:23:054 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:23:823 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:23:824 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:23:825 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:24:592 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Desalojado por fin de quantum
+[INFO] 18:28:24:593 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 18:28:24:593 KERNEL_SCHEDULER/(1757:1760): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:25:105 KERNEL_SCHEDULER/(1757:1770): ## (<5>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:28:25:106 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:28:25:106 KERNEL_SCHEDULER/(1757:1760): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:28:25:107 KERNEL_SCHEDULER/(1757:1770): ## (<5>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:29:03:480 KERNEL_SCHEDULER/(1757:1770): ## (<4>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:29:03:480 KERNEL_SCHEDULER/(1757:1770): ## (<4>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:29:03:480 KERNEL_SCHEDULER/(1757:1760): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:29:03:481 KERNEL_SCHEDULER/(1757:1770): ## (<4>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:29:41:615 KERNEL_SCHEDULER/(1757:1770): ## (<3>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:29:41:615 KERNEL_SCHEDULER/(1757:1770): ## (<3>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:29:41:615 KERNEL_SCHEDULER/(1757:1760): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:29:41:616 KERNEL_SCHEDULER/(1757:1770): ## (<3>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:29:42:382 KERNEL_SCHEDULER/(1757:1770): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 18:29:42:383 KERNEL_SCHEDULER/(1757:1770): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:29:42:383 KERNEL_SCHEDULER/(1757:1760): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:29:43:148 KERNEL_SCHEDULER/(1757:1770): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 18:29:43:149 KERNEL_SCHEDULER/(1757:1770): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:30:02:385 KERNEL_SCHEDULER/(1757:1767): ## (<1>) finalizó IO y pasa a READY
+[INFO] 18:30:02:385 KERNEL_SCHEDULER/(1757:1767): ## (<1>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:30:02:385 KERNEL_SCHEDULER/(1757:1760): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:30:03:153 KERNEL_SCHEDULER/(1757:1770): ## (<1>) - Solicitó syscall: <SLEEP>
+[INFO] 18:30:03:155 KERNEL_SCHEDULER/(1757:1770): ## (<1>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:30:22:390 KERNEL_SCHEDULER/(1757:1767): ## (<2>) finalizó IO y pasa a READY
+[INFO] 18:30:22:390 KERNEL_SCHEDULER/(1757:1767): ## (<2>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 18:30:22:390 KERNEL_SCHEDULER/(1757:1760): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:30:23:156 KERNEL_SCHEDULER/(1757:1770): ## (<2>) - Solicitó syscall: <SLEEP>
+[INFO] 18:30:23:157 KERNEL_SCHEDULER/(1757:1770): ## (<2>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 18:30:42:385 KERNEL_SCHEDULER/(1757:1794): ## (<1>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 18:30:42:385 KERNEL_SCHEDULER/(1757:1794): ## (<1>) Iniciando traspaso a SWAP...
+[INFO] 18:30:42:391 KERNEL_SCHEDULER/(1757:1767): ## (<1>) finalizó IO y pasa a SUSP. READY
+[INFO] 18:30:42:391 KERNEL_SCHEDULER/(1757:1767): ## (<1>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 18:30:42:393 KERNEL_SCHEDULER/(1757:1759): ## (<1>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 18:30:42:393 KERNEL_SCHEDULER/(1757:1760): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:30:42:650 KERNEL_SCHEDULER/(1757:1770): ## (<1>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:30:42:650 KERNEL_SCHEDULER/(1757:1770): ## (<1>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:30:42:652 KERNEL_SCHEDULER/(1757:1770): ## (<1>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:30:43:152 KERNEL_SCHEDULER/(1757:1796): ## (<2>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 18:30:43:152 KERNEL_SCHEDULER/(1757:1796): ## (<2>) Iniciando traspaso a SWAP...
+[INFO] 18:31:02:393 KERNEL_SCHEDULER/(1757:1767): ## (<2>) finalizó IO y pasa a SUSP. READY
+[INFO] 18:31:02:393 KERNEL_SCHEDULER/(1757:1767): ## (<2>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 18:31:02:394 KERNEL_SCHEDULER/(1757:1759): ## (<2>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 18:31:02:394 KERNEL_SCHEDULER/(1757:1760): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 18:31:02:653 KERNEL_SCHEDULER/(1757:1770): ## (<2>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 18:31:02:655 KERNEL_SCHEDULER/(1757:1770): ## (<2>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 18:31:02:657 KERNEL_SCHEDULER/(1757:1770): ## (<2>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 18:31:02:657 KERNEL_SCHEDULER/(1757:1758): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS

@@ -1,0 +1,188 @@
+[ERROR] 21:51:39:841 KERNEL_SCHEDULER/(13759:13759): Error al conectar: Connection refused
+[ERROR] 21:51:39:842 KERNEL_SCHEDULER/(13759:13759): Error al conectar con kernel memory
+[INFO] 21:52:28:972 KERNEL_SCHEDULER/(13765:13765): ## Conectado a Kernel Memory
+[INFO] 21:52:28:973 KERNEL_SCHEDULER/(13765:13765): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 21:52:28:981 KERNEL_SCHEDULER/(13765:13767): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 21:52:46:768 KERNEL_SCHEDULER/(13765:13786): ## CPU 1 Conectada
+[INFO] 21:52:46:770 KERNEL_SCHEDULER/(13765:13768): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:52:47:800 KERNEL_SCHEDULER/(13765:13787): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=64
+[INFO] 21:52:48:312 KERNEL_SCHEDULER/(13765:13787): ## (<0>) - Desalojado por fin de quantum
+[INFO] 21:52:48:312 KERNEL_SCHEDULER/(13765:13787): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 21:52:48:314 KERNEL_SCHEDULER/(13765:13768): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:52:49:335 KERNEL_SCHEDULER/(13765:13787): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:52:49:336 KERNEL_SCHEDULER/(13765:13787): ## (<0>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>
+[INFO] 21:52:49:339 KERNEL_SCHEDULER/(13765:13766): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS
+[INFO] 21:56:00:578 KERNEL_SCHEDULER/(13809:13809): ## Conectado a Kernel Memory
+[INFO] 21:56:00:579 KERNEL_SCHEDULER/(13809:13809): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 21:56:00:591 KERNEL_SCHEDULER/(13809:13811): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 21:56:24:279 KERNEL_SCHEDULER/(13809:13831): ## CPU 1 Conectada
+[INFO] 21:56:24:280 KERNEL_SCHEDULER/(13809:13812): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:56:25:314 KERNEL_SCHEDULER/(13809:13832): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=64
+[INFO] 21:56:25:834 KERNEL_SCHEDULER/(13809:13832): ## (<0>) - Desalojado por fin de quantum
+[INFO] 21:56:25:834 KERNEL_SCHEDULER/(13809:13832): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 21:56:25:834 KERNEL_SCHEDULER/(13809:13812): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 21:56:26:846 KERNEL_SCHEDULER/(13809:13832): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 21:56:26:847 KERNEL_SCHEDULER/(13809:13832): ## (<0>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>
+[INFO] 21:56:26:849 KERNEL_SCHEDULER/(13809:13810): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS
+[INFO] 21:59:23:025 KERNEL_SCHEDULER/(13842:13842): ## Conectado a Kernel Memory
+[INFO] 21:59:23:026 KERNEL_SCHEDULER/(13842:13842): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 21:59:23:038 KERNEL_SCHEDULER/(13842:13844): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 22:00:11:445 KERNEL_SCHEDULER/(13842:13874): ## CPU 1 Conectada
+[INFO] 22:00:11:447 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:12:485 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=64
+[INFO] 22:00:12:996 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:12:996 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:12:996 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:15:523 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:15:523 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:15:523 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:16:036 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=1 tamanio=32
+[INFO] 22:00:17:051 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:17:053 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:17:053 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:19:066 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:19:066 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:19:066 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:19:582 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=2 tamanio=16
+[INFO] 22:00:20:600 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:20:600 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:20:600 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:22:622 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:22:623 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:22:623 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:23:137 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=3 tamanio=32
+[INFO] 22:00:24:151 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:24:152 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:24:153 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:26:172 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:26:174 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:26:174 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:26:688 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=4 tamanio=64
+[INFO] 22:00:27:706 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:27:708 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:27:708 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:29:722 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:29:722 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:29:723 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:30:237 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_FREE> idSegmento=0
+[INFO] 22:00:31:259 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:31:259 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:31:261 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:31:772 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=5 tamanio=32
+[INFO] 22:00:32:791 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:32:792 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:32:793 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:34:812 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:34:812 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:34:813 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:35:319 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=6 tamanio=48
+[INFO] 22:00:36:348 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:36:349 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:36:350 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:38:380 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:38:380 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:38:381 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:41:421 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:41:422 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:41:422 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:43:947 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:43:947 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:43:948 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:46:479 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:46:480 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:46:480 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:49:016 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:49:017 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:49:017 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:51:540 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:51:541 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:51:541 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:54:076 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:00:54:076 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:00:54:076 KERNEL_SCHEDULER/(13842:13845): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:00:54:588 KERNEL_SCHEDULER/(13842:13875): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 22:00:54:589 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 22:00:54:591 KERNEL_SCHEDULER/(13842:13875): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 22:00:54:591 KERNEL_SCHEDULER/(13842:13843): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS
+[INFO] 22:02:48:614 KERNEL_SCHEDULER/(13902:13902): ## Conectado a Kernel Memory
+[INFO] 22:02:48:614 KERNEL_SCHEDULER/(13902:13902): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 22:02:48:624 KERNEL_SCHEDULER/(13902:13904): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 22:03:07:802 KERNEL_SCHEDULER/(13902:13923): ## CPU 1 Conectada
+[INFO] 22:03:07:805 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:08:832 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=64
+[INFO] 22:03:09:346 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:09:346 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:09:346 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:11:867 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:11:867 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:11:867 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:12:390 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=1 tamanio=32
+[INFO] 22:03:13:421 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:13:422 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:13:423 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:15:436 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:15:436 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:15:437 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:15:958 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=2 tamanio=16
+[INFO] 22:03:16:979 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:16:979 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:16:980 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:19:001 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:19:001 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:19:002 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:19:525 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=3 tamanio=32
+[INFO] 22:03:20:544 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:20:544 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:20:546 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:22:573 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:22:573 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:22:574 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:23:092 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=4 tamanio=64
+[INFO] 22:03:24:125 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:24:127 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:24:127 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:26:142 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:26:143 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:26:144 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:26:662 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_FREE> idSegmento=0
+[INFO] 22:03:27:700 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:27:701 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:27:701 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:28:217 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=5 tamanio=32
+[INFO] 22:03:29:243 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:29:246 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:29:246 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:31:263 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:03:31:263 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:31:263 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:03:31:782 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <MEM_ALLOC> idSegmento=6 tamanio=48
+[INFO] 22:03:31:787 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:03:31:787 KERNEL_SCHEDULER/(13902:13904): ## Inicio de compactación
+[ERROR] 22:03:31:788 KERNEL_SCHEDULER/(13902:13904): No hay CPUs disponibles para procesar el PID 0
+[INFO] 22:04:15:377 KERNEL_SCHEDULER/(13902:13904): ## Fin de compactación
+[INFO] 22:04:15:377 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:18:421 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:18:421 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:18:421 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:21:464 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:21:464 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:21:464 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:23:999 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:23:999 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:23:999 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:26:528 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:26:528 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:26:528 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:29:063 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:29:063 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:29:063 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:31:590 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:31:590 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:31:590 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:34:122 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Desalojado por fin de quantum
+[INFO] 22:04:34:122 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 22:04:34:122 KERNEL_SCHEDULER/(13902:13905): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 22:04:34:648 KERNEL_SCHEDULER/(13902:13924): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 22:04:34:648 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 22:04:34:648 KERNEL_SCHEDULER/(13902:13924): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 22:04:34:648 KERNEL_SCHEDULER/(13902:13903): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS

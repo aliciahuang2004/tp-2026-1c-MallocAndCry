@@ -1,0 +1,336 @@
+[ERROR] 19:54:15:901 KERNEL_SCHEDULER/(3339:3339): Error al conectar: Connection refused
+[ERROR] 19:54:15:901 KERNEL_SCHEDULER/(3339:3339): Error al conectar con kernel memory
+[INFO] 20:07:43:995 KERNEL_SCHEDULER/(3580:3580): ## Conectado a Kernel Memory
+[INFO] 20:07:43:995 KERNEL_SCHEDULER/(3580:3580): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 20:07:44:000 KERNEL_SCHEDULER/(3580:3582): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:20:133 KERNEL_SCHEDULER/(3580:3604): ## CPU 1 Conectada
+[INFO] 20:09:20:133 KERNEL_SCHEDULER/(3580:3583): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:21:147 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[INFO] 20:09:21:147 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:21:149 KERNEL_SCHEDULER/(3580:3582): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:21:650 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[INFO] 20:09:21:650 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:21:654 KERNEL_SCHEDULER/(3580:3582): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:22:158 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[INFO] 20:09:22:159 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:22:161 KERNEL_SCHEDULER/(3580:3582): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:22:670 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[INFO] 20:09:22:670 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:22:673 KERNEL_SCHEDULER/(3580:3582): ## (<4>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:24:192 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_2.prc (prioridad 2)
+[INFO] 20:09:24:193 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:24:195 KERNEL_SCHEDULER/(3580:3582): ## (<5>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:24:706 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_2.prc (prioridad 2)
+[INFO] 20:09:24:706 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:24:708 KERNEL_SCHEDULER/(3580:3582): ## (<6>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:26:226 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_3.prc (prioridad 1)
+[INFO] 20:09:26:227 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Se crea el proceso - Estado: NEW
+[INFO] 20:09:26:230 KERNEL_SCHEDULER/(3580:3582): ## (<7>) Pasa del estado <NEW> al estado <READY>
+[INFO] 20:09:26:737 KERNEL_SCHEDULER/(3580:3605): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 20:09:26:737 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:26:738 KERNEL_SCHEDULER/(3580:3605): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:09:26:742 KERNEL_SCHEDULER/(3580:3605): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 20:09:27:750 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:27:750 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:27:750 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:28:762 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:28:762 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:28:763 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:29:778 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:29:778 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:29:778 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:31:296 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:09:31:297 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:31:297 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:32:815 KERNEL_SCHEDULER/(3580:3605): ## (<2>) - Desalojado por fin de quantum
+[INFO] 20:09:32:815 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:32:815 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:34:338 KERNEL_SCHEDULER/(3580:3605): ## (<3>) - Desalojado por fin de quantum
+[INFO] 20:09:34:338 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:34:338 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:35:866 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:09:35:866 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:35:866 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:37:398 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:09:37:398 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:37:398 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:37:755 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:09:37:755 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:37:918 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:37:918 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:37:918 KERNEL_SCHEDULER/(3580:3584): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:09:39:439 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:39:440 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:39:440 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:40:967 KERNEL_SCHEDULER/(3580:3605): ## (<3>) - Desalojado por fin de quantum
+[INFO] 20:09:40:967 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:40:967 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:42:500 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:09:42:501 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:42:501 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:42:758 KERNEL_SCHEDULER/(3580:3603): ## (<5>) finalizó IO y pasa a READY
+[INFO] 20:09:42:759 KERNEL_SCHEDULER/(3580:3603): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:43:011 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:43:011 KERNEL_SCHEDULER/(3580:3584): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <2>
+[INFO] 20:09:43:012 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:44:530 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Desalojado por fin de quantum
+[INFO] 20:09:44:531 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:44:531 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:46:051 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:46:051 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:46:052 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:47:574 KERNEL_SCHEDULER/(3580:3605): ## (<2>) - Desalojado por fin de quantum
+[INFO] 20:09:47:575 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:47:575 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:47:767 KERNEL_SCHEDULER/(3580:3603): ## (<6>) finalizó IO y pasa a READY
+[INFO] 20:09:47:767 KERNEL_SCHEDULER/(3580:3603): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:48:089 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:48:089 KERNEL_SCHEDULER/(3580:3584): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <6> con prioridad <2>
+[INFO] 20:09:48:090 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:48:774 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:09:48:774 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:49:108 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:49:109 KERNEL_SCHEDULER/(3580:3584): ## (<6>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:09:49:109 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:50:634 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:50:635 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:50:635 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:51:779 KERNEL_SCHEDULER/(3580:3603): ## (<5>) finalizó IO y pasa a READY
+[INFO] 20:09:51:780 KERNEL_SCHEDULER/(3580:3603): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:52:165 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Desalojado por fin de quantum
+[INFO] 20:09:52:166 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:52:166 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:52:783 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:09:52:783 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:53:183 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:53:183 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:53:184 KERNEL_SCHEDULER/(3580:3584): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:09:54:712 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:54:713 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:54:714 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:55:231 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:55:232 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:55:232 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:55:718 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:09:55:719 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:55:741 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:55:741 KERNEL_SCHEDULER/(3580:3584): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:09:55:742 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:57:261 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:57:262 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:57:262 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:58:722 KERNEL_SCHEDULER/(3580:3603): ## (<6>) finalizó IO y pasa a READY
+[INFO] 20:09:58:722 KERNEL_SCHEDULER/(3580:3603): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:58:789 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Solicitó syscall: <SLEEP>
+[INFO] 20:09:58:790 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:09:58:790 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:09:59:727 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:09:59:728 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:09:59:802 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:09:59:803 KERNEL_SCHEDULER/(3580:3584): ## (<6>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:09:59:803 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:01:328 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:01:328 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:01:328 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:02:752 KERNEL_SCHEDULER/(3580:3608): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:02:752 KERNEL_SCHEDULER/(3580:3608): ## (<7>) Iniciando traspaso a SWAP...
+[INFO] 20:10:02:846 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Desalojado por fin de quantum
+[INFO] 20:10:02:846 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:02:847 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:03:358 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:03:359 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:03:359 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:03:765 KERNEL_SCHEDULER/(3580:3610): ## (<5>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:03:766 KERNEL_SCHEDULER/(3580:3610): ## (<5>) Iniciando traspaso a SWAP...
+[INFO] 20:10:04:734 KERNEL_SCHEDULER/(3580:3603): ## (<5>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:04:734 KERNEL_SCHEDULER/(3580:3603): ## (<5>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:04:738 KERNEL_SCHEDULER/(3580:3582): ## (<5>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:04:779 KERNEL_SCHEDULER/(3580:3612): ## (<6>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:04:779 KERNEL_SCHEDULER/(3580:3612): ## (<6>) Iniciando traspaso a SWAP...
+[INFO] 20:10:04:881 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:04:881 KERNEL_SCHEDULER/(3580:3584): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <2>
+[INFO] 20:10:04:882 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:05:741 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:05:742 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:05:746 KERNEL_SCHEDULER/(3580:3582): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:05:912 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:05:912 KERNEL_SCHEDULER/(3580:3584): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:05:912 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:07:438 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Desalojado por fin de quantum
+[INFO] 20:10:07:439 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:07:439 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:07:954 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:07:954 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:07:954 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:09:477 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Desalojado por fin de quantum
+[INFO] 20:10:09:479 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:09:480 KERNEL_SCHEDULER/(3580:3583): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:09:994 KERNEL_SCHEDULER/(3580:3605): ## (<5>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 20:10:09:994 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:10:09:995 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:09:995 KERNEL_SCHEDULER/(3580:3605): ## (<5>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 20:10:10:746 KERNEL_SCHEDULER/(3580:3603): ## (<6>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:10:747 KERNEL_SCHEDULER/(3580:3603): ## (<6>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:10:749 KERNEL_SCHEDULER/(3580:3582): ## (<6>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:11:011 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:11:011 KERNEL_SCHEDULER/(3580:3584): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <6> con prioridad <2>
+[INFO] 20:10:11:011 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:12:534 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Desalojado por fin de quantum
+[INFO] 20:10:12:535 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:12:535 KERNEL_SCHEDULER/(3580:3583): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:14:068 KERNEL_SCHEDULER/(3580:3605): ## (<6>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 20:10:14:068 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:10:14:068 KERNEL_SCHEDULER/(3580:3605): ## (<6>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 20:10:14:068 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:14:441 KERNEL_SCHEDULER/(3580:3619): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:14:442 KERNEL_SCHEDULER/(3580:3619): ## (<7>) Iniciando traspaso a SWAP...
+[INFO] 20:10:15:587 KERNEL_SCHEDULER/(3580:3605): ## (<2>) - Desalojado por fin de quantum
+[INFO] 20:10:15:587 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:15:588 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:17:109 KERNEL_SCHEDULER/(3580:3605): ## (<3>) - Desalojado por fin de quantum
+[INFO] 20:10:17:109 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:17:109 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:18:625 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:10:18:625 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:18:625 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:20:146 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:10:20:146 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:20:146 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:20:750 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:20:750 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:20:752 KERNEL_SCHEDULER/(3580:3582): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:21:170 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:21:170 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:21:171 KERNEL_SCHEDULER/(3580:3584): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:22:704 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:22:704 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:22:704 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:23:707 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:23:707 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:23:714 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:23:714 KERNEL_SCHEDULER/(3580:3584): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:23:714 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:25:242 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:25:242 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:25:242 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:25:638 KERNEL_SCHEDULER/(3580:3630): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:25:638 KERNEL_SCHEDULER/(3580:3630): ## (<7>) Iniciando traspaso a SWAP...
+[INFO] 20:10:26:245 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:26:248 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:26:253 KERNEL_SCHEDULER/(3580:3582): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:26:258 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:26:258 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:26:259 KERNEL_SCHEDULER/(3580:3584): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:27:778 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:27:778 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:27:778 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:28:783 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:28:783 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:28:793 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:28:794 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:28:794 KERNEL_SCHEDULER/(3580:3584): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:30:310 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:30:310 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:30:310 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:31:312 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:31:312 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:31:329 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:31:330 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:31:330 KERNEL_SCHEDULER/(3580:3584): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:32:852 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:32:852 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:32:852 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:33:860 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:33:860 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:33:872 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:33:872 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:33:872 KERNEL_SCHEDULER/(3580:3584): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:35:397 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Desalojado por fin de quantum
+[INFO] 20:10:35:397 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:35:397 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:35:913 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:35:913 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:35:913 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:36:329 KERNEL_SCHEDULER/(3580:3644): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:10:36:329 KERNEL_SCHEDULER/(3580:3644): ## (<7>) Iniciando traspaso a SWAP...
+[INFO] 20:10:37:442 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:10:37:442 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:37:442 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:38:962 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:10:38:962 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:38:963 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:40:487 KERNEL_SCHEDULER/(3580:3605): ## (<2>) - Desalojado por fin de quantum
+[INFO] 20:10:40:488 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:40:489 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:42:010 KERNEL_SCHEDULER/(3580:3605): ## (<3>) - Desalojado por fin de quantum
+[INFO] 20:10:42:010 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:42:010 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:43:530 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:10:43:531 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:43:531 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:45:058 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:10:45:058 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:45:058 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:45:916 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:10:45:916 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[INFO] 20:10:45:918 KERNEL_SCHEDULER/(3580:3582): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[INFO] 20:10:46:070 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:46:071 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:46:071 KERNEL_SCHEDULER/(3580:3584): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:47:590 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:47:590 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:47:591 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:48:598 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:48:598 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:48:610 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:48:610 KERNEL_SCHEDULER/(3580:3584): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:48:610 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:50:129 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:50:129 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:50:129 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:51:134 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:51:134 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:51:143 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:51:143 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:51:143 KERNEL_SCHEDULER/(3580:3584): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:52:669 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:52:669 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:52:670 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:53:673 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:53:673 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:53:686 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:53:686 KERNEL_SCHEDULER/(3580:3584): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:53:686 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:55:200 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:55:200 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:55:200 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:56:204 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:56:204 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:56:217 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:56:217 KERNEL_SCHEDULER/(3580:3584): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:56:217 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:57:735 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:10:57:735 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:10:57:735 KERNEL_SCHEDULER/(3580:3583): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:10:58:739 KERNEL_SCHEDULER/(3580:3603): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:10:58:739 KERNEL_SCHEDULER/(3580:3603): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 20:10:58:752 KERNEL_SCHEDULER/(3580:3605): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:10:58:752 KERNEL_SCHEDULER/(3580:3584): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[INFO] 20:10:58:752 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:11:00:268 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Desalojado por fin de quantum
+[INFO] 20:11:00:268 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:11:00:268 KERNEL_SCHEDULER/(3580:3583): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:11:00:789 KERNEL_SCHEDULER/(3580:3605): ## (<7>) - Solicitó syscall: <SLEEP>
+[INFO] 20:11:00:789 KERNEL_SCHEDULER/(3580:3605): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:11:00:789 KERNEL_SCHEDULER/(3580:3583): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:11:02:310 KERNEL_SCHEDULER/(3580:3605): ## (<4>) - Desalojado por fin de quantum
+[INFO] 20:11:02:310 KERNEL_SCHEDULER/(3580:3605): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:11:02:310 KERNEL_SCHEDULER/(3580:3583): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:11:02:780 KERNEL_SCHEDULER/(3580:3670): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:11:02:780 KERNEL_SCHEDULER/(3580:3670): ## (<7>) Iniciando traspaso a SWAP...
+[INFO] 20:11:03:825 KERNEL_SCHEDULER/(3580:3605): ## (<1>) - Desalojado por fin de quantum
+[INFO] 20:11:03:826 KERNEL_SCHEDULER/(3580:3605): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:11:03:826 KERNEL_SCHEDULER/(3580:3583): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[ERROR] 20:11:04:347 KERNEL_SCHEDULER/(3580:3605): Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual
+[INFO] 20:11:04:347 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:11:04:348 KERNEL_SCHEDULER/(3580:3605): ## (<2>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>
