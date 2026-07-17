@@ -152,7 +152,7 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu){
             mutex->pidAsignado = proximo_pid;
             //pthread_mutex_unlock(&mutex_diccionario);
 
-            t_pcb* pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK, &mutex_BLOCK);
+            pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK, &mutex_BLOCK);
             if(pcbADesbloquear == NULL){
                 pcbADesbloquear = buscarPCBPorPID(proximo_pid,colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
             }
