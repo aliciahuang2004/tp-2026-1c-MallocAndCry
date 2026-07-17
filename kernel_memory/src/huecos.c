@@ -25,7 +25,62 @@ t_resultado_hueco agregar_hueco_libre(uint32_t base, uint32_t tamano)
 
     return resultado;
 }
+t_resultado_hueco agregar_hueco_sinmtx(uint32_t base, uint32_t tamano)
+{
+    t_resultado_hueco resultado = {0, 0}; // valores por defecto si falla
 
+    t_hueco* hueco = malloc(sizeof(t_hueco));
+    if(hueco == NULL)
+        return resultado;
+    memset(hueco, 0, sizeof(t_hueco));
+    hueco->base   = base;
+    hueco->tamano = tamano;
+    hueco->limite = base + tamano - 1;
+
+    resultado.base   = hueco->base;
+    resultado.limite = hueco->limite;
+
+    list_add(lista_huecos_libres, hueco);
+
+    return resultado;
+}
+
+void quitar_y_liberar_hueco(int index) {
+    t_hueco* hueco = list_remove(lista_huecos_libres, index);
+    if (hueco != NULL) {
+        free(hueco);
+    }
+}
+
+void agregar_hueco_ms(uint32_t base, uint32_t tamano, t_log* logger) {
+    uint32_t limite_buscado = base - 1;
+    bool encontrado = false;
+
+    pthread_mutex_lock(&mutex_huecos);
+
+    int total = list_size(lista_huecos_libres);
+    for (int i = 0; i < total; i++) {
+        t_hueco* hueco = list_get(lista_huecos_libres, i);
+
+        if (hueco->limite == limite_buscado) {
+            uint32_t hueco_base_original = hueco->base;
+            uint32_t nuevo_tamano_total = hueco->tamano + tamano;
+
+            quitar_y_liberar_hueco(i); 
+
+            agregar_hueco_sinmtx(hueco_base_original, nuevo_tamano_total);
+            
+            encontrado = true;
+            break; 
+        }
+    }
+
+    if (!encontrado) {
+        agregar_hueco_sinmtx(base, tamano);
+    }
+
+    pthread_mutex_unlock(&mutex_huecos);
+}
 
 void consumir_hueco(t_hueco* hueco, uint32_t tamano) {//revisar que hace esta funcion
 
@@ -115,7 +170,7 @@ void vaciar_lista_de_huecos(t_log* logger) {
 
 void loguear_huecos(t_log* logger)
 {
-    log_debug(logger, "----- LISTA DE HUECOS -----");
+    log_debug(logger, "========= LISTA DE HUECOS ==========");
     for(int i = 0; i < list_size(lista_huecos_libres); i++)
     {
         t_hueco* hueco = list_get(lista_huecos_libres, i);

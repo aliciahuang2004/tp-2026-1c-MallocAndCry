@@ -55,10 +55,10 @@ void agregar_cpu_conectada(int cpu_id, int socket_cliente)
     pthread_mutex_unlock(&mutex_cpus_conectadas);
 }
 
-void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logger,t_resultado_hueco resultado)
+void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logger,uint32_t base,uint32_t tamano)
 {
     pthread_mutex_lock(&mutex_cpus_conectadas);
-
+    uint32_t lim = base + tamano - 1 ;
     int total = list_size(cpus_conectadas);
     log_debug(logger, "Avisando nuevo MS ID:%d a %d CPUs conectadas", ms_id, total);
 
@@ -69,8 +69,8 @@ void avisar_cpus_conectadas(int ms_id, char* ms_puerto, char* ms_ip,t_log* logge
         agregar_a_paquete(paquete, &ms_id,sizeof(int));
         agregar_a_paquete(paquete, ms_puerto,strlen(ms_puerto) + 1);
         agregar_a_paquete(paquete, ms_ip,strlen(ms_ip) + 1);
-        agregar_a_paquete(paquete, &resultado.base,sizeof(uint32_t));
-        agregar_a_paquete(paquete, &resultado.limite,sizeof(uint32_t));
+        agregar_a_paquete(paquete, &base,sizeof(uint32_t));
+        agregar_a_paquete(paquete, &lim,sizeof(uint32_t));
         enviar_paquete(paquete, cpu->socket, logger);
         log_debug(logger, "Antes de destruir paquete: ip='%s' puerto='%s'", ms_ip, ms_puerto);
         eliminar_paquete(paquete);
@@ -153,10 +153,10 @@ void* atender_conexion(void* arg) {
                     break;
                 }
                 
-                t_resultado_hueco r = agregar_hueco_libre(base_nuevo_ms, ms_tamano);
+                agregar_hueco_ms(base_nuevo_ms, ms_tamano,logger);
                 loguear_huecos(logger);
-                agregar_posicion_ms(r,ms_id,logger);
-                avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,r); 
+                agregar_posicion_ms(base_nuevo_ms,ms_tamano,ms_id,logger);
+                avisar_cpus_conectadas(ms_id,ms_puerto,ms_ip,logger,base_nuevo_ms,ms_tamano); 
 
                 pthread_mutex_lock(&mutex_memoria_total);
                 log_debug(logger, "Memoria total disponible: %u bytes", memoria_total);

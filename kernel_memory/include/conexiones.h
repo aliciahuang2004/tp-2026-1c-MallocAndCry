@@ -7,7 +7,7 @@
 void* atender_conexion(void* arg);
 void esperarConexiones(t_kernel_memory* kernelMemory, int kernel_memory_fd);
 void agregar_cpu_conectada(int cpu_id,int socket_cliente);
-void avisar_cpus_conectadas(int id,char* puerto, char* ip, t_log* logger, t_resultado_hueco resultado);
+void avisar_cpus_conectadas(int id,char* puerto, char* ip, t_log* logger,uint32_t base,uint32_t tamano);
 void remover_cpu_conectada(int socket_cliente, t_log* logger);
 
 int buscar_bloques_libres_swap(int bloques_necesarios);
