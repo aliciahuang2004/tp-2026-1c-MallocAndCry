@@ -11,6 +11,7 @@ t_pcb* crear_PCB(char* path, int prioridad){
     pcbCreado->socketCPUEjecuta = -1;
     pcbCreado->suspensionEnCurso = false; 
     pcbCreado->ioCompletadaEnTransito = false;
+    pcbCreado->idBloqueoActual = 0;
     switch (obtenerPlanificacion(kernel->planification_algorithm)){
     case FIFO:
         pcbCreado->ejecutaPorRR = false;

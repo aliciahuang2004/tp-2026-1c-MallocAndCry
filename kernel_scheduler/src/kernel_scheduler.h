@@ -39,6 +39,7 @@ typedef struct{
     t_list* mutexTomados; // Lista de mutex que el proceso tiene tomado ahora mismo
     bool suspensionEnCurso;        
     bool ioCompletadaEnTransito;
+    int idBloqueoActual; // id del bloqueo actual, si es que tiene alguno
 } t_pcb;
 
 typedef struct {
@@ -108,6 +109,11 @@ typedef struct {
     int tiempoSleep;
     char* leido;
 } t_solicitud_io;
+
+typedef struct {
+    int pid;
+    int idBloqueo;
+} t_arg_timer_suspension;
 
 // extern char* pathInicial;
 extern int pidParaAsignar;
