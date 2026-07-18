@@ -3,17 +3,13 @@
 void* atender_kernel_memory(void* arg) {
     log_debug(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
 
-    while (1) {
+    while (ejecutando) {
         t_list* paquete = recibir_paquete(kernel->socket_kernel_memory);
 
         if (paquete == NULL) {
             log_error(kernel->logger, "KM Listener: KM se desconectó o error en socket");
-            liberarConexiones();
-            finalizarColas();
-            finalizarSemaforos();
-            finalizarInterfaces();
-            destruir_kernel_scheduler(kernel);
-            exit(EXIT_FAILURE);
+            liberarRecursos();
+            return NULL;
         }
 
         int cod_op = *(int*) list_get(paquete, 0);
@@ -79,11 +75,8 @@ void* atender_kernel_memory(void* arg) {
                 finalizarTodosLosProcesos();// TODO
                 log_debug(kernel->logger,"Todos los procesos fueron finalizados");
                 log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER POR BLUE SCREEN OF DEATH");
-                liberarConexiones();
-                finalizarColas();
-                finalizarSemaforos();
-                finalizarInterfaces();
-                destruir_kernel_scheduler(kernel);
+                ejecutando = false;
+                liberarRecursos();
                 exit(EXIT_FAILURE);
                 break;
             }
@@ -307,7 +300,7 @@ void finalizarProcesosReady(){
                     pthread_mutex_lock(&mutex_READY[i]);
                     if(queue_is_empty(colasREADY[i])){
                         pthread_mutex_unlock(&mutex_READY[i]);
-                        log_debug(kernel->logger,"Todos los procesos con estado NEW, fueron finalizados");
+                        log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
                         break;
                     }
                     t_pcb* pcb = queue_peek(colasREADY[i]);
@@ -324,7 +317,7 @@ void finalizarProcesosReady(){
                 pthread_mutex_lock(&mutex_READY[0]);
                 if(queue_is_empty(colasREADY[0])){
                     pthread_mutex_unlock(&mutex_READY[0]);
-                    log_debug(kernel->logger,"Todos los procesos con estado NEW, fueron finalizados");
+                    log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
                     break;
                 }
                 t_pcb* pcb = queue_peek(colasREADY[0]);
