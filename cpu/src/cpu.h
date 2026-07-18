@@ -21,8 +21,16 @@ typedef struct
     int socket_kernel_scheduler;
     int socket_kernel_memory;
     t_list *sockets_memory_sticks; // Para manejar múltiples sticks dinámicos
+    pthread_mutex_t mutex_lista_ms; // Mutex para proteger la lista de sockets
     int segment_max_size;          // tamaño máximo del segmento que nos pasa el kernel memory
 } t_cpu;
+
+typedef struct {
+    int socket_ms;
+    uint32_t dir_local;
+    int tamano;
+    int offset; // En qué byte de nuestro buffer armamos el fragmento
+} t_fragmento_cpu;
 
 // estructura de registros
 typedef struct
@@ -36,8 +44,8 @@ typedef struct
     uint32_t EBX;
     uint32_t ECX;
     uint32_t EDX;
-    uint32_t SI;
-    uint32_t DI;
+    uint32_t SI; //indice origen
+    uint32_t DI; //indice destino
 
 } t_registros;
 
@@ -51,10 +59,10 @@ typedef struct
 
 // estructura de contexto
 typedef struct
-{ // consultar
+{ 
     int pid;
     t_registros registros;
-    t_list *tabla_segmentos; // lista de t_segmento
+    t_list *tabla_segmentos; 
 } t_contexto;
 
 typedef enum
@@ -67,6 +75,8 @@ typedef enum
     INST_SUB,
     INST_JNZ,
     INST_COPY_MEM,
+
+    //syscalls
     INST_MUTEX_CREATE,
     INST_MUTEX_LOCK,
     INST_MUTEX_UNLOCK,
@@ -77,6 +87,7 @@ typedef enum
     INST_STDIN,
     INST_INIT_PROC,
     INST_EXIT,
+    //fin syscalls
     INST_DESCONOCIDA
 } t_codigo_instruccion;
 
@@ -93,6 +104,8 @@ typedef struct
 {
     int id;
     int socket;
+    uint32_t base_global;
+    uint32_t limite_global;
 } t_ms_conectado;
 
 // semaforos y buffers globales para la recepcion asincronica
@@ -107,7 +120,7 @@ t_cpu *iniciar_cpu(char *path_config, char *id_cpu);
 int conectar_kernel_memory(t_cpu *cpu);
 int conectar_kernel_scheduler(t_cpu *cpu);
 void *escuchar_kernel_memory(void *arg);
-int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id);
+int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_t base, uint32_t limite);
 
 void liberar_cpu(t_cpu *cpu);
 
@@ -120,4 +133,6 @@ int execute(t_cpu *cpu, t_contexto *contexto, t_instruccion_decodificada instruc
 bool hay_interrupcion_pendiente(int socket_fd);
 void enviar_contexto_a_memoria(t_cpu *cpu, t_contexto *contexto);
 void devolver_proceso_interrumpido(t_cpu *cpu, int pid, op_code motivo_desalojo);
+void desconectar_memory_stick(t_cpu* cpu, int ms_id);
+
 #endif

@@ -4,20 +4,33 @@ void* atender_io(void* arg) {
     int socket_io = *(int*)arg;
     free(arg);
 
-    log_info(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
+    log_debug(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
     sem_post(&sem_hayIO[buscarTipoIOPorSocket(socket_io)]);
 
     while(1) {
         t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
         t_list* paquete = recibir_paquete(socket_io);
         if (!paquete) {
-            log_error(kernel->logger, "Error al recibir paquete de datos de IO");
+            switch (tipoIO){
+                case IO_SLEEP:
+                    log_error(kernel->logger, "Se desconecto IO SLEEP, en socket %d",socket_io);
+                    break;
+                case IO_STDIN:
+                    log_error(kernel->logger, "Se desconecto IO STDIN, en socket %d",socket_io);
+                    break;
+                case IO_STDOUT:
+                    log_error(kernel->logger, "Se desconecto IO STDOUT, en socket %d",socket_io);
+                    break;
+                default:
+                    break;
+            }
             pthread_mutex_lock(&mutex_interfaces[tipoIO]);
             if(interfaces[tipoIO].socket_interfaz == socket_io){
                 pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
                 int pid = finalizoConexionIO(tipoIO);
-                finalizarProceso(pid,DESCONEXION_IO);
-            return NULL;
+                if(pid!=-1) finalizarProceso(pid,DESCONEXION_IO);
+                liberar_conexion(socket_io);
+                pthread_exit(NULL);
             }
             pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
         }
@@ -26,34 +39,93 @@ void* atender_io(void* arg) {
 
         switch (cod_op) {
             case IO_OK://termino syscall
-
-                // Extraer de forma segura el PID que envió el módulo de I/O
-                log_debug(kernel->logger, "IO_OK recibido para PID %d en socket %d", pid, socket_io);
-                if (buscarPCBPorPID(pid, colaBLOCK, mutex_BLOCK) == NULL) {
-                    log_warning(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
-                    if (buscarPCBPorPID(pid, colaBLOCK_SUSP, mutex_BLOCK_SUSP) == NULL) {
-                        log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
-                        break; // Salimos del case para evitar errores posteriores
-                    } else {
-                        pasarProcesoBlockSuspAReadySusp(pid);
-                        log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                
+                switch(tipoIO){
+                    case IO_STDIN:{
+                        log_debug(kernel->logger, "IO_OK recibido para PID: %d TIPO: STDIN", pid);
+                        char* lecturaIO = (char*) list_get(paquete, 3);
+                        pthread_mutex_lock(&mutex_interfaces[tipoIO]);
+                        t_solicitud_io* solicitudSTDIN = queue_peek(interfaces[tipoIO].solicitudes);
+                        if(solicitudSTDIN->pidSolicitaSyscall == pid){
+                        solicitudSTDIN->leido = malloc(solicitudSTDIN->tamanio);  
+                        memcpy(solicitudSTDIN->leido, lecturaIO, solicitudSTDIN->tamanio);                          
+                        log_debug(kernel->logger, "STDIN recibió %u bytes para PID: %d", solicitudSTDIN->tamanio, pid);                            pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
+                        }
+                        pthread_mutex_unlock(&mutex_interfaces[tipoIO]);
+                        sem_post(&sem_recibiLecuraDeIO);
+                        liberarIO(tipoIO);
+                        break;
                     }
-                } else {
-                    pasarProcesoBlockaReady(pid);
-                    log_info(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
-                }
-                liberarIO(tipoIO);
-                revisarProcesosBloqueadosParaTipoIO(tipoIO);
-                break;
-            /*case IO_REQUEST:
-                break;*/
-            default:
+                    case IO_SLEEP:{
+                        log_debug(kernel->logger, "IO_OK recibido para PID: %d TIPO: SLEEP", pid);
+                        t_solicitud_io* solicitud = retirarSolicitud(tipoIO,pid);
+                        if (solicitud == NULL){
+                            log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                        }
+                            // Extraer de forma segura el PID que envió el módulo de I/O
+                        if (buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK) == NULL) {
+                            log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
+                             t_pcb* pcbSuspendiendo = buscarPCBPorPID(pid, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
+                            if (pcbSuspendiendo == NULL) {
+                                log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
+                                break; // Salimos del case para evitar errores posteriores
+                            } else if (pcbSuspendiendo->suspensionEnCurso) {
+                                pcbSuspendiendo->ioCompletadaEnTransito = true;
+                                log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
+                            } else {
+                                log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+                                pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(-1);
+                                
+                            }
+                        } else {
+                            log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
+                            log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
+                            pasarProcesoBlockaReady(pid);
+                            
+                        }
+                        free(solicitud);
+                        liberarIO(tipoIO);
+                        break;
+                    }
+                    case IO_STDOUT:{
+                        log_debug(kernel->logger, "IO_OK recibido para PID: %d TIPO: STDOUT", pid);
+                        t_solicitud_io* solicitud = retirarSolicitud(tipoIO,pid);
+                        if (solicitud == NULL){
+                            log_error(kernel->logger, "ERROR al retirar solicitud IO de la cola de solicitudes");
+                        }
+                            // Extraer de forma segura el PID que envió el módulo de I/O
+                        if (buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK) == NULL) {
+                            log_debug(kernel->logger, "No se encontró el PCB para PID %d en BLOCK. Verificando otras colas...", pid);
+                            t_pcb* pcbSuspendiendo = buscarPCBPorPID(pid, colaBLOCK_SUSP, &mutex_BLOCK_SUSP);
+                            if (pcbSuspendiendo == NULL) {
+                                log_error(kernel->logger, "Error: No se encontró el PCB para PID %d en ninguna cola de bloqueados.", pid);
+                                break; // Salimos del case para evitar errores posteriores
+                            } else if (pcbSuspendiendo->suspensionEnCurso) {
+                                pcbSuspendiendo->ioCompletadaEnTransito = true;
+                                log_debug(kernel->logger, "## (<%d>) IO finalizo mientras se completaba el traspaso a SWAP, se desuspendera al terminar", pid);
+                            } else {
+                                log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK_SUSP.", pid);
+                                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+                                pasarProcesoBlockSuspAReadySusp(pid);
+                                solicitarDesuspenderProceso(-1);
+                            }
+                        } else {
+                            log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", pid);
+                            log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", pid);
+                            pasarProcesoBlockaReady(pid);
+                        }
+                        liberarIO(tipoIO);
+                        break;
+                    }
+                default:
                 log_warning(kernel->logger, "Operación desconocida de cliente en socket %d", socket_io);
                 break;
-        }
-        list_destroy_and_destroy_elements(paquete,free);
+            }
+            list_destroy_and_destroy_elements(paquete,free);
     // Aca el hilo puede continuar en un bucle según la necesidad del protocolo
-
+        }
     }
 }
 
@@ -71,23 +143,39 @@ void liberarIO(t_tipo_io tipo){
     pthread_mutex_lock(&mutex_interfaces[tipo]);
     interfaces[tipo].ocupada = false;
     interfaces[tipo].pidAsignado = -1;
-    log_info(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
+    log_debug(kernel->logger, "## Interfaz [%s] liberada.", interfaces[tipo].nombre);
     pthread_mutex_unlock(&mutex_interfaces[tipo]);
     sem_post(&sem_hayIO[tipo]);
 }
 
 void revisarProcesosBloqueadosParaTipoIO(t_tipo_io tipo) {
     pthread_mutex_lock(&mutex_interfaces[tipo]);
-    if (!queue_is_empty(interfaces[tipo].solicitudes)) {
-        t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
+    if (!queue_is_empty(interfaces[tipo].solicitudes) && interfaces[tipo].ocupada == false) {
+        t_solicitud_io* solicitud = queue_peek(interfaces[tipo].solicitudes);
         interfaces[tipo].ocupada = true;
         interfaces[tipo].pidAsignado = solicitud->pidSolicitaSyscall;
-        log_info(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
-        pthread_mutex_unlock(&mutex_interfaces[tipo]);
-        enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
-        free(solicitud);
-    } else {
+        log_debug(kernel->logger, "## PID %d - Enviado a Interfaz [%s] desde cola de espera.", solicitud->pidSolicitaSyscall, interfaces[tipo].nombre);
+        switch (tipo){
+        case IO_STDIN:
+            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+            hacerSTDIN(solicitud,interfaces[tipo].socket_interfaz);
+            break;
+        case IO_SLEEP:
+            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+            enviarAIO(interfaces[tipo].socket_interfaz, solicitud);
+            break;
+        case IO_STDOUT:
+            pthread_mutex_unlock(&mutex_interfaces[tipo]);
+            hacerSTDOUT(solicitud,interfaces[tipo].socket_interfaz);          
+            break;
+        }
         pthread_mutex_unlock(&mutex_interfaces[tipo]);
     }
-    
+}
+
+t_solicitud_io* retirarSolicitud(t_tipo_io tipo, int pid){
+    pthread_mutex_lock(&mutex_interfaces[tipo]);
+    t_solicitud_io* solicitud = queue_pop(interfaces[tipo].solicitudes);
+    pthread_mutex_unlock(&mutex_interfaces[tipo]);
+    return solicitud;
 }

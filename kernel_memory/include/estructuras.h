@@ -4,6 +4,7 @@
 #include <commons/collections/dictionary.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 typedef struct {
     //int pid;
@@ -35,6 +36,8 @@ typedef struct {
 
     uint32_t limite_global;
 
+    uint32_t tamanio;
+
     int memory_stick_id;
 
     bool en_swap;
@@ -59,7 +62,9 @@ typedef struct {
 
     uint32_t base;
 
-    uint32_t tamanio;
+    uint32_t limite;
+
+    uint32_t tamano;
 
 } t_hueco;
 
@@ -73,12 +78,13 @@ typedef struct {
 typedef struct {
 
     int id;
-
-    //uint32_t base_global;//REVISAR SI LO BORRO
-
     uint32_t tamano;
-
     int socket;
+    int ultimo_codigo_op;
+    pthread_mutex_t mutex_socket;   // Protege el envío y la espera
+    pthread_cond_t cond_respuesta;  // Para que el hilo CPU espere la respuesta
+    void* buffer_respuesta;         // Donde el Dispatcher deposita el resultado
+    bool respuesta_lista;           // Flag de sincronización
 
 } t_ms_info;  //t_memory_stick
 
@@ -88,12 +94,26 @@ typedef struct {
 
     uint32_t base_global;
 
-    uint32_t tamano;
+    uint32_t limite_global;
+
+} t_ms_pos;
+
+typedef struct {
+
+    int id;
+
+    char* ip;
+
+    char* puerto;
+
+} t_ms_conexion;
+typedef struct {
+
+    int id;
 
     int socket;
 
-} t_ms_info;  //t_memory_stick
-
+} t_cpu;
 typedef struct {
     int ms_id;
     uint32_t dir_local;

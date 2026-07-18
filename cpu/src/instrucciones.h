@@ -21,6 +21,11 @@ int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos);
 int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano);
 
 //syscalls
-void ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion);
+int ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion);
+//mmu
+bool mmu_traducir_direccion(t_cpu* cpu, t_contexto* ctx, uint32_t dir_logica, uint32_t tamano_a_operar, uint32_t* dir_fisica_out, int* ms_id_out);
+
+t_list* fragmentar_acceso_memoria(t_cpu* cpu, uint32_t dir_fisica_global, int tamanio_total);
+    
 
 #endif /* INSTRUCCIONES_H_ */

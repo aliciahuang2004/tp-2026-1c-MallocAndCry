@@ -11,6 +11,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "estructuras.h"
+#include <commons/bitarray.h>
+
+extern t_bitarray* bitmap_swap;
+extern int swap_block_size;
+extern int km_socket_swap;
 
 typedef struct {
     t_log* logger;
@@ -34,16 +39,31 @@ typedef struct {
     t_kernel_memory* km;
 } t_hacerConnect;
 
+typedef struct {
+    uint32_t base;
+    uint32_t tamanio;
+    t_segmento* segmento;
+} t_reserva;
+
 //GLOBALES
 extern t_dictionary* procesos;
 
-extern t_list* huecos_libres;
+extern t_list* lista_huecos_libres;
 
 extern t_list* lista_ms;
 
 extern t_list* bloques_swap;
 
 extern t_dictionary* tabla_contextos;
+
+extern uint32_t memoria_total;
+
+extern t_list* lista_dir_global_ms;
+
+extern t_list* cpus_conectadas;
+
+extern t_list* lista_ms_conexion;
+
 
 //MUTEX
 extern pthread_mutex_t mutex_procesos;
@@ -56,9 +76,27 @@ extern pthread_mutex_t mutex_swap;
 
 extern pthread_mutex_t mutex_tabla_contextos;
 
+extern pthread_mutex_t mutex_memoria_total;
+
+extern pthread_mutex_t mutex_lista_dir_global_ms;
+
+extern pthread_mutex_t mutex_cpus_conectadas;
+
+extern pthread_mutex_t mutex_lista_ms_conexion;
+
+extern pthread_mutex_t mutex_socket_swap;
+
+extern pthread_mutex_t mutex_paths;
+
 t_kernel_memory* iniciar_kernelMemory(char* argv);
 void verificarKernelMemory(t_kernel_memory* kernelMemory);
 int recibir_operacion(int socket_cliente);
 void enviar_operacion(int socket_cliente, op_code codigo);
+uint32_t aumentar_memoria_total(uint32_t tamano);
+void destruir_kernel_memory(t_kernel_memory* km);
+void eliminar_ms_conexion_elemento(void* elemento);
+void limpiar_lista_ms_conexiones(void);
+void capturar_sigint(int s);
+void destruir_elemento_diccionario(void* elemento);
 
 #endif /* KERNEL_MEMORY_H */

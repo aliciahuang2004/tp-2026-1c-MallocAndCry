@@ -9,7 +9,7 @@
 t_buffer *crear_buffer()
 {
     t_buffer *buffer = malloc(sizeof(t_buffer));
-
+    memset(buffer, 0, sizeof(t_buffer));
     buffer->size = 0; 
     buffer->stream = NULL;
 
@@ -67,24 +67,28 @@ void* serializar_paquete(t_paquete* paquete, int bytes, t_log* logger)
 //Enviar paquete
 int enviar_paquete(t_paquete* paquete, int socket_cliente, t_log* logger)
 {
-	int bytes = paquete->buffer->size + 2*sizeof(int);
-	void* a_enviar = serializar_paquete(paquete, bytes, logger);
+    int bytes = paquete->buffer->size + 2*sizeof(int);
+    void* a_enviar = serializar_paquete(paquete, bytes, logger);
 
-	int resultado = send(socket_cliente, a_enviar, bytes, 0);
-	if (resultado <= 0) {
+    int enviados = 0;
+    while (enviados < bytes) {
+        int resultado = send(socket_cliente, a_enviar + enviados, bytes - enviados, 0);
+        if (resultado <= 0) {
             if (resultado == -1) {
                 log_warning(logger, "Error al enviar (socket %d)", socket_cliente);
             } else {
                 log_warning(logger, "Socket %d cerrado durante envío", socket_cliente);
             }
+            free(a_enviar);
             return -1; // fallo
         }
-	
-	free(a_enviar);
-	return 0;
+        enviados += resultado;
+    }
 
-	//free(a_enviar);
+    free(a_enviar);
+    return 0;
 }
+
 
 //eliminarPaquete
 void eliminar_paquete(t_paquete *packet)

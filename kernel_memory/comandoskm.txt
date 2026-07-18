@@ -1,0 +1,157 @@
+PARA "PRUEBA BASE" :
+
+comandos:
+./bin/kernel_memory km_pb.config
+./bin/kernel_scheduler ks_pb.config PLANI_PRE_0.prc
+./bin/kernel_scheduler ks_pb.config MEMORIA_PRE_0.prc //compacta,deberia?
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms2.config 256 1
+
+cuando se conecte un ms,expando el ultimo hueco con el tamaño de este nuevo ms
+si el ultimo hueco ya esta ocupado,el nuevo ms solo se convierte en un nuevo hueco 
+
+para (((PRUEBA PLANIFICACION CORTO PLAZO)))----
+
+
+comandos:
+./bin/kernel_memory km_cp.config
+./bin/kernel_scheduler ks_pb.config PCP.prc
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms2.config 256 1
+--------------------------------
+PARA "PRUEBA MEMORIA" 
+ primero con BEST (sin compactacion),luego segunda prueba con WORST (hay compactacion)
+
+comandos:
+./bin/kernel_memory km_pmB.config
+./bin/kernel_memory km_pmW.config
+./bin/kernel_scheduler ks_mem.config PLANI_MEM.prc 
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 32 2
+./bin/memory_stick ms3.config 64 3
+./bin/memory_stick ms4.config 128 4
+---------------------
+
+-----------------------
+PARA PRUEBA MEDIANO PLAZO:
+(con modificaciones en PMP.prc y config de issue si funciona)
+comandos:
+./bin/kernel_memory kernel_memory.config
+./bin/kernel_scheduler kernel_scheduler.config PMP.prc 
+./bin/io io.config SLEEP
+./bin/io io.config STDOUT
+./bin/io io.config STDIN
+./bin/swap swap.config 
+./bin/cpu cpu.config 1
+./bin/memory_stick ms5.config 16 1
+./bin/memory_stick ms2.config 16 2
+./bin/memory_stick ms3.config 32 3
+./bin/memory_stick ms4.config 64 4
+
+--------------------------------------------------------------------------------
+make clean && make
+rm -f */*.log */bin/*.log /tmp/tp_so_swapfile.bin
+killall -9 kernel_memory cpu kernel_scheduler memory_stick 2>/dev/null
+
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_scheduler
+SCRIPTS_BASEPATH=/home/utnso/tp-2026-1c-MallocAndCry/kernel_memory
+-----------------------------------------------------------------------------ks
+./bin/kernel_scheduler kernel_scheduler.config PLANI_MEM.prc
+./bin/kernel_scheduler kernel_scheduler.config PLANI_PRE_0.prc
+
+valgrind --leak-check=full ./bin/kernel_scheduler kernel_scheduler.config .....
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config pruebam.txt
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config PLANI_PRE_0.prc
+gdb --args ./bin/kernel_scheduler kernel_scheduler.config PLANI_MEM.prc 
+run
+bt
+-----------------------------------------------------------------------------ms
+valgrind --leak-check=full ./bin/memory_stick ms1.config 16 1
+gdb --args ./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms1.config 16 1
+gdb --args ./bin/memory_stick ms2.config 32 2
+./bin/memory_stick ms2.config 32 2
+gdb --args ./bin/memory_stick ms3.config 64 3
+./bin/memory_stick ms3.config 64 3
+gdb --args ./bin/memory_stick ms4.config 128 4
+./bin/memory_stick ms4.config 128 4
+------------------------------------------------------------------------------cpu
+valgrind --leak-check=full ./bin/cpu cpu.config 1
+gdb --args ./bin/cpu cpu1.config 1 
+./bin/cpu cpu1.config 1
+./bin/cpu cpu2.config 2
+./bin/cpu cpu3.config 3
+
+------------------------------------------------------------------------------km
+valgrind --leak-check=full ./bin/kernel_memory kernel_memory.config
+valgrind --leak-check=full --track-origins=yes ./bin/kernel_memory kernel_memory.config
+valgrind --leak-check=full --show-leak-kinds=all ./bin/kernel_memory kernel_memory.config
+./bin/kernel_memory kernel_memory.config 
+gdb --args ./bin/kernel_memory kernel_memory.config 
+run
+bt
+./bin/kernel_memory kernel_memory.config 
+------------------------------------------------------------------------------io 
+valgrind --leak-check=full ./bin/io io.config STDIN 
+gdb --args ./bin/io io.config STDIN
+./bin/io io.config STDIN
+valgrind --leak-check=full ./bin/io io.config STDOUT
+./bin/io io.config STDOUT
+valgrind --leak-check=full ./bin/io io.config SLEEP
+./bin/io io.config SLEEP
+-----------------------------------------------------------------------------swap 
+valgrind --leak-check=full ./bin/swap swap.config 
+gdb --args ./bin/swap swap.config
+./bin/swap swap.config 
+------------------------------------------------------------------------------
+cuando levanto km dos veces seguidas a veces tira mensaje "socket -1" :
+puertos 
+km 9001
+ks 9002
+cpu1 9004
+cpu2 9005
+cpu3 9009
+ms1 9003
+ms2 9006
+ms3 9007
+ms4 9008
+swap -
+io stdin -
+io sleep -
+io stdout -
+
+pkill -f kernel_memory
+pkill -f kernel_scheduler
+pkill -f cpu
+fuser -k 9001/tcp
+fuser -k 9002/tcp
+fuser -k 9003/tcp
+fuser -k 9004/tcp
+fuser -k 9005/tcp
+fuser -k 9006/tcp
+fuser -k -n tcp 9003
+fuser -k -n tcp 9004
+fuser -k -n tcp 9006
+fuser -k -n tcp 9005
+fuser -k -n tcp 9006
+fuser -k -n tcp 9007
+------------------------------------------------
+
+debo garantizar el orden 
+mutex procesos
+mutex huecos
+y no en orden inverso
+

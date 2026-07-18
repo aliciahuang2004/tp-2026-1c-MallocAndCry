@@ -19,12 +19,12 @@ void ejecutar_stdin(int pid, uint32_t datos_size, int socket_ks, t_log* logger) 
         if (input_len >= datos_size) {
         // Si la entrada es mayor o igual, copiar solo los primeros N bytes
             memcpy(buffer_respuesta, input, datos_size);
-            log_info(logger, "Entrada truncada a %u bytes (entrada original: %zu bytes)", datos_size, input_len);
+            log_debug(logger, "Entrada truncada a %u bytes (entrada original: %zu bytes)", datos_size, input_len);
         } else {
         // Si la entrada es menor, copiar y rellenar con '\0'
             memcpy(buffer_respuesta, input, input_len);
             // El resto ya está en '\0' por calloc
-            log_info(logger, "Entrada completada con null terminators (%zu + %lu bytes de padding)", input_len, datos_size - input_len);
+            log_debug(logger, "Entrada completada con null terminators (%zu + %lu bytes de padding)", input_len, datos_size - input_len);
                 }
             }
 
@@ -44,7 +44,6 @@ void ejecutar_stdout(int pid, uint32_t datos_size, void* datos, int socket_ks, t
         log_info(logger, "## PID: %d - %s", pid, datos_str);
         
         // Imprimir en pantalla
-        printf("[IO STDOUT PID %d] ", pid);
         fwrite(datos, 1, datos_size, stdout);
         printf("\n");
         fflush(stdout);

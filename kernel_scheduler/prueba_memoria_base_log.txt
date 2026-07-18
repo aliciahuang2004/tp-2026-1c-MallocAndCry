@@ -1,0 +1,52 @@
+[INFO] 18:59:36:322 KERNEL_SCHEDULER/(2084:2084): ## Conectado a Kernel Memory
+[INFO] 18:59:36:322 KERNEL_SCHEDULER/(2084:2084): ## (<0>) Se crea el proceso - Estado: NEW
+[INFO] 18:59:36:332 KERNEL_SCHEDULER/(2084:2086): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[INFO] 19:00:37:708 KERNEL_SCHEDULER/(2084:2119): ## CPU 1 Conectada
+[INFO] 19:00:37:708 KERNEL_SCHEDULER/(2084:2087): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:00:38:012 KERNEL_SCHEDULER/(2084:2120): ## (<0>) - Solicitó Syscall: <INIT_PROC> MEMORIA_PRE_3.prc (prioridad 1)
+[INFO] 19:00:38:013 KERNEL_SCHEDULER/(2084:2120): ## (<1>) Se crea el proceso - Estado: NEW
+[INFO] 19:00:38:016 KERNEL_SCHEDULER/(2084:2086): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[INFO] 19:00:38:271 KERNEL_SCHEDULER/(2084:2120): ## (<0>) - Solicitó syscall: <SLEEP>
+[INFO] 19:00:38:272 KERNEL_SCHEDULER/(2084:2120): ## (<0>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 19:00:38:272 KERNEL_SCHEDULER/(2084:2087): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:00:39:044 KERNEL_SCHEDULER/(2084:2120): ## (<1>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=16
+[INFO] 19:00:39:310 KERNEL_SCHEDULER/(2084:2120): ## (<1>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 19:00:39:310 KERNEL_SCHEDULER/(2084:2120): ## (<1>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>
+[INFO] 19:00:48:274 KERNEL_SCHEDULER/(2084:2111): ## (<0>) finalizó IO y pasa a READY
+[INFO] 19:00:48:274 KERNEL_SCHEDULER/(2084:2111): ## (<0>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 19:00:48:274 KERNEL_SCHEDULER/(2084:2087): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:00:48:529 KERNEL_SCHEDULER/(2084:2120): ## (<0>) - Solicitó Syscall: <INIT_PROC> MEMORIA_PRE_1.prc (prioridad 2)
+[INFO] 19:00:48:529 KERNEL_SCHEDULER/(2084:2120): ## (<2>) Se crea el proceso - Estado: NEW
+[INFO] 19:00:48:532 KERNEL_SCHEDULER/(2084:2086): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[INFO] 19:00:48:786 KERNEL_SCHEDULER/(2084:2120): ## (<0>) - Solicitó Syscall: <INIT_PROC> MEMORIA_PRE_2.prc (prioridad 2)
+[INFO] 19:00:48:786 KERNEL_SCHEDULER/(2084:2120): ## (<3>) Se crea el proceso - Estado: NEW
+[INFO] 19:00:48:788 KERNEL_SCHEDULER/(2084:2086): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[INFO] 19:00:49:053 KERNEL_SCHEDULER/(2084:2120): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 19:00:49:054 KERNEL_SCHEDULER/(2084:2120): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 19:00:49:054 KERNEL_SCHEDULER/(2084:2087): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:00:49:055 KERNEL_SCHEDULER/(2084:2120): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 19:00:49:311 KERNEL_SCHEDULER/(2084:2120): ## (<2>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=32
+[INFO] 19:00:49:570 KERNEL_SCHEDULER/(2084:2120): ## (<2>) - Solicitó syscall: <MEM_ALLOC> idSegmento=1 tamanio=32
+[INFO] 19:00:49:828 KERNEL_SCHEDULER/(2084:2120): ## (<2>) - Solicitó syscall: <MEM_ALLOC> idSegmento=2 tamanio=32
+[INFO] 19:00:50:088 KERNEL_SCHEDULER/(2084:2120): ## (<2>) - Solicitó syscall: <MEM_ALLOC> idSegmento=3 tamanio=32
+[INFO] 19:00:50:857 KERNEL_SCHEDULER/(2084:2120): ## (<2>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 19:00:50:858 KERNEL_SCHEDULER/(2084:2120): ## (<2>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>
+[INFO] 19:00:50:860 KERNEL_SCHEDULER/(2084:2087): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:00:51:372 KERNEL_SCHEDULER/(2084:2120): ## (<3>) - Solicitó syscall: <MEM_ALLOC> idSegmento=0 tamanio=64
+[INFO] 19:00:52:143 KERNEL_SCHEDULER/(2084:2120): ## (<3>) - Solicitó Syscall <STDIN> 
+[INFO] 19:00:52:145 KERNEL_SCHEDULER/(2084:2120): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[WARNING] 19:00:52:145 KERNEL_SCHEDULER/(2084:2090): EsperandoIO_OK, enviando a KM para PID 3
+[WARNING] 19:01:13:860 KERNEL_SCHEDULER/(2084:2090): IO_OK, enviando a KM para PID 3
+[INFO] 19:01:15:363 KERNEL_SCHEDULER/(2084:2090): ## (<3>) finalizó IO y pasa a READY
+[INFO] 19:01:15:364 KERNEL_SCHEDULER/(2084:2090): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 19:01:15:364 KERNEL_SCHEDULER/(2084:2087): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:01:19:433 KERNEL_SCHEDULER/(2084:2120): ## (<3>) - Solicitó syscall: <STDOUT>
+[INFO] 19:01:19:435 KERNEL_SCHEDULER/(2084:2120): ## (<3>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 19:01:20:943 KERNEL_SCHEDULER/(2084:2114): ## (<3>) finalizó IO y pasa a READY
+[INFO] 19:01:20:944 KERNEL_SCHEDULER/(2084:2114): ## (<3>) Pasa del estado <BLOCK> al estado <READY>
+[INFO] 19:01:20:946 KERNEL_SCHEDULER/(2084:2087): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 19:01:21:201 KERNEL_SCHEDULER/(2084:2120): ## (<3>) - Solicitó syscall: <MEM_FREE> idSegmento=0
+[INFO] 19:01:21:460 KERNEL_SCHEDULER/(2084:2120): ## (<3>) - Solicitó syscall: <EXIT_PROC>
+[INFO] 19:01:21:461 KERNEL_SCHEDULER/(2084:2120): ## (<3>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 19:01:21:463 KERNEL_SCHEDULER/(2084:2120): ## (<3>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[INFO] 19:01:21:464 KERNEL_SCHEDULER/(2084:2085): FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS

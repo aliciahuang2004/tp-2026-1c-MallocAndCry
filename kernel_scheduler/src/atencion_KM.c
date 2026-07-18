@@ -1,14 +1,19 @@
 #include "kernel_scheduler.h"
 
 void* atender_kernel_memory(void* arg) {
-    log_info(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
+    log_debug(kernel->logger, "KM Listener: hilo iniciado en socket %d", kernel->socket_kernel_memory);
 
     while (1) {
         t_list* paquete = recibir_paquete(kernel->socket_kernel_memory);
 
         if (paquete == NULL) {
             log_error(kernel->logger, "KM Listener: KM se desconectó o error en socket");
-            break;
+            liberarConexiones();
+            finalizarColas();
+            finalizarSemaforos();
+            finalizarInterfaces();
+            destruir_kernel_scheduler(kernel);
+            exit(EXIT_FAILURE);
         }
 
         int cod_op = *(int*) list_get(paquete, 0);
@@ -26,112 +31,106 @@ void* atender_kernel_memory(void* arg) {
                 finalizarProceso(pid,CREACION_DE_PROCESO_ERROR);
                 break;
             }
-            /*case ELIMINACION_DE_SEGMENTO_OK:{
+            case ELIMINACION_DE_SEG_OK: {
                 int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM confirmó eliminación de proceso - PID: %d", pid);
-                enviarPIDAcpu(pid,buscarCPUSegunPID(pid));
+                log_debug(kernel->logger, "## KM confirmó eliminación de segmento - PID: %d", pid);
                 break;
             }
-            case ELIMINACION_DE_SEGMENTO_ERROR:{
+            case ELIMINACION_DE_SEG_ERROR: {
                 int pid = *(int*) list_get(paquete, 1);
-                log_error(kernel->logger, "## KM reportó error en eliminación de proceso - PID: %d", pid);
-                //SE VUELVE A MANDAR O FINALIZA?
+                log_error(kernel->logger, "## KM reportó error en eliminación de segmento - PID: %d", pid);
                 break;
-            }*/
+            }
+
             case CREACION_DE_SEGMENTO_OK:{
                 int pid = *(int*) list_get(paquete, 1);
                 log_debug(kernel->logger, "## KM confirmó creación de segmento - PID: %d", pid);
                 enviarPIDAcpu(pid,buscarCPUSegunPID(pid));
                 break;
             }
-            case CREACION_DE_SEGMENTO_ERROR:{
+            case CREACION_DE_SEGMENTO_ERROR:{ // en nuestro flujo e compactacion cuando llega CREACION_DE_SEGMENTO_ERROR, el proceso ya fue movido a READY y la CPU ya fue liberada
                 int pid = *(int*) list_get(paquete, 1);
                 log_error(kernel->logger, "## KM reportó error en creación de segmento - PID: %d", pid);
-                //SE VUELVE A MANDAR O FINALIZA?
                 break;
             }
             case RTA_LECTURA:{
                 int pid = *(int*) list_get(paquete, 1);
                 char* leido = (char*) list_get(paquete, 2);
-                log_debug(kernel->logger, "## KM confirmó lectura : %s", leido);
-                pthread_mutex_lock(&mutex_interfaces[STDIN]);
-                t_solicitud_io* solicitud = queue_peek(interfaces[STDIN].solicitudes);
-
-                // *** chequeo por las dudas pero no deberia de haber error
-
-                if(solicitud->pidSolicitaSyscall == pid){
-                    solicitud->leido = leido;
+                log_debug(kernel->logger, "## KM confirmó lectura para PID: %d", pid);
+                pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
+                t_solicitud_io* solicitud = queue_peek(interfaces[IO_STDOUT].solicitudes);
+                if(solicitud != NULL && solicitud->pidSolicitaSyscall == pid){
+                    solicitud->leido = malloc(solicitud->tamanio);
+                    memcpy(solicitud->leido, leido, solicitud->tamanio);
                 }
-                pthread_mutex_unlock(&mutex_interfaces[STDIN]);
+                pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
                 sem_post(&sem_recibiLecuraDeKM);
+                break;
+            }
+            case ESCRITURA_DE_DATOS_OK: {
+                int pid = *(int*) list_get(paquete, 1);
+                log_debug(kernel->logger, "## KM confirmó escritura STDIN para PID: %d", pid);
+                sem_post(&sem_recibiEscrituraDeKM);
                 break;
             }
             case CORRUPCION_MEMORIA:{
                 log_debug(kernel->logger, "## KM informa corrupcion");
-                // TODO
-                /* se deberán finalizar todos los Procesos y finalizar 
-                el Kernel Scheduler con motivo de Blue Screen of Death*/
+                kernel->noHayCorrupcion = false; // para el planificador para desalojar todo
+                finalizarTodosLosProcesos();// TODO
+                log_debug(kernel->logger,"Todos los procesos fueron finalizados");
+                log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER POR BLUE SCREEN OF DEATH");
+                liberarConexiones();
+                finalizarColas();
+                finalizarSemaforos();
+                finalizarInterfaces();
+                destruir_kernel_scheduler(kernel);
+                exit(EXIT_FAILURE);
                 break;
             }
             case INICIAR_COMPACTACION:{
+                log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento");
                 int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM solicita inicio de compactación para creación de segmento - PID: %d", pid);
-                //prepararParaCompactar();
-                /*
-                // pedirDesalojoPorCompactacion();
-                // reencolar procesos
+                int id_seg = *(int*) list_get(paquete, 2);
+                uint32_t tamano = *(uint32_t *)list_get(paquete, 3);
+                kernel->noHayCompactacion = false; // para el planificador
+                pedirDesalojoPorCompactacion();
+                chequearCPUsDesalojadas();
+                
                 t_paquete* paquete = crear_paquete(CPUS_DESALOJADAS, crear_buffer());
-            
-                agregar_a_paquete(paquete,&pidSolicitaSyscall,sizeof(int));
-
-                enviar_paquete(paquete,kernel->socket_kernel_memory,kernel->logger);
+                agregar_a_paquete(paquete, &pid, sizeof(int));
+                agregar_a_paquete(paquete, &id_seg, sizeof(int));
+                agregar_a_paquete(paquete, &tamano, sizeof(uint32_t));
+                enviarPaqueteAKM(paquete);
             
                 eliminar_paquete(paquete);
-
-                int cod_op2 = recibir_operacion(kernel->socket_kernel_memory);
-                if(cod_op2 == CREACION_DE_SEGMENTO_OK) {
-                    log_info(kernel->logger, "Compactación finalizada, reactivando planificador");
-                    // reactivar planificador
-                }
-                */
+                log_info(kernel->logger, "## Inicio de compactación");
 
                 break;
             }
-            case COMPACTACION_TERMINADA:{
-                int pid = *(int*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM informó fin de compactación para creación de segmento - PID: %d", pid);
-                // replanificar();
+            case COMPACTACION_OK:{
+                log_debug(kernel->logger, "## KM informó fin de compactación");
+                kernel->noHayCompactacion = true; // reinicia planificador
+                sem_post(&sem_compactacionTerminada);   // despierta a monitorPrioridades (y a cualquier otro que espere lo mismo)
+                log_info(kernel->logger, "## Fin de compactación");
                 break;
             }
             case AUMENTO_DE_MEMORIA:{
-                log_debug(kernel->logger, "## KM informó tener un aumento de memoria");
-                sem_post(&sem_hayMemoria); 
-                // OJO PORQUE AL PEDIR CREAR SEGMENTO VUELVO A PERDER MEMORIA 
-                // ENTONCES DEBERIA HACER sem_wait(&sem_hayMemoria); AL RECIBIR CREACION DE MEMORIA
-
-            /*
-            t_pcb* pcb = sacardeColaBlockPorPID(pid);
-            if (pcb != NULL) {
-                pcb->estado = READY;
-                pthread_mutex_lock(&mutex_READY);
-                queue_push(colaREADY, pcb);
-                pthread_mutex_unlock(&mutex_READY);
-                log_info(kernel->logger, "## (<%d>) Pasa del estado <BLOCK> al estado <READY>", pid);
-                sem_post(&sem_procesosReady);
-            } else {
-                log_error(kernel->logger,
-                        "KM Listener: CREACION_DE_SEGMENTO_OK - no se encontró PID %d en BLOCK", pid);
+                log_debug(kernel->logger, "## KM informó tener un aumento de memoria, eligiendo proceso suspendido");
+                solicitarDesuspenderProceso(-1);
+                // pedir hacer swap
+                break;
             }
+            case SUSPENSION_OK: {
+            log_debug(kernel->logger, "## KM confirmo la suspension");
+            sem_post(&sem_suspension_ok);
             break;
-            */
-/*
-            case AUMENTO_DE_MEMORIA: {
-                uint32_t memoria_total = *(uint32_t*) list_get(paquete, 1);
-                log_debug(kernel->logger, "## KM reporta aumento de memoria disponible: %u bytes", memoria_total);
-                break;
             }
-            }*/
-                break;
+            case DESUSPENSION_OK: {
+                int pid = *(int*) list_get(paquete, 1);
+                log_debug(kernel->logger, "## KM confirmo la desuspension");
+                pasarProcesoReadySuspAReady(pid);
+                solicitarDesuspenderProceso(-1);
+            break;
             }
             default:
                 log_warning(kernel->logger, "KM Listener: código de operación inesperado: %d", cod_op);
@@ -142,4 +141,211 @@ void* atender_kernel_memory(void* arg) {
     }
 
     return NULL;
+}
+
+void pedirDesalojoPorCompactacion(){
+    t_cpu_conectada* cpuOcupada = NULL;
+
+    t_queue* cpuOcupadas = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidadCpu = queue_size(colaCPUs); 
+    for(int i = 0; i < cantidadCpu ; i++){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if(!cpu->libre){
+            cpuOcupada = cpu;
+            queue_push(cpuOcupadas,cpuOcupada);
+        }
+        queue_push(colaCPUs,cpu);
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+
+    log_debug(kernel->logger,"TOTAL CPU'S %d", cantidadCpu);
+    log_debug(kernel->logger,"TOTAL CPU'S OCUPADAS %d",  queue_size(cpuOcupadas));
+    log_debug(kernel->logger, "[DEBUG-1] queue_is_empty(cpuOcupadas)=%d (0=tiene CPUs, 1=vacia)", queue_is_empty(cpuOcupadas));
+    while (!queue_is_empty(cpuOcupadas)){
+        log_debug(kernel->logger, "[DEBUG-2] Enviando desalojo a una CPU");
+        t_cpu_conectada* cpu = queue_pop(cpuOcupadas);
+        notificarDesalojo(cpu,NULL, PROCESO_DESALOJADO_COMPACTACION);
+    }
+    queue_destroy(cpuOcupadas);
+}
+
+void chequearCPUsDesalojadas(){
+    bool faltaLiberar =true ;
+    while(faltaLiberar){
+        pthread_mutex_lock(&mutex_EXEC);
+        int cantidad = queue_size(colaEXEC);
+        pthread_mutex_unlock(&mutex_EXEC);
+        if(cantidad == 0){
+            log_debug(kernel->logger, "Procesos ejecutando %d", cantidad);
+            faltaLiberar = false;
+        }
+    }
+}
+
+void solicitarDesuspenderProceso(int pid){
+    t_buffer* buffer = crear_buffer();
+    t_paquete* paquete = crear_paquete(DESUSPENSION_DE_PROCESO, buffer);
+
+    if(pid == -1){ 
+        //POR AVISO DE KM: libero memoria, se agrego un memory stick nuevo, o se compacto 
+        ordenarSuspReadySegunPrioridad();
+        pthread_mutex_lock(&mutex_READY_SUSP);
+        bool hayProcesoSuspendido = !queue_is_empty(colaREADY_SUSP);
+        int pidElegido = -1;
+        if(hayProcesoSuspendido){
+            t_pcb* pcb = queue_peek(colaREADY_SUSP);
+            pidElegido = pcb->pid;
+        }
+        pthread_mutex_unlock(&mutex_READY_SUSP);
+
+        if(!hayProcesoSuspendido){
+            eliminar_paquete(paquete);
+            return; // no hay nadie para desuspender, no le mandamos nada a KM
+        }
+        agregar_a_paquete(paquete, &pidElegido, sizeof(int));
+    }else{
+        agregar_a_paquete(paquete, &pid, sizeof(int));
+    }
+
+    int resultado = enviarPaqueteAKM(paquete);
+
+    if (resultado != 0) {
+        log_error(kernel->logger, "Error al enviar pedido de desuspencion a Kernel Memory");
+        exit(EXIT_FAILURE);
+    }
+    eliminar_paquete(paquete);
+}
+
+void finalizarTodosLosProcesos(){
+    pedirDesalojoPorCorrupcion(); // SE FINALIZA LOS EXEC
+    finalizarProcesosBlock();
+    finalizarProcesosBlockSusp();
+    finalizarProcesosNew();
+    finalizarProcesosReady();
+    finalizarProcesosReadySusp();
+    // EXIT YA TIENEN SU PROPIO MOTIVO DE DESALOJO
+}
+
+void pedirDesalojoPorCorrupcion(){
+    t_cpu_conectada* cpuOcupada = NULL;
+
+    t_queue* cpuOcupadas = queue_create();
+
+    pthread_mutex_lock(&mutex_CPU);
+    int cantidadCpu = queue_size(colaCPUs); 
+    for(int i = 0; i < cantidadCpu ; i++){
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        if(!cpu->libre){
+            cpuOcupada = cpu;
+            queue_push(cpuOcupadas,cpuOcupada);
+        }
+        queue_push(colaCPUs,cpu);
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+
+    log_debug(kernel->logger,"TOTAL CPU'S %d", cantidadCpu);
+    log_debug(kernel->logger,"TOTAL CPU'S OCUPADAS %d",  queue_size(cpuOcupadas));
+    log_debug(kernel->logger, "[DEBUG-1] queue_is_empty(cpuOcupadas)=%d (0=tiene CPUs, 1=vacia)", queue_is_empty(cpuOcupadas));
+    while (!queue_is_empty(cpuOcupadas)){
+        log_debug(kernel->logger, "[DEBUG-2] Enviando desalojo por corrupcion a una CPU");
+        t_cpu_conectada* cpu = queue_pop(cpuOcupadas);
+        notificarDesalojo(cpu,NULL, CORRUPCION_MEMORIA);
+    }
+    queue_destroy(cpuOcupadas);
+}
+
+void finalizarProcesosBlock(){
+    while(1){
+        pthread_mutex_lock(&mutex_BLOCK);
+        if(queue_is_empty(colaBLOCK)){
+            pthread_mutex_unlock(&mutex_BLOCK);
+            log_debug(kernel->logger,"Todos los procesos con estado BLOCK, fueron finalizados");
+            break;
+        }
+        t_pcb* pcb = queue_peek(colaBLOCK);
+        int pid = pcb->pid; 
+        pthread_mutex_unlock(&mutex_BLOCK);
+        finalizarProceso(pid,CORRUPCION_MEMORIA); 
+    }
+}
+
+void finalizarProcesosBlockSusp(){
+    while(1){
+        pthread_mutex_lock(&mutex_BLOCK_SUSP);
+        if(queue_is_empty(colaBLOCK_SUSP)){
+            pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+            log_debug(kernel->logger,"Todos los procesos con estado BLOCK SUSPENDIDO, fueron finalizados");
+            break;
+        }
+        t_pcb* pcb = queue_peek(colaBLOCK_SUSP);
+        int pid = pcb->pid; 
+        pthread_mutex_unlock(&mutex_BLOCK);
+        finalizarProceso(pid,CORRUPCION_MEMORIA); 
+    }
+}
+void finalizarProcesosNew(){
+    while(1){
+        pthread_mutex_lock(&mutex_NEW);
+        if(queue_is_empty(colaNEW)){
+            pthread_mutex_unlock(&mutex_NEW);
+            log_debug(kernel->logger,"Todos los procesos con estado NEW, fueron finalizados");
+            break;
+        }
+        t_pcb* pcb = queue_peek(colaNEW);
+        int pid = pcb->pid; 
+        pthread_mutex_unlock(&mutex_NEW);
+        finalizarProceso(pid,CORRUPCION_MEMORIA); 
+    }
+}
+void finalizarProcesosReady(){
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+        case CMN:
+            for(int i = 0; i < kernel->cantidadColasMultinivel; i++){
+                while(1){
+                    pthread_mutex_lock(&mutex_READY[i]);
+                    if(queue_is_empty(colasREADY[i])){
+                        pthread_mutex_unlock(&mutex_READY[i]);
+                        log_debug(kernel->logger,"Todos los procesos con estado NEW, fueron finalizados");
+                        break;
+                    }
+                    t_pcb* pcb = queue_peek(colasREADY[i]);
+                    int pid = pcb->pid; 
+                    pthread_mutex_unlock(&mutex_READY[i]);
+                    finalizarProceso(pid,CORRUPCION_MEMORIA);
+
+                }
+            }
+            break;
+        case FIFO:
+        case RR:
+            while(1){
+                pthread_mutex_lock(&mutex_READY[0]);
+                if(queue_is_empty(colasREADY[0])){
+                    pthread_mutex_unlock(&mutex_READY[0]);
+                    log_debug(kernel->logger,"Todos los procesos con estado NEW, fueron finalizados");
+                    break;
+                }
+                t_pcb* pcb = queue_peek(colasREADY[0]);
+                int pid = pcb->pid; 
+                pthread_mutex_unlock(&mutex_READY[0]);
+                finalizarProceso(pid,CORRUPCION_MEMORIA);
+                }
+            break;
+    }
+}
+void finalizarProcesosReadySusp(){
+    while(1){
+        pthread_mutex_lock(&mutex_READY_SUSP);
+        if(queue_is_empty(colaREADY_SUSP)){
+            pthread_mutex_unlock(&mutex_READY_SUSP);
+            log_debug(kernel->logger,"Todos los procesos con estado READY SUSPENDIDO, fueron finalizados");
+            break;
+        }
+        t_pcb* pcb = queue_peek(colaREADY_SUSP);
+        int pid = pcb->pid; 
+        pthread_mutex_unlock(&mutex_READY_SUSP);
+        finalizarProceso(pid,CORRUPCION_MEMORIA); 
+    }
 }

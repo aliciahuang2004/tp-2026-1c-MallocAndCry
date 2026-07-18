@@ -1,0 +1,154 @@
+---PRUEBA BASE
+
+KS
+./bin/kernel_scheduler ks_pb.config PLANI_PRE_0.prc
+
+./bin/kernel_scheduler ks_pb.config MEMORIA_PRE_0.prc
+
+KM
+./bin/kernel_memory km_pb.config
+
+MS
+./bin/memory_stick ms1.config 256 1
+
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 48 2
+./bin/memory_stick ms3.config 64 3
+./bin/memory_stick ms4.config 128 4
+
+./bin/memory_stick ms1.config 128 1
+./bin/memory_stick ms2.config 128 2
+
+SWAP
+./bin/swap swap.config
+
+IO SLEEP
+./bin/io io.config sleep
+
+IO STDIN
+./bin/io io.config stdin
+
+IO STDOUT
+./bin/io io.config stdout
+
+CPU
+./bin/cpu cpu.config 1
+
+
+---CORTO PLAZO
+
+KS
+./bin/kernel_scheduler ks_cp.config PCP.prc
+
+KM
+./bin/kernel_memory km_cp.config
+
+MS
+./bin/memory_stick ms1.config 256 1
+
+SWAP
+./bin/swap swap.config
+
+IO SLEEP
+./bin/io io.config sleep
+
+IO STDIN
+./bin/io io.config stdin
+
+IO STDOUT
+./bin/io io.config stdout
+
+CPU
+./bin/cpu cpu.config 1
+
+
+---MEMORIA
+
+KS
+./bin/kernel_scheduler ks_mem.config PLANI_MEM.prc
+
+KM
+./bin/kernel_memory km_mem.config
+
+./bin/kernel_memory km_resto.config
+
+
+MS
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 32 2
+./bin/memory_stick ms3.config 64 3
+./bin/memory_stick ms4.config 128 4
+
+SWAP
+./bin/swap swap.config
+
+IO SLEEP
+./bin/io io.config sleep
+
+IO STDIN
+./bin/io io.config stdin
+
+IO STDOUT
+./bin/io io.config stdout
+
+CPU
+./bin/cpu cpu.config 1
+
+
+---MEDIANO PLAZO
+
+KS
+./bin/kernel_scheduler ks_mp.config PMP.prc
+
+KM
+./bin/kernel_memory km_resto.config
+
+
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 16 2
+./bin/memory_stick ms3.config 32 3
+./bin/memory_stick ms4.config 64 4
+
+SWAP
+./bin/swap swap.config
+
+IO SLEEP
+./bin/io io.config sleep
+
+IO STDIN
+./bin/io io.config stdin
+
+IO STDOUT
+./bin/io io.config stdout
+
+CPU
+./bin/cpu cpu.config 1
+
+
+---HERENCIA DE PRIORIDADES
+
+KS
+./bin/kernel_scheduler ks_hp.config PHP.prc
+
+KM
+./bin/kernel_memory km_resto.config
+
+
+MS
+./bin/memory_stick ms1.config 16 1
+./bin/memory_stick ms2.config 16 2
+
+SWAP
+./bin/swap swap.config
+
+IO SLEEP
+./bin/io io.config sleep
+
+IO STDIN
+./bin/io io.config stdin
+
+IO STDOUT
+./bin/io io.config stdout
+
+CPU
+./bin/cpu cpu.config 1

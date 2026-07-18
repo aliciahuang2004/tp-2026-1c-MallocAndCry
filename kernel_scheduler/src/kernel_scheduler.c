@@ -1,7 +1,15 @@
 #include "kernel_scheduler.h"
 
 int idCPUParaAsignar = 0;
+pthread_mutex_t mutex_socket_KM = PTHREAD_MUTEX_INITIALIZER;
 
+int enviarPaqueteAKM(t_paquete* paquete) {
+    pthread_mutex_lock(&mutex_socket_KM);
+    int resultado = enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    pthread_mutex_unlock(&mutex_socket_KM);
+
+    return resultado;
+}
 t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     t_kernel_scheduler* kernel_scheduler = malloc(sizeof(t_kernel_scheduler));
 
@@ -18,6 +26,7 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     kernel_scheduler->ip_kernel_memory = config_get_string_value(kernel_scheduler->config, "IP_KERNEL_MEMORY");
     kernel_scheduler->puerto_kernel_memory = config_get_string_value(kernel_scheduler->config, "PUERTO_KERNEL_MEMORY");
     kernel_scheduler->planification_algorithm = config_get_string_value(kernel_scheduler->config, "PLANIFICATION_ALGORITHM");
+    kernel_scheduler->queues_algorithms = config_get_array_value(kernel_scheduler->config, "QUEUES_ALGORITHMS");
     kernel_scheduler->rr_quantum = config_get_int_value(kernel_scheduler->config,"RR_QUANTUM");
     char* colas_desalojan = config_get_string_value(kernel_scheduler->config, "QUEUE_PREEMPTION");
     if(strcmp(colas_desalojan, "TRUE") == 0){
@@ -32,7 +41,9 @@ t_kernel_scheduler* iniciar_kernel_scheduler(char* path_config) {
     while(kernel_scheduler->queues_algorithms[kernel_scheduler->cantidadColasMultinivel] != NULL) {
         kernel_scheduler->cantidadColasMultinivel++;
     }
-
+    kernel_scheduler->noHayCompactacion = true;
+    kernel_scheduler->noHayCorrupcion = true;
+    kernel_scheduler->pcbFinalizados = 0;
     log_debug(kernel_scheduler->logger, "El kernel scheduler se inicializo correctamente");
     
     return kernel_scheduler;
@@ -52,7 +63,7 @@ void conectar_con_kernel_memory(){
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(KERNEL_SCHEDULER_HANDSHAKE, buffer);
 
-    enviar_paquete(paquete, kernel->socket_kernel_memory, kernel->logger);
+    enviarPaqueteAKM(paquete);
 
     eliminar_paquete(paquete);
 
@@ -65,12 +76,12 @@ void esperar_conexiones() {
         log_error(kernel->logger, "No se pudo iniciar el servidor Scheduler en puerto %s", kernel->puerto_escucha);
         return;
     }
-    log_info(kernel->logger, "Servidor Scheduler escuchando en puerto %s", kernel->puerto_escucha);
+    log_debug(kernel->logger, "Servidor Scheduler escuchando en puerto %s", kernel->puerto_escucha);
 
     while (1) {
         int cliente_fd = esperar_cliente(server_fd);
         if (cliente_fd != -1) {
-            log_info(kernel->logger, "Cliente conectado en socket %d", cliente_fd);
+            log_debug(kernel->logger, "Cliente conectado en socket %d", cliente_fd);
             pthread_t hilo_atencion;
             t_atencion_cliente* datos = malloc(sizeof(t_atencion_cliente));
             datos->socket_cliente = cliente_fd;
@@ -89,7 +100,7 @@ void* atender_cliente_scheduler(void* arg) {
     t_log* logger = datos->logger;
 
     while (1) {
-        log_info(logger, "Nuevo cliente detectado en socket %d. Leyendo operación...", socket_cliente);
+        log_debug(logger, "Nuevo cliente detectado en socket %d. Leyendo operación...", socket_cliente);
         t_list* paquete = recibir_paquete(socket_cliente);
         if (paquete == NULL) {
             log_error(logger, "El cliente en socket %d se desconectó o envió un paquete inválido", socket_cliente);
@@ -102,7 +113,7 @@ void* atender_cliente_scheduler(void* arg) {
             break;
         }
         int cod_op = *cod_op_ptr;
-        log_info(logger, "Código de operación recibido: %d", cod_op);
+        log_debug(logger, "Código de operación recibido: %d", cod_op);
 
         switch (cod_op) {
             case CPU_HANDSHAKE:{
@@ -138,18 +149,12 @@ void* atender_cliente_scheduler(void* arg) {
                 pthread_create(&hilo_cpu, NULL, atender_cpu, socket_cpu_ptr);
                 pthread_detach(hilo_cpu);
 
-               /* if(!kernel->procesoInicialCreado){
-                    log_info(logger, "Creando proceso inicial...");
-                    crearProceso(pathInicial, 0);
-                    kernel->procesoInicialCreado = true; 
-                }*/ // se movio al main para que se cree antes de esperar CPUs, asi no hay riesgo de que llegue una CPU nueva y no haya proceso inicial creado
-                
                 list_destroy_and_destroy_elements(paquete, free);
                 return NULL; // Salimos del hilo de atención porque ahora cada CPU tiene su propio hilo dedicado
                 break;
             }
             case IO_HANDSHAKE:{
-                log_info(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
+                log_debug(logger, "Nuevo módulo de I/O detectado en socket %d. Leyendo datos...", socket_cliente);
                 int* tipo_interfaz_ptr = (int*) list_get(paquete, 1);
 
                 if (tipo_interfaz_ptr == NULL) {
@@ -168,11 +173,12 @@ void* atender_cliente_scheduler(void* arg) {
                 if(interfaces[tipo_interfaz].socket_interfaz == -1){
                     interfaces[tipo_interfaz].socket_interfaz = socket_cliente;
                     interfaces[tipo_interfaz].ocupada = false;
-                    log_info(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
+                    log_debug(kernel->logger, "## Interfaz registrada: Tipo: %s. Socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
                     pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                 }else{
+                    pthread_mutex_unlock(&mutex_interfaces[tipo_interfaz]);
                     log_error(kernel->logger, "ERROR: Tipo %s, ya conectado en socket: %d", interfaces[tipo_interfaz].nombre, interfaces[tipo_interfaz].socket_interfaz);
-                    close(socket_cliente);
+                    liberar_conexion(socket_cliente);
                     return NULL ;
                 }
                 
@@ -215,10 +221,12 @@ void inicializar_interfaces() {
     interfaces[IO_STDOUT].solicitudes = queue_create();
     
     sem_hayIO = malloc(3 * sizeof(sem_t));
+    sem_haySolicitudIO = malloc(3 * sizeof(sem_t));
 
     for (int i = 0; i < 3; i++) {
         pthread_mutex_init(&mutex_interfaces[i], NULL);
         sem_init(&sem_hayIO[i],0,0);
+        sem_init(&sem_haySolicitudIO[i],0,0);
     }
 
 }
@@ -266,3 +274,146 @@ void imprimir_lista_interfaces_io(t_log* logger) {
     pthread_mutex_unlock(&mutex_lista_interfaces);
 }
 */
+
+void destruir_kernel_scheduler(t_kernel_scheduler* kernel_scheduler) {
+   if (!kernel_scheduler) return; // Verificar que el puntero no sea NULL antes de destruir
+
+   if (kernel_scheduler->logger) {
+       log_destroy(kernel_scheduler->logger);
+   }
+   if (kernel_scheduler->config) {
+       config_destroy(kernel_scheduler->config);
+   }
+   free(kernel_scheduler);
+
+}
+
+void liberarConexiones(){
+    // LIBERO IO
+    pthread_mutex_lock(&mutex_interfaces[IO_SLEEP]);
+    liberar_conexion(interfaces[IO_SLEEP].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_SLEEP]);
+
+    pthread_mutex_lock(&mutex_interfaces[IO_STDIN]);
+    liberar_conexion(interfaces[IO_STDIN].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDIN]);    
+
+    pthread_mutex_lock(&mutex_interfaces[IO_STDOUT]);
+    liberar_conexion(interfaces[IO_STDOUT].socket_interfaz);
+    pthread_mutex_unlock(&mutex_interfaces[IO_STDOUT]);
+
+    // LIBERO CPU
+    t_queue* colaAux = queue_create();
+    pthread_mutex_lock(&mutex_CPU);
+    while (!queue_is_empty(colaCPUs)) {
+        t_cpu_conectada* cpu = queue_pop(colaCPUs);
+        liberar_conexion(cpu->socket_cliente);
+        queue_push(colaAux, cpu);
+    }
+    while (!queue_is_empty(colaAux)) {
+        queue_push(colaCPUs, queue_pop(colaAux));
+    }
+    pthread_mutex_unlock(&mutex_CPU);
+    queue_destroy(colaAux);
+
+    //KM
+    liberar_conexion(kernel->socket_kernel_memory);
+
+}
+
+void finalizarColas(){
+    pthread_mutex_lock(&mutex_NEW);
+    queue_destroy_and_destroy_elements(colaNEW,NULL);
+    pthread_mutex_unlock(&mutex_NEW);
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+        case FIFO:
+        case RR:
+            pthread_mutex_lock(&mutex_READY[0]);
+            queue_destroy_and_destroy_elements(colasREADY[0],NULL);
+            pthread_mutex_unlock(&mutex_READY[0]);
+            break;
+        
+        case CMN:
+            for (int i = 0; i < kernel->cantidadColasMultinivel; i++){
+                pthread_mutex_lock(&mutex_READY[i]);
+                queue_destroy_and_destroy_elements(colasREADY[i],NULL);
+                pthread_mutex_unlock(&mutex_READY[i]);
+            }
+            break;
+    }
+    pthread_mutex_lock(&mutex_READY_SUSP);
+    queue_destroy_and_destroy_elements(colaREADY_SUSP,NULL);
+    pthread_mutex_unlock(&mutex_READY_SUSP);
+    pthread_mutex_lock(&mutex_EXEC);
+    queue_destroy_and_destroy_elements(colaEXEC,NULL);
+    pthread_mutex_unlock(&mutex_EXEC);
+    pthread_mutex_lock(&mutex_BLOCK);
+    queue_destroy_and_destroy_elements(colaBLOCK,NULL);
+    pthread_mutex_unlock(&mutex_BLOCK);
+    pthread_mutex_lock(&mutex_BLOCK_SUSP);
+    queue_destroy_and_destroy_elements(colaBLOCK_SUSP,NULL);
+    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+    pthread_mutex_lock(&mutex_EXIT);
+    queue_destroy_and_destroy_elements(colaEXIT,NULL);
+    pthread_mutex_unlock(&mutex_EXIT);
+    pthread_mutex_lock(&mutex_CPU);
+    //queue_destroy_and_destroy_elements(colaCPUs, NULL); DA SF VER PORQUE, PORQUE EL HAY UNA CPU Y NO ES DIRECCION INVALIDA
+    for(int i = 0; i < queue_size(colaCPUs); i++){
+        free(queue_pop(colaCPUs));
+    }
+    queue_destroy(colaCPUs);
+    pthread_mutex_unlock(&mutex_CPU);
+}
+
+void finalizarSemaforos(){
+    //MUTEX
+    pthread_mutex_destroy(&mutex_NEW);
+    if(obtenerPlanificacion(kernel->planification_algorithm) == CMN){
+        for (int i = 0; i < kernel->cantidadColasMultinivel; i++) {
+            pthread_mutex_destroy(&mutex_READY[i]);
+        }
+    }else{
+        pthread_mutex_destroy(&mutex_READY[0]);
+    }
+    pthread_mutex_destroy(&mutex_READY_SUSP);
+    pthread_mutex_destroy(&mutex_EXEC);
+    pthread_mutex_destroy(&mutex_BLOCK);
+    pthread_mutex_destroy(&mutex_BLOCK_SUSP);
+    pthread_mutex_destroy(&mutex_EXIT);
+
+    //SEMAFOROS
+    sem_destroy(&sem_hayCPUdisponible); // CPU se conecta o liberamos
+    // sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
+    sem_destroy(&sem_hayProcesosEnReady);
+    sem_destroy(&sem_readyPrioridad);
+    sem_destroy(&sem_recibiLecuraDeIO);
+    sem_destroy(&sem_recibiLecuraDeKM);
+    sem_destroy(&sem_recibiEscrituraDeKM);
+    sem_destroy(&sem_suspension_ok);
+    // sem_init(&sem_desuspension_ok, 0, 0);
+    // sem_destroy(&sem_hayProcesosEnExec);
+    sem_destroy(&sem_procesoDesalojadoPrioridad);
+
+    dictionary_destroy_and_destroy_elements(diccionario_mutex,NULL);
+    pthread_mutex_destroy(&mutex_diccionario);
+
+    //INTERFACES
+
+    for (int i = 0; i < 3; i++) {
+        pthread_mutex_destroy(&mutex_interfaces[i]);
+        sem_destroy(&sem_hayIO[i]);
+        sem_destroy(&sem_haySolicitudIO[i]);
+    }
+
+}
+void finalizarInterfaces(){
+    for (int i = 0; i < 3; i++) {
+        if (interfaces[i].solicitudes != NULL) {
+            while (!queue_is_empty(interfaces[i].solicitudes)) {
+                t_solicitud_io* elem = queue_pop(interfaces[i].solicitudes);
+                free(elem);
+            }
+            queue_destroy(interfaces[i].solicitudes);
+        }
+    }
+}

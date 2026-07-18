@@ -24,11 +24,17 @@ pthread_mutex_t mutex_EXIT;
 sem_t sem_hayProcesosEnReady;
 sem_t sem_readyPrioridad;
 sem_t sem_hayCPUdisponible;
-sem_t sem_finSyscall;
-sem_t sem_hayMemoria;
+// sem_t sem_finSyscall;
+// sem_t sem_hayMemoria;
 sem_t* sem_hayIO;
+sem_t* sem_haySolicitudIO;
 sem_t sem_recibiLecuraDeIO;
 sem_t sem_recibiLecuraDeKM;
+sem_t sem_recibiEscrituraDeKM;
+sem_t sem_suspension_ok;
+sem_t sem_procesoFinalizado;
+// sem_t sem_hayProcesosEnExec;
+sem_t sem_procesoDesalojadoPrioridad;
 
 t_dictionary* diccionario_mutex;
 pthread_mutex_t mutex_diccionario;
@@ -36,7 +42,7 @@ pthread_mutex_t mutex_diccionario;
 // t_list* lista_interfaces_io;
 t_interfaz_conectada interfaces[3];
 pthread_mutex_t mutex_interfaces[3];
-
+sem_t sem_compactacionTerminada;
 void inicializarColas(){
     colaNEW = queue_create();
     if(strcmp(kernel->planification_algorithm,"CMN") == 0 ){
@@ -57,6 +63,7 @@ void inicializarColas(){
     colaCPUs = queue_create();
 
 }
+
 void inicializarSemaforos(){
     //MUTEX
     pthread_mutex_init(&mutex_NEW, NULL);
@@ -77,12 +84,22 @@ void inicializarSemaforos(){
 
     //SEMAFOROS
     sem_init(&sem_hayCPUdisponible,0,0); // CPU se conecta o liberamos
-    sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
+    // sem_init(&sem_hayMemoria,0,0);  //CHEQUEAR
     sem_init(&sem_hayProcesosEnReady, 0, 0);
     sem_init(&sem_readyPrioridad,0,0);
-    sem_init(&sem_finSyscall,0,0);  // 
+    // sem_init(&sem_finSyscall,0,0);  // 
     sem_init(&sem_recibiLecuraDeIO,0,0);
     sem_init(&sem_recibiLecuraDeKM,0,0);
+    sem_init(&sem_recibiEscrituraDeKM,0,0);
+    sem_init(&sem_suspension_ok, 0, 0);
+    sem_init(&sem_procesoFinalizado, 0, 0);
+    // sem_init(&sem_hayProcesosEnExec,0,0);
+    sem_init(&sem_procesoDesalojadoPrioridad,0,0);
+
+    diccionario_mutex = dictionary_create();
+    pthread_mutex_init(&mutex_diccionario, NULL);
+    sem_init(&sem_compactacionTerminada, 0, 0);
+
 }
 
 void pasarProcesoNewAReady(){
@@ -132,8 +149,7 @@ t_planificador obtenerPlanificacion(char* planificador){
 }
 
 void pasarProcesoReadyAExec(){
-    t_pcb* pcbAEjecutar;
-    bool ejecutaPorRR = false;
+    t_pcb* pcbAEjecutar = NULL;
 
     //ELEGIR DE READY
 
@@ -143,12 +159,10 @@ void pasarProcesoReadyAExec(){
             break;
         case RR:
             pcbAEjecutar = elegirPorRR();
-            ejecutaPorRR = true;
             break;
 
         case CMN:
             pcbAEjecutar = elegirPorCMN();
-            ejecutaPorRR = colaDeProcesoEjecutaRR(pcbAEjecutar->prioridad);
             break;
         default:
             log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
@@ -157,7 +171,7 @@ void pasarProcesoReadyAExec(){
     // ELEGIR CPU
     t_cpu_conectada* cpuElegida = elegirCPU();
     if(cpuElegida == NULL || pcbAEjecutar == NULL) {
-        log_error(kernel->logger,"No se pudo asignar proceso a CPU");
+        log_error(kernel->logger,"No se pudo asignar proceso a CPU o PID (cpu=%p, pcb=%p)", (void*)cpuElegida, (void*)pcbAEjecutar);
         return;
     }
     // LO AGREGO A EXEC
@@ -166,20 +180,24 @@ void pasarProcesoReadyAExec(){
     
     pcbAEjecutar->estado = EXEC;
     pcbAEjecutar->socketCPUEjecuta = cpuElegida->socket_cliente;
+
     pthread_mutex_lock(&mutex_EXEC);
     queue_push(colaEXEC,pcbAEjecutar);
     pthread_mutex_unlock(&mutex_EXEC);
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcbAEjecutar->pid);
 
-    if(ejecutaPorRR) {
+    // ENVIAR A CPU
+    enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
+
+    if(buscarPCBPorPID(pcbAEjecutar->pid,colaEXEC,&mutex_EXEC)->ejecutaPorRR){
+        log_debug(kernel->logger,"Iniciando el temporizador por %d ms...",kernel->rr_quantum);
         pthread_t hiloQuantum;
         pthread_create(&hiloQuantum, NULL, iniciarTemporizadorRR, cpuElegida);
         pthread_detach(hiloQuantum);
     }
 
-    // ENVIAR A CPU
-    enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
+    // sem_post(&sem_hayProcesosEnExec);
 }
 
 t_pcb* elegirPorFIFO(){
@@ -191,6 +209,7 @@ t_pcb* elegirPorFIFO(){
     pthread_mutex_unlock(&mutex_READY[0]);
     return pcb;
 }
+
 t_pcb* elegirPorRR(){
     t_pcb* pcb = NULL; 
     pthread_mutex_lock(&mutex_READY[0]);
@@ -208,12 +227,11 @@ t_pcb* elegirPorCMN(){
         if (!queue_is_empty(colasREADY[i])){
             pcbELegido = queue_pop(colasREADY[i]);
             pthread_mutex_unlock(&mutex_READY[i]);
+            break;
         }
+        pthread_mutex_unlock(&mutex_READY[i]);
     }
-    if (pcbELegido != NULL){
-        return pcbELegido;
-    }
-    return NULL;
+    return pcbELegido;
 }
 
 int colaDeProcesoEjecutaRR(int prioridad){
@@ -237,9 +255,6 @@ t_cpu_conectada* elegirCPU(){
     //MARCO CPU COMO OCUPADA Y LA AGREGO A LA COLA
     if (cpu_elegida != NULL) {
         cpu_elegida->libre = false;
-        pthread_mutex_lock(&mutex_CPU);
-        queue_push(colaCPUs, cpu_elegida); 
-        pthread_mutex_unlock(&mutex_CPU);
     }
     return cpu_elegida;
 }
@@ -273,8 +288,6 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
         log_error(kernel->logger, "No hay CPUs disponibles para procesar el PID %d", pid);
         return;
     }
-    
-    cpu->pidEjecutando = pid;
 
     t_buffer* buffer = crear_buffer();
     t_paquete* paquete = crear_paquete(PROCESO_A_PROCESAR, buffer);
@@ -289,11 +302,16 @@ void enviarPIDAcpu(int pid, t_cpu_conectada* cpu){
 
 void* iniciarTemporizadorRR(void* arg){
     t_cpu_conectada* cpu = (t_cpu_conectada*) arg;
+    int pid = cpu->pidEjecutando;
+    t_pcb* pcbOriginal = cpu->pcbEjecutando;
     
     usleep(kernel->rr_quantum * 1000);
-    
-    notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
-    
+
+    t_pcb* pcbActual = buscarPCBPorPID(pid, colaEXEC, &mutex_EXEC);
+
+    if(pcbActual != NULL && pcbActual == pcbOriginal && cpu->pcbEjecutando == pcbOriginal){
+        notificarDesalojo(cpu, NULL, PROCESO_DESALOJADO_QUANTUM);
+    }
     return NULL;
 }
 
@@ -310,10 +328,15 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
     switch (motivo){
     case PROCESO_DESALOJADO_QUANTUM:
-        log_info(kernel->logger,"## (<%d>) - Desalojado por fin de quantum",cpu->pidEjecutando);
+        log_debug(kernel->logger, "Notificando desalojo por fin de quantum a cpu:%d - ejecutando pid:%d", cpu->id_cpu,cpu->pidEjecutando);
         break;
     case PROCESO_DESALOJADO_PRIORIDAD:
-        t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,mutex_EXEC);
+        t_pcb* pcbEnExec = buscarPCBPorPID(cpu->pidEjecutando,colaEXEC,&mutex_EXEC);
+        if(pcbEnExec == NULL){
+            log_debug(kernel->logger, "Desalojo por prioridad ignorado: CPU %d ya no tiene el proceso en EXEC", cpu->id_cpu);
+            break;
+        }
+        sem_wait(&sem_procesoDesalojadoPrioridad);
         log_info(kernel->logger,"## (<%d>) Prioridad: <%d> - Desalojado por cola más prioritaria por el proceso <%d> con prioridad <%d>",pcbEnExec->pid, pcbEnExec->prioridad, pcbOtroProceso->pid,pcbOtroProceso->prioridad);
         break;
     default:
@@ -323,43 +346,80 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 
 void* monitorPrioridades(void* arg){
     while(1) {
-        sem_wait(&sem_readyPrioridad);
-        while(buscarCPULibre() == NULL){
-            pthread_mutex_lock(&mutex_CPU);
-            int cantidad = queue_size(colaCPUs);    
-            for(int i = 0; i < cantidad; i++) {
-                t_cpu_conectada* cpu = queue_pop(colaCPUs);
-                if(!cpu->libre ) {
-                    int prioridadActual = cpu->pidEjecutando;
-                    int nuevaPrioridad = procesoMasPrioritario(prioridadActual);
-                    if(nuevaPrioridad != -1) {
-                        t_pcb* pcbMasPrioridad = buscarPCBenReadyConPrioridad(nuevaPrioridad);
-                        notificarDesalojo(cpu, pcbMasPrioridad, PROCESO_DESALOJADO_PRIORIDAD);
-                    }
+        while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
+            t_pcb* pcbExecMenorPrioridad = NULL;
+            int nuevaPrioridad = -1;
+            sem_wait(&sem_readyPrioridad);
+            while(buscarCPULibre() == NULL){
+                // sem_wait(&sem_hayProcesosEnExec);
+                pcbExecMenorPrioridad = buscarMenorPrioridad();
+                if(pcbExecMenorPrioridad == NULL){
+                    break;
                 }
-                queue_push(colaCPUs,cpu);
+                nuevaPrioridad = procesoMasPrioritario(pcbExecMenorPrioridad->prioridad);
+                break;
             }
-            pthread_mutex_unlock(&mutex_CPU);
+            if(nuevaPrioridad != -1){
+                notificarDesalojo(buscarCPUSegunPID(pcbExecMenorPrioridad->pid),buscarPCBenReadyConPrioridad(nuevaPrioridad),PROCESO_DESALOJADO_PRIORIDAD);
+            }
         }
+        if(!kernel->noHayCorrupcion){
+            return NULL;   // BSOD: este hilo ya no tiene sentido, termina limpio
+        }
+        sem_wait(&sem_compactacionTerminada);   // bloquea sin gastar CPU hasta que termine la compactación
     }
     return NULL;
 }
 
+t_pcb* buscarMenorPrioridad() {
+    pthread_mutex_lock(&mutex_EXEC);
+    if(queue_is_empty(colaEXEC)){
+        pthread_mutex_unlock(&mutex_EXEC);
+        log_debug(kernel->logger,"No hay procesos en exec");
+        return NULL;
+    } 
+
+    t_queue* colaAux = queue_create();
+    t_pcb* pcbMenor = NULL;
+    int minPrioridad = 0;
+
+    while(!queue_is_empty(colaEXEC)) {
+        t_pcb* pcb = queue_pop(colaEXEC);
+        if(pcb->prioridad > minPrioridad) {
+            minPrioridad = pcb->prioridad;
+            pcbMenor = pcb;
+        }
+        queue_push(colaAux, pcb);
+    }
+
+    while(!queue_is_empty(colaAux)) {
+        queue_push(colaEXEC, queue_pop(colaAux));
+    }
+
+    queue_destroy(colaAux);
+    pthread_mutex_unlock(&mutex_EXEC);
+    return pcbMenor;
+}
+
+
 int procesoMasPrioritario(int prioridadActual){
     for(int i = 0; i < prioridadActual; i++) {
+        pthread_mutex_lock(&mutex_READY[i]);
         if(!queue_is_empty(colasREADY[i])) {
+            pthread_mutex_unlock(&mutex_READY[i]);
             return i;
         }
+        pthread_mutex_unlock(&mutex_READY[i]);
     }
     return -1;
 }
 
-t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex){
+t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t* mutex){
     t_pcb* pcbEncontrada = NULL;
 
     t_queue* colaAux = queue_create();
     
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(mutex);
 
     while (!queue_is_empty(cola)){
         t_pcb* pcb = queue_pop(cola);
@@ -375,7 +435,7 @@ t_pcb* buscarPCBPorPID(int pid, t_queue* cola, pthread_mutex_t mutex){
     
     queue_destroy(colaAux);
     
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(mutex);
     
     return pcbEncontrada;
 
@@ -410,23 +470,30 @@ void pasarProcesoExecAReady(int pid){
     pthread_mutex_unlock(&mutex_EXEC);
 
     pcb->estado = READY;
-    int socket_cpu = pcb->socketCPUEjecuta;
     pcb->socketCPUEjecuta = -1;
     
     //AGREGO A READY
-    pthread_mutex_lock(&mutex_READY[pcb->prioridad]);
-    queue_push(colasREADY[pcb->prioridad],pcb);
-    pthread_mutex_unlock(&mutex_READY[pcb->prioridad]);
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+    case RR:
+        pthread_mutex_lock(&mutex_READY[0]);
+        queue_push(colasREADY[0],pcb);
+        pthread_mutex_unlock(&mutex_READY[0]);
+        break;
+
+    case CMN:
+        pthread_mutex_lock(&mutex_READY[pcb->prioridad]);
+        queue_push(colasREADY[pcb->prioridad],pcb);
+        pthread_mutex_unlock(&mutex_READY[pcb->prioridad]);
+        sem_post(&sem_readyPrioridad); 
+        break;   
+    default:
+        log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
+        break;
+    }
     
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
-
-    t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
-    if(cpu != NULL){
-        //LIBERO CPU
-        liberarCPU(cpu);
-    }else{
-        log_error(kernel->logger, "ERROR al liberar CPU");
-    }
+    sem_post(&sem_hayProcesosEnReady);
 }
 
 void liberarCPU(t_cpu_conectada* cpu){
@@ -435,6 +502,7 @@ void liberarCPU(t_cpu_conectada* cpu){
     cpu->pidEjecutando = -1;
     cpu->pcbEjecutando = NULL;
     pthread_mutex_unlock(&mutex_CPU);
+    log_debug(kernel->logger,"Se libero CPU: %d", cpu->id_cpu);
     sem_post(&sem_hayCPUdisponible);
 }
 
@@ -541,9 +609,7 @@ void pasarProcesoBlockaReady(int pid){
 
 void pasarProcesoBlockABlockSusp(int pid){
     t_pcb* pcb = NULL;
-    //SACO A BLOCK
     pthread_mutex_lock(&mutex_BLOCK);
-    
     int cantidad = queue_size(colaBLOCK);
     for(int i = 0; i < cantidad; i++){
         t_pcb* pcbBlock = queue_pop(colaBLOCK);
@@ -555,18 +621,42 @@ void pasarProcesoBlockABlockSusp(int pid){
     }
     pthread_mutex_unlock(&mutex_BLOCK);
 
-    pcb->estado = BLOCK_SUSP;
+    if (pcb == NULL) {
+        log_error(kernel->logger, "Error: No se encontró el PID %d en la cola BLOCK", pid);
+        return;
+    }
 
-    //AGREGO SUSP BLOCK
+    // Lo hacemos encontrable en BLOCK_SUSP ANTES de pedirle a KM que suspenda
+    // para que el PCB nunca deje de estar en alguna cola
+    pcb->estado = BLOCK_SUSP;
+    pcb->suspensionEnCurso = true;
+
     pthread_mutex_lock(&mutex_BLOCK_SUSP);
     queue_push(colaBLOCK_SUSP,pcb);
     pthread_mutex_unlock(&mutex_BLOCK_SUSP);
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
+    log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
 
-    sem_wait(&sem_finSyscall);
-    pasarProcesoBlockSuspAReadySusp(pid);
+    t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    enviarPaqueteAKM(paquete);
+    eliminar_paquete(paquete);
 
+    sem_wait(&sem_suspension_ok);
+
+    pthread_mutex_lock(&mutex_BLOCK_SUSP);
+    pcb->suspensionEnCurso = false;
+    bool ioQuedoPendiente = pcb->ioCompletadaEnTransito;
+    pcb->ioCompletadaEnTransito = false;
+    pthread_mutex_unlock(&mutex_BLOCK_SUSP);
+
+    if (ioQuedoPendiente) {
+        log_debug(kernel->logger, "## (<%d>) IO había finalizado durante la suspensión, disparando desuspensión diferida", pid);
+        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+        pasarProcesoBlockSuspAReadySusp(pid);
+        solicitarDesuspenderProceso(pid);
+    }
 }
 
 void pasarProcesoBlockSuspAReadySusp(int pid){
@@ -594,8 +684,6 @@ void pasarProcesoBlockSuspAReadySusp(int pid){
 
     log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>",pcb->pid);
 
-    sem_wait(&sem_hayMemoria);
-    pasarProcesoReadySuspAReady(pid);
 }
 
 void pasarProcesoReadySuspAReady(int pid){
@@ -641,51 +729,17 @@ void pasarProcesoReadySuspAReady(int pid){
     log_info(kernel->logger,"## (<%d>) Pasa del estado <READY_SUSP> al estado <READY>",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
 
+
 }
 
 void pasarProcesoExecAExit(){
-    //SACO DE EXEC
-    // pthread_mutex_lock(&mutex_EXEC);
-    
-    // int cantidad = queue_size(colaEXEC);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbEjecuta = queue_pop(colaEXEC);
-    //     if (pcb == NULL && pcbEjecuta->pid == pid){
-    //         pcb = pcbEjecuta;
-    //     }else{
-    //         queue_push(colaEXEC,pcbEjecuta);
-    //     }        
-    // }
-    // pthread_mutex_unlock(&mutex_EXEC);
+    //sf o desconexion cpu, syscall exit
 }
 void pasarProcesoReadyAExit(){
-    //SACO DE READY
-    // pthread_mutex_lock(&mutex_READY);
-    
-    // int cantidad = queue_size(colaREADY);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbReady = queue_pop(colaREADY);
-    //     if (pcb == NULL && pcbReady->pid == pid){
-    //         pcb = pcbReady;
-    //     }else{
-    //         queue_push(colaREADY,pcbReady);
-    //     }        
-    // }
-    // pthread_mutex_unlock(&mutex_READY);
+    //corrupcion de memoria
 }
 void pasarProcesoBlockAExit(){
-    //SACO DE BLOCK
-    // pthread_mutex_lock(&mutex_BLOCK);    
-    // int cantidad = queue_size(colaBLOCK);
-    // for(int i = 0; i < cantidad; i++){
-    //     t_pcb* pcbBlock = queue_pop(colaBLOCK);
-    //     if (pcb == NULL && pcbBlock->pid == pid){
-    //         pcb = pcbBlock;
-    //     }else{
-    //         queue_push(colaBLOCK,pcbBlock);
-    //     }
-    // }
-    // pthread_mutex_unlock(&mutex_BLOCK);
+    //desconexion de io
 }
 
 t_cpu_conectada* buscarCPUSegunPID(int pid){
@@ -698,9 +752,8 @@ t_cpu_conectada* buscarCPUSegunPID(int pid){
         t_cpu_conectada* cpu = queue_pop(colaCPUs);
         if (cpu_elegida == NULL && cpu->pidEjecutando == pid){
             cpu_elegida = cpu;
-        } else {
-            queue_push(colaAux, cpu);
         }
+        queue_push(colaAux, cpu);
     }
 
     while(!queue_is_empty(colaAux)){
@@ -738,12 +791,21 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
 }
 
 void* loop_corto_plazo(void* args) {
-    log_info(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
+    log_debug(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
     
     while(1) {
-        sem_wait(&sem_hayCPUdisponible);
-        sem_wait(&sem_hayProcesosEnReady);
+            sem_wait(&sem_hayCPUdisponible);
+            sem_wait(&sem_hayProcesosEnReady);
+
+        if(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             pasarProcesoReadyAExec();
+        } else {
+           
+            //esperamos a que termine la compactación/corrupción
+            sem_post(&sem_hayCPUdisponible);
+            sem_post(&sem_hayProcesosEnReady);
+            sem_wait(&sem_compactacionTerminada);
+        }
     }
     return NULL;
 }
@@ -759,4 +821,275 @@ t_tipo_io buscarTipoIOPorSocket(int socket_io) {
         pthread_mutex_unlock(&mutex_interfaces[i]);
     }
     return -1; // No se encontró el tipo de IO para el socket dado
+}
+
+void reencolarAlInicio(int pid){
+    t_pcb* pcb = NULL;
+
+    //SACO DE EXEC
+    pthread_mutex_lock(&mutex_EXEC);
+    
+    int cantidad = queue_size(colaEXEC);
+    for(int i = 0; i < cantidad; i++){
+        t_pcb* pcbEjecuta = queue_pop(colaEXEC);
+        if (pcb == NULL && pcbEjecuta->pid == pid){
+            pcb = pcbEjecuta;
+        }else{
+            queue_push(colaEXEC,pcbEjecuta);
+        }        
+    }
+    pthread_mutex_unlock(&mutex_EXEC);
+
+    pcb->estado = READY;
+        
+    //AGREGO A READY
+
+    t_queue* colaAux = queue_create();
+    
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case FIFO:
+    case RR:
+        //SACO TODO DE LA COLA, AGREGO, METO LO SACADO
+        pthread_mutex_lock(&mutex_READY[0]);
+        while(!queue_is_empty(colasREADY[0])){
+            queue_push(colaAux,queue_pop(colasREADY[0]));
+        }
+        queue_push(colasREADY[0],pcb);
+        while(!queue_is_empty(colaAux)){
+            queue_push(colasREADY[0],queue_pop(colaAux));
+        }
+        pthread_mutex_unlock(&mutex_READY[0]);
+        break;
+
+    case CMN:
+        int prioridad = pcb->prioridad;
+        pthread_mutex_lock(&mutex_READY[prioridad]);
+        while(!queue_is_empty(colasREADY[prioridad])){
+            queue_push(colaAux,queue_pop(colasREADY[prioridad]));
+        }
+        queue_push(colasREADY[prioridad],pcb);
+        while(!queue_is_empty(colaAux)){
+            queue_push(colasREADY[prioridad],queue_pop(colaAux));
+        }
+        pthread_mutex_unlock(&mutex_READY[prioridad]);
+        break;   
+    default:
+        log_error(kernel->logger,"Se desconoce el algortimo elegido para la planificacion");
+        break;
+    }
+    queue_destroy(colaAux);
+    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
+    sem_post(&sem_hayProcesosEnReady);
+}
+
+void inicializarHilos(){
+    //CPU E IO AL CONECTARSE
+
+    //MONITOREAR EL CIERRE
+    pthread_t finalizarKS;
+    if (pthread_create(&finalizarKS, NULL, finalizarKernelScheduler, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo para finalizar KERNEL SCHEDULER");
+        return ;
+    }
+    pthread_detach(finalizarKS);
+
+
+    //KM
+    pthread_t hilo_escucha_km;
+    if (pthread_create(&hilo_escucha_km, NULL, atender_kernel_memory, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo de escucha de Kernel Memory");
+        return ;
+    }
+    pthread_detach(hilo_escucha_km);
+
+    //PLANIFICADOR CORTO PLAZO
+    pthread_t hilo_corto_plazo;
+    if (pthread_create(&hilo_corto_plazo, NULL, loop_corto_plazo, NULL) != 0) {
+        log_error(kernel->logger, "No se pudo crear el hilo del Planificador de Corto Plazo");
+        return ;
+    }
+    pthread_detach(hilo_corto_plazo);
+
+    //MONITOR PRIORIDADES
+    if(kernel->queues_preemption && obtenerPlanificacion(kernel->planification_algorithm) == CMN){
+        pthread_t hiloMonitorPrioridades;
+        if (pthread_create(&hiloMonitorPrioridades, NULL, monitorPrioridades, NULL) != 0) {
+            log_error(kernel->logger, "No se pudo crear el hilo de monitorización de prioridades");
+            return ;
+        }
+        pthread_detach(hiloMonitorPrioridades);
+    }
+
+    //ATENCION DE SYSCALL IO
+    pthread_t solicitudSleep;
+    if(pthread_create(&solicitudSleep, NULL, atencionIOsleep, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall SLEEP");
+            return ;
+    }
+    pthread_detach(solicitudSleep);
+
+    pthread_t solicitudStdIn;
+    if(pthread_create(&solicitudStdIn, NULL, atencionIOstdIN, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall STDIN");
+            return ;
+    }
+    pthread_detach(solicitudStdIn);
+
+    pthread_t solicitudStdOut;
+    if(pthread_create(&solicitudStdOut, NULL, atencionIOstdOUT, NULL) != 0){
+        log_error(kernel->logger, "No se pudo crear el hilo para atencion a syscall STDOUT");
+            return ;
+    }
+    pthread_detach(solicitudStdOut);
+
+}
+
+void* atencionIOsleep(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_SLEEP]);
+        sem_wait(&sem_haySolicitudIO[IO_SLEEP]);
+        revisarProcesosBloqueadosParaTipoIO(IO_SLEEP);
+    }
+    return NULL;
+}
+
+void* atencionIOstdIN(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_STDIN]);
+        sem_wait(&sem_haySolicitudIO[IO_STDIN]);
+        revisarProcesosBloqueadosParaTipoIO(IO_STDIN);
+    }
+    return NULL;
+}
+
+void* atencionIOstdOUT(void* args) {
+    
+    while(1) {
+        sem_wait(&sem_hayIO[IO_STDOUT]);
+        sem_wait(&sem_haySolicitudIO[IO_STDOUT]);
+        revisarProcesosBloqueadosParaTipoIO(IO_STDOUT);
+    }
+    return NULL;
+}
+
+void ordenarSuspReadySegunPrioridad(){
+    int maximaPrioridad = 0;
+
+    t_list* listaAux = list_create();
+
+    pthread_mutex_lock(&mutex_READY_SUSP);
+    while(!queue_is_empty(colaREADY_SUSP)){
+        t_pcb* pcb = queue_pop(colaREADY_SUSP);
+        list_add(listaAux,pcb);
+        if(pcb->prioridad > maximaPrioridad){
+            maximaPrioridad = pcb->prioridad;
+        }
+    }
+
+    for (int i = 0; i <= maximaPrioridad; i++){
+        for(int j = 0; j< list_size(listaAux); j++){
+            t_pcb* pcb = list_get(listaAux, j);
+            if(pcb->prioridad == i){
+                queue_push(colaREADY_SUSP,pcb);
+            }
+        }
+    }
+    pthread_mutex_unlock(&mutex_READY_SUSP);
+    list_destroy(listaAux);
+}
+
+void* finalizarKernelScheduler(void* args){
+    while(1){
+        sem_wait(&sem_procesoFinalizado);
+        if (pidParaAsignar == (kernel->pcbFinalizados)){
+            log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
+            liberarConexiones();
+            finalizarColas();
+            finalizarSemaforos();
+            finalizarInterfaces();
+            destruir_kernel_scheduler(kernel);
+            exit(EXIT_SUCCESS);
+        }
+        
+    }
+}
+t_pcb* retiraSegunPID(int pid, t_queue* cola, pthread_mutex_t mutex){
+    t_pcb* pcbEncontrada = NULL;
+
+    t_queue* colaAux = queue_create();
+    
+    pthread_mutex_lock(&mutex);
+
+    while (!queue_is_empty(cola)){
+        t_pcb* pcb = queue_pop(cola);
+        if (pcbEncontrada == NULL && pcb->pid == pid){
+            pcbEncontrada = pcb;
+        }else{
+            queue_push(colaAux, pcb);
+        }
+    }
+
+    while(!queue_is_empty(colaAux)){
+        queue_push(cola, queue_pop(colaAux));
+    }
+    
+    queue_destroy(colaAux);
+    
+    pthread_mutex_unlock(&mutex);
+    
+    return pcbEncontrada;
+}
+
+t_pcb* retiraSegunPIDdeREADY(int pid){
+    t_pcb* pcbEncontrada = NULL;
+
+    t_queue* colaAux = queue_create();
+
+    switch (obtenerPlanificacion(kernel->planification_algorithm)){
+    case CMN:
+        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+            pthread_mutex_lock(&mutex_READY[i]);
+            while (!queue_is_empty(colasREADY[i])){
+                t_pcb* pcb = queue_pop(colasREADY[i]);
+                if (pcbEncontrada == NULL && pcb->pid == pid){
+                    pcbEncontrada = pcb;
+                }else{
+                    queue_push(colaAux, pcb);
+                }
+            }
+            while(!queue_is_empty(colaAux)){
+                queue_push(colasREADY[i], queue_pop(colaAux));
+            }
+            
+            queue_destroy(colaAux);
+            
+            pthread_mutex_unlock(&mutex_READY[i]);
+        }
+        return pcbEncontrada;
+
+    case FIFO:
+    case RR:
+        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+            pthread_mutex_lock(&mutex_READY[0]);
+            while (!queue_is_empty(colasREADY[0])){
+                t_pcb* pcb = queue_pop(colasREADY[0]);
+                if (pcbEncontrada == NULL && pcb->pid == pid){
+                    pcbEncontrada = pcb;
+                }else{
+                    queue_push(colaAux, pcb);
+                }
+            }
+            while(!queue_is_empty(colaAux)){
+                queue_push(colasREADY[0], queue_pop(colaAux));
+            }
+            
+            queue_destroy(colaAux);
+            
+            pthread_mutex_unlock(&mutex_READY[0]);
+        }
+        return pcbEncontrada;
+    }
+    return pcbEncontrada;
 }

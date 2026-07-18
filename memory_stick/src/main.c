@@ -15,7 +15,14 @@ int main(int argc, char* argv[]) {
        
         
         verificar_memory_stick(ms);
-
+    //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
+        int servidor_fd = iniciar_servidor(ms->puerto_escucha);
+        if (servidor_fd == -1) {
+            log_error(ms->logger, "No se pudo iniciar el servidor Memory Stick en puerto %s", ms->puerto_escucha);
+            destruir_memory_stick(ms);
+            return EXIT_FAILURE;
+        }
+        log_info(ms->logger,"Servidor Memory Stick ID:%d listo, esperando peticiones de CPUs..", ms->id);
         //conectarse como cliente a kernel_memory
         if(conectar_al_kernelmem(ms) == -1){
         destruir_memory_stick(ms);
@@ -28,17 +35,8 @@ int main(int argc, char* argv[]) {
         pthread_create(&hilo_km, NULL, escuchar_kernel_memory, ms);
         pthread_detach(hilo_km);   
 
-        //-----------AHORA ES SERVIDOR PARA ATENDER CPUS--------------------------------
+        
        
-        int servidor_fd = iniciar_servidor(ms->puerto_escucha);
-        if (servidor_fd == -1) {
-            log_error(ms->logger, "No se pudo iniciar el servidor Memory Stick en puerto %s", ms->puerto_escucha);
-            destruir_memory_stick(ms);
-            return EXIT_FAILURE;
-        }
-
-        log_info(ms->logger,"Servidor Memory Stick ID:%d listo, esperando peticiones de CPUs..", ms->id);
-
         rutina_recepcion(ms, servidor_fd); //CREA HILOS PARA ATENDER A CADA CPU
 
         destruir_memory_stick(ms);

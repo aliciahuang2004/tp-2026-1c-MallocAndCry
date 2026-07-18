@@ -1,0 +1,1393 @@
+[DEBUG] 20:22:25:930 KERNEL_SCHEDULER/(4259:4259): Archivo de configuración cargado correctamente: ks_cp.config
+[DEBUG] 20:22:25:930 KERNEL_SCHEDULER/(4259:4259): El kernel scheduler se inicializo correctamente
+[INFO] 20:22:25:931 KERNEL_SCHEDULER/(4259:4259): ## Conectado a Kernel Memory
+[DEBUG] 20:22:25:931 KERNEL_SCHEDULER/(4259:4259): PLANIFICA CMN- CON FIFO
+[INFO] 20:22:25:931 KERNEL_SCHEDULER/(4259:4259): ## (<0>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:25:932 KERNEL_SCHEDULER/(4259:4259): Servidor Scheduler escuchando en puerto 9002
+[DEBUG] 20:22:25:932 KERNEL_SCHEDULER/(4259:4262): Planificador de Corto Plazo iniciado correctamente
+[DEBUG] 20:22:25:932 KERNEL_SCHEDULER/(4259:4261): KM Listener: hilo iniciado en socket 4
+[DEBUG] 20:22:25:934 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 0
+[INFO] 20:22:25:934 KERNEL_SCHEDULER/(4259:4261): ## (<0>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:25:935 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:22:28:093 KERNEL_SCHEDULER/(4259:4259): Cliente conectado en socket 6
+[DEBUG] 20:22:28:094 KERNEL_SCHEDULER/(4259:4267): Nuevo cliente detectado en socket 6. Leyendo operación...
+[DEBUG] 20:22:28:095 KERNEL_SCHEDULER/(4259:4267): Código de operación recibido: 7
+[DEBUG] 20:22:28:096 KERNEL_SCHEDULER/(4259:4267): Nuevo módulo de I/O detectado en socket 6. Leyendo datos...
+[DEBUG] 20:22:28:098 KERNEL_SCHEDULER/(4259:4267): ## Interfaz registrada: Tipo: STDIN. Socket: 6
+[DEBUG] 20:22:28:099 KERNEL_SCHEDULER/(4259:4268): IO Listener: hilo iniciado en socket 6
+[DEBUG] 20:22:29:886 KERNEL_SCHEDULER/(4259:4261): ## KM informó tener un aumento de memoria, eligiendo proceso suspendido
+[DEBUG] 20:22:30:245 KERNEL_SCHEDULER/(4259:4259): Cliente conectado en socket 7
+[DEBUG] 20:22:30:246 KERNEL_SCHEDULER/(4259:4271): Nuevo cliente detectado en socket 7. Leyendo operación...
+[DEBUG] 20:22:30:247 KERNEL_SCHEDULER/(4259:4271): Código de operación recibido: 7
+[DEBUG] 20:22:30:248 KERNEL_SCHEDULER/(4259:4271): Nuevo módulo de I/O detectado en socket 7. Leyendo datos...
+[DEBUG] 20:22:30:248 KERNEL_SCHEDULER/(4259:4271): ## Interfaz registrada: Tipo: STDOUT. Socket: 7
+[DEBUG] 20:22:30:250 KERNEL_SCHEDULER/(4259:4272): IO Listener: hilo iniciado en socket 7
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4259): Cliente conectado en socket 8
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4273): Nuevo cliente detectado en socket 8. Leyendo operación...
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4273): Código de operación recibido: 7
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4273): Nuevo módulo de I/O detectado en socket 8. Leyendo datos...
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4273): ## Interfaz registrada: Tipo: SLEEP. Socket: 8
+[DEBUG] 20:22:32:325 KERNEL_SCHEDULER/(4259:4274): IO Listener: hilo iniciado en socket 8
+[DEBUG] 20:22:37:762 KERNEL_SCHEDULER/(4259:4259): Cliente conectado en socket 9
+[DEBUG] 20:22:37:763 KERNEL_SCHEDULER/(4259:4275): Nuevo cliente detectado en socket 9. Leyendo operación...
+[DEBUG] 20:22:37:763 KERNEL_SCHEDULER/(4259:4275): Código de operación recibido: 4
+[INFO] 20:22:37:763 KERNEL_SCHEDULER/(4259:4275): ## CPU 1 Conectada
+[DEBUG] 20:22:37:763 KERNEL_SCHEDULER/(4259:4276): CPU Listener: hilo iniciado en socket 9
+[INFO] 20:22:37:764 KERNEL_SCHEDULER/(4259:4262): ## (<0>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:38:792 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:38:793 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[DEBUG] 20:22:38:793 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:38:793 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:38:795 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 1
+[INFO] 20:22:38:795 KERNEL_SCHEDULER/(4259:4261): ## (<1>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:39:306 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:39:306 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[DEBUG] 20:22:39:306 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:39:306 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:39:310 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 2
+[INFO] 20:22:39:311 KERNEL_SCHEDULER/(4259:4261): ## (<2>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:39:824 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:39:825 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[DEBUG] 20:22:39:826 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:39:827 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:39:829 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 3
+[INFO] 20:22:39:829 KERNEL_SCHEDULER/(4259:4261): ## (<3>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:40:335 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:40:335 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_1.prc (prioridad 3)
+[DEBUG] 20:22:40:336 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:40:336 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:40:339 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 4
+[INFO] 20:22:40:340 KERNEL_SCHEDULER/(4259:4261): ## (<4>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:41:855 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:41:855 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_2.prc (prioridad 2)
+[DEBUG] 20:22:41:855 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:41:855 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:41:858 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 5
+[INFO] 20:22:41:858 KERNEL_SCHEDULER/(4259:4261): ## (<5>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:42:369 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:42:370 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_2.prc (prioridad 2)
+[DEBUG] 20:22:42:370 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:42:370 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:42:374 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 6
+[INFO] 20:22:42:374 KERNEL_SCHEDULER/(4259:4261): ## (<6>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:43:890 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:43:890 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó Syscall: <INIT_PROC> PCP_3.prc (prioridad 1)
+[DEBUG] 20:22:43:890 KERNEL_SCHEDULER/(4259:4276): PLANIFICA CMN- CON RR
+[INFO] 20:22:43:890 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Se crea el proceso - Estado: NEW
+[DEBUG] 20:22:43:892 KERNEL_SCHEDULER/(4259:4261): ## KM confirmó creación de proceso - PID: 7
+[INFO] 20:22:43:893 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <NEW> al estado <READY>
+[DEBUG] 20:22:44:407 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:44:407 KERNEL_SCHEDULER/(4259:4276): ## (<0>) - Solicitó syscall: <EXIT_PROC>
+[DEBUG] 20:22:44:407 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:44:408 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:44:408 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:22:44:408 KERNEL_SCHEDULER/(4259:4276): ## (<0>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:22:44:409 KERNEL_SCHEDULER/(4259:4276): ## (<0>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[DEBUG] 20:22:44:410 KERNEL_SCHEDULER/(4259:4261): ## KM informó tener un aumento de memoria, eligiendo proceso suspendido
+[DEBUG] 20:22:45:430 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:45:430 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:22:45:430 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:45:430 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:45:430 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:22:45:431 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[DEBUG] 20:22:45:431 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:22:45:431 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:22:46:450 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:46:450 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:22:46:450 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:46:450 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:22:46:450 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:46:450 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:47:470 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:47:470 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:22:47:470 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:47:470 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:22:47:470 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:47:470 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:48:972 KERNEL_SCHEDULER/(4259:4283): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:22:48:988 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:48:988 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:22:48:988 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:48:988 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:48:988 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:48:988 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:48:988 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:50:489 KERNEL_SCHEDULER/(4259:4284): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:22:50:510 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:50:510 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:22:50:510 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:50:510 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:50:510 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:22:50:510 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:50:510 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:50:510 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:52:011 KERNEL_SCHEDULER/(4259:4285): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:22:52:028 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:52:028 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:22:52:029 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:52:029 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:52:029 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:22:52:029 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:52:030 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:52:031 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:53:531 KERNEL_SCHEDULER/(4259:4286): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:22:53:553 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:53:553 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:22:53:553 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:53:553 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:53:554 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:22:53:554 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:53:554 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:53:554 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:55:056 KERNEL_SCHEDULER/(4259:4287): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:22:55:078 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:55:078 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:22:55:078 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:55:078 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:55:078 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:55:078 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:55:078 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:55:434 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:22:55:434 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:22:55:434 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:22:55:434 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:22:55:434 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:22:55:434 KERNEL_SCHEDULER/(4259:4264): ## PID 5 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:22:55:435 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:22:55:587 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:22:55:587 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:22:55:588 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:22:55:588 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:22:55:588 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:55:589 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:55:590 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:57:090 KERNEL_SCHEDULER/(4259:4289): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:22:57:108 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:57:109 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:22:57:109 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:57:109 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:22:57:109 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:57:109 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:22:58:610 KERNEL_SCHEDULER/(4259:4291): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:22:58:630 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:22:58:630 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:22:58:630 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:22:58:630 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:22:58:630 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:22:58:631 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:22:58:631 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:22:58:631 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:00:133 KERNEL_SCHEDULER/(4259:4292): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:23:00:149 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:00:149 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:23:00:149 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:00:150 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:00:150 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:00:150 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:00:150 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:00:150 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:00:440 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 5 TIPO: SLEEP
+[DEBUG] 20:23:00:440 KERNEL_SCHEDULER/(4259:4274): PCB para PID 5 encontrado en BLOCK.
+[INFO] 20:23:00:442 KERNEL_SCHEDULER/(4259:4274): ## (<5>) finalizó IO y pasa a READY
+[INFO] 20:23:00:442 KERNEL_SCHEDULER/(4259:4274): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:00:443 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:00:443 KERNEL_SCHEDULER/(4259:4264): ## PID 6 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:00:443 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:00:661 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:00:662 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:23:00:662 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:00:662 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <2>
+[DEBUG] 20:23:00:662 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:00:662 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:00:662 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:02:164 KERNEL_SCHEDULER/(4259:4294): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:5
+[DEBUG] 20:23:02:180 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:02:180 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Desalojado por fin de quantum
+[DEBUG] 20:23:02:181 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 5 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:02:181 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:02:181 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:02:181 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:02:181 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:02:182 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:03:683 KERNEL_SCHEDULER/(4259:4295): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:5
+[DEBUG] 20:23:03:698 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:03:698 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:03:698 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:03:698 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:03:699 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:03:699 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:05:200 KERNEL_SCHEDULER/(4259:4297): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:23:05:226 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:05:226 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:23:05:226 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:05:226 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:05:226 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:05:226 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:05:226 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:05:226 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:05:446 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 6 TIPO: SLEEP
+[DEBUG] 20:23:05:446 KERNEL_SCHEDULER/(4259:4274): PCB para PID 6 encontrado en BLOCK.
+[INFO] 20:23:05:446 KERNEL_SCHEDULER/(4259:4274): ## (<6>) finalizó IO y pasa a READY
+[INFO] 20:23:05:446 KERNEL_SCHEDULER/(4259:4274): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:05:446 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:05:447 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:05:447 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:05:739 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:05:739 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:23:05:739 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:05:739 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:05:740 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:05:740 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:05:741 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <6> con prioridad <2>
+[DEBUG] 20:23:06:454 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:06:455 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:06:455 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:06:458 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:06:459 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:06:459 KERNEL_SCHEDULER/(4259:4264): ## PID 5 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:06:459 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:06:757 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:06:757 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 6 - Por proceso con prioridad más alta
+[INFO] 20:23:06:757 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:06:757 KERNEL_SCHEDULER/(4259:4263): ## (<6>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:06:758 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:06:758 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:06:758 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:08:261 KERNEL_SCHEDULER/(4259:4300): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:08:277 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:08:277 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:08:277 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:08:277 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:08:277 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:08:277 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:09:462 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 5 TIPO: SLEEP
+[DEBUG] 20:23:09:462 KERNEL_SCHEDULER/(4259:4274): PCB para PID 5 encontrado en BLOCK.
+[INFO] 20:23:09:462 KERNEL_SCHEDULER/(4259:4274): ## (<5>) finalizó IO y pasa a READY
+[INFO] 20:23:09:462 KERNEL_SCHEDULER/(4259:4274): ## (<5>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:09:462 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:09:462 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:09:462 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:09:778 KERNEL_SCHEDULER/(4259:4302): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:6
+[DEBUG] 20:23:09:794 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:09:794 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Desalojado por fin de quantum
+[DEBUG] 20:23:09:794 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 6 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:09:794 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:09:795 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:09:795 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:09:795 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:09:795 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:10:467 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:10:467 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:10:467 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:10:467 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:10:467 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:10:804 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:10:805 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 5 - Por proceso con prioridad más alta
+[INFO] 20:23:10:805 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:10:805 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:10:806 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:10:806 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:10:807 KERNEL_SCHEDULER/(4259:4263): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:12:308 KERNEL_SCHEDULER/(4259:4304): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:12:323 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:12:323 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:12:323 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:12:323 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[DEBUG] 20:23:12:323 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:12:323 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[INFO] 20:23:12:323 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:12:323 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:12:832 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:12:832 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:12:832 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:12:832 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:12:833 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:12:833 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:13:327 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:13:327 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:13:332 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:13:332 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:13:332 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:13:332 KERNEL_SCHEDULER/(4259:4264): ## PID 6 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:13:332 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:13:342 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:13:342 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 5 - Por proceso con prioridad más alta
+[INFO] 20:23:13:342 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:13:342 KERNEL_SCHEDULER/(4259:4263): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:13:342 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:13:342 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:13:342 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:14:843 KERNEL_SCHEDULER/(4259:4309): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:14:858 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:14:858 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:14:858 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:14:858 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:14:858 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:14:858 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:16:334 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 6 TIPO: SLEEP
+[DEBUG] 20:23:16:334 KERNEL_SCHEDULER/(4259:4274): PCB para PID 6 encontrado en BLOCK.
+[INFO] 20:23:16:334 KERNEL_SCHEDULER/(4259:4274): ## (<6>) finalizó IO y pasa a READY
+[INFO] 20:23:16:334 KERNEL_SCHEDULER/(4259:4274): ## (<6>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:16:334 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:16:335 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:16:335 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:16:360 KERNEL_SCHEDULER/(4259:4311): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:5
+[DEBUG] 20:23:16:383 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:16:383 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:16:383 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:16:383 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:16:383 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:16:384 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:17:344 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:17:345 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:17:345 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:17:346 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:17:347 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:17:347 KERNEL_SCHEDULER/(4259:4264): ## PID 5 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:17:348 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:17:401 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:17:401 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 6 - Por proceso con prioridad más alta
+[INFO] 20:23:17:401 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:17:401 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:17:402 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:17:402 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:17:402 KERNEL_SCHEDULER/(4259:4263): ## (<6>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:18:903 KERNEL_SCHEDULER/(4259:4314): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:18:922 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:18:923 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:18:923 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:18:923 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:18:923 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:18:924 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:20:424 KERNEL_SCHEDULER/(4259:4316): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:6
+[INFO] 20:23:20:433 KERNEL_SCHEDULER/(4259:4279): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:20:433 KERNEL_SCHEDULER/(4259:4279): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:20:435 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:20:446 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:20:446 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Desalojado por fin de quantum
+[DEBUG] 20:23:20:446 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 6 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:20:447 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:20:447 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:20:447 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:20:447 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:20:447 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:20:959 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:20:959 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:20:961 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:20:961 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:20:962 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:20:962 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:21:451 KERNEL_SCHEDULER/(4259:4280): ## (<5>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:21:453 KERNEL_SCHEDULER/(4259:4280): ## (<5>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:21:456 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:22:350 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 5 TIPO: SLEEP
+[DEBUG] 20:23:22:350 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 5 en BLOCK. Verificando otras colas...
+[DEBUG] 20:23:22:350 KERNEL_SCHEDULER/(4259:4274): PCB para PID 5 encontrado en BLOCK_SUSP.
+[INFO] 20:23:22:350 KERNEL_SCHEDULER/(4259:4274): ## (<5>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:23:22:350 KERNEL_SCHEDULER/(4259:4274): ## (<5>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:23:22:351 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:22:351 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:22:351 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:22:353 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:23:22:353 KERNEL_SCHEDULER/(4259:4261): ## (<5>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:23:22:463 KERNEL_SCHEDULER/(4259:4318): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[INFO] 20:23:22:472 KERNEL_SCHEDULER/(4259:4282): ## (<6>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:22:472 KERNEL_SCHEDULER/(4259:4282): ## (<6>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:22:473 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:22:477 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:22:477 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:23:22:477 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:22:477 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <5> con prioridad <2>
+[DEBUG] 20:23:22:477 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:22:477 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:22:477 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:22:477 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:23:358 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:23:358 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:23:23:359 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:23:23:360 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:23:23:362 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:23:23:362 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:23:363 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:23:23:365 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:23:23:365 KERNEL_SCHEDULER/(4259:4264): ## PID 6 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:23:365 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:23:501 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:23:502 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 5 - Por proceso con prioridad más alta
+[INFO] 20:23:23:502 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:23:502 KERNEL_SCHEDULER/(4259:4263): ## (<5>) Prioridad: <2> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:23:502 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:23:502 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:23:502 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:25:004 KERNEL_SCHEDULER/(4259:4321): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:25:030 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:25:030 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Desalojado por fin de quantum
+[DEBUG] 20:23:25:030 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 7 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:25:030 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:25:030 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:25:030 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:25:030 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:25:030 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:25:549 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:25:549 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:25:549 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:25:550 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:25:550 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:25:550 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:27:052 KERNEL_SCHEDULER/(4259:4324): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:5
+[DEBUG] 20:23:27:066 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:27:066 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Desalojado por fin de quantum
+[DEBUG] 20:23:27:066 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 5 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:27:066 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:27:067 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:27:067 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:27:067 KERNEL_SCHEDULER/(4259:4262): ## (<5>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:27:067 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:27:580 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:27:581 KERNEL_SCHEDULER/(4259:4276): ## (<5>) - Solicitó syscall: <EXIT_PROC>
+[DEBUG] 20:23:27:582 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:27:583 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:27:583 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:27:585 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:23:27:585 KERNEL_SCHEDULER/(4259:4276): ## (<5>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[DEBUG] 20:23:27:587 KERNEL_SCHEDULER/(4259:4261): ## KM informó tener un aumento de memoria, eligiendo proceso suspendido
+[DEBUG] 20:23:28:367 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 6 TIPO: SLEEP
+[DEBUG] 20:23:28:367 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 6 en BLOCK. Verificando otras colas...
+[DEBUG] 20:23:28:367 KERNEL_SCHEDULER/(4259:4274): PCB para PID 6 encontrado en BLOCK_SUSP.
+[INFO] 20:23:28:368 KERNEL_SCHEDULER/(4259:4274): ## (<6>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:23:28:368 KERNEL_SCHEDULER/(4259:4274): ## (<6>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:23:28:368 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:28:369 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:28:369 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:28:370 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:23:28:370 KERNEL_SCHEDULER/(4259:4261): ## (<6>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:23:28:604 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:28:604 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:23:28:604 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:28:604 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <6> con prioridad <2>
+[DEBUG] 20:23:28:604 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:28:604 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:28:604 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:30:106 KERNEL_SCHEDULER/(4259:4327): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:6
+[DEBUG] 20:23:30:124 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:30:124 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Desalojado por fin de quantum
+[DEBUG] 20:23:30:124 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 6 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:30:125 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:30:125 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:30:125 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:30:125 KERNEL_SCHEDULER/(4259:4262): ## (<6>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:30:125 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:31:626 KERNEL_SCHEDULER/(4259:4328): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:6
+[DEBUG] 20:23:31:642 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:31:642 KERNEL_SCHEDULER/(4259:4276): ## (<6>) - Solicitó syscall: <EXIT_PROC>
+[DEBUG] 20:23:31:642 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:31:642 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Pasa del estado <EXEC> al estado <EXIT>
+[INFO] 20:23:31:642 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[INFO] 20:23:31:642 KERNEL_SCHEDULER/(4259:4276): ## (<6>) Finalizó su ejecución con motivo de <SYSCALL EXIT>
+[DEBUG] 20:23:31:642 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:31:645 KERNEL_SCHEDULER/(4259:4261): ## KM informó tener un aumento de memoria, eligiendo proceso suspendido
+[INFO] 20:23:32:110 KERNEL_SCHEDULER/(4259:4290): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:32:111 KERNEL_SCHEDULER/(4259:4290): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:32:113 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:33:144 KERNEL_SCHEDULER/(4259:4329): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:23:33:159 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:33:159 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:23:33:159 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:33:159 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:33:159 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:33:159 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:33:159 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:33:160 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:34:660 KERNEL_SCHEDULER/(4259:4330): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:23:34:680 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:34:680 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:23:34:681 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:34:681 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:34:681 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:34:681 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:34:681 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:34:681 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:36:183 KERNEL_SCHEDULER/(4259:4331): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:23:36:201 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:36:202 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:23:36:202 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:36:202 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:36:202 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:36:202 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:36:202 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:36:202 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:37:703 KERNEL_SCHEDULER/(4259:4332): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:23:37:717 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:37:717 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:23:37:717 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:37:717 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:37:717 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:37:717 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:37:718 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:37:718 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:38:374 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:38:375 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:23:38:375 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:23:38:376 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:23:38:376 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:23:38:376 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:38:378 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:23:38:378 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:23:38:734 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:38:735 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:23:38:735 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:38:735 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:38:735 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:38:735 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:38:735 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:40:237 KERNEL_SCHEDULER/(4259:4334): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:40:260 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:40:260 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:40:260 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:40:260 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:40:260 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:40:260 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:40:260 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:40:260 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:41:266 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:41:267 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:41:267 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:41:267 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:41:267 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:41:275 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:41:275 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:23:41:275 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:41:275 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:41:275 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:41:275 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:41:275 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:42:775 KERNEL_SCHEDULER/(4259:4337): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:42:795 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:42:796 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:42:796 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:42:796 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:42:796 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:42:796 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:42:796 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:42:796 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:43:278 KERNEL_SCHEDULER/(4259:4301): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:43:278 KERNEL_SCHEDULER/(4259:4301): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:43:280 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:43:799 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:43:799 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:23:43:799 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:23:43:800 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:23:43:800 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:23:43:800 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:43:805 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:23:43:806 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:23:43:816 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:43:816 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:23:43:816 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:43:816 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:43:816 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:43:816 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:43:816 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:45:317 KERNEL_SCHEDULER/(4259:4340): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:45:337 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:45:337 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:45:338 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:45:339 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:45:339 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:45:339 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:45:339 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:45:339 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:46:342 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:46:344 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:46:344 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:46:344 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:46:345 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:46:350 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:46:350 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:23:46:350 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:46:350 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:46:350 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:46:350 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:46:350 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:47:851 KERNEL_SCHEDULER/(4259:4343): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:47:870 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:47:870 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:47:870 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:47:870 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:47:870 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:47:870 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:47:871 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:47:871 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:48:878 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:48:879 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:48:880 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:48:880 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:48:881 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:48:886 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:48:886 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:23:48:886 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:48:886 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:48:886 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:48:886 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:48:886 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:50:387 KERNEL_SCHEDULER/(4259:4346): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:50:406 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:50:407 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:50:407 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:50:407 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:50:407 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:50:408 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:50:408 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:50:408 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:51:414 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:23:51:415 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:23:51:415 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:23:51:416 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:23:51:417 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:23:51:427 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:23:51:427 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:23:51:427 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:23:51:427 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:23:51:427 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:51:427 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:51:427 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:52:929 KERNEL_SCHEDULER/(4259:4349): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:23:52:949 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:52:949 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Desalojado por fin de quantum
+[DEBUG] 20:23:52:949 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 7 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:52:949 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:52:949 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:52:949 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:52:949 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:52:949 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:53:464 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:53:464 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:23:53:464 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:53:464 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:23:53:464 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:53:464 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:23:53:464 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:23:53:464 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:23:53:924 KERNEL_SCHEDULER/(4259:4315): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:23:53:924 KERNEL_SCHEDULER/(4259:4315): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:23:53:929 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:23:54:965 KERNEL_SCHEDULER/(4259:4352): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:23:54:981 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:54:981 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:23:54:981 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:54:981 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:54:981 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:54:982 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:54:982 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:54:982 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:56:482 KERNEL_SCHEDULER/(4259:4353): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:23:56:497 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:56:497 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:23:56:497 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:56:497 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:56:497 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:56:497 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:56:497 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:57:997 KERNEL_SCHEDULER/(4259:4354): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:23:58:016 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:58:016 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:23:58:016 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:58:016 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:58:017 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:58:017 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:58:017 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:58:017 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:23:59:518 KERNEL_SCHEDULER/(4259:4355): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:23:59:540 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:23:59:540 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:23:59:540 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:23:59:540 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:23:59:540 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:23:59:540 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:23:59:540 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:23:59:540 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:01:041 KERNEL_SCHEDULER/(4259:4356): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:24:01:060 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:01:061 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:24:01:061 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:01:061 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:01:061 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:01:061 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:01:061 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:01:062 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:02:562 KERNEL_SCHEDULER/(4259:4357): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:24:02:577 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:02:577 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:24:02:577 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:02:577 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:02:577 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:02:577 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:02:578 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:02:578 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:03:469 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:03:469 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:24:03:470 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:24:03:470 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:24:03:470 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:24:03:470 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:03:472 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:24:03:473 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:24:03:592 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:03:592 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:24:03:592 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:03:592 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:03:592 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:03:592 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:03:592 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:05:093 KERNEL_SCHEDULER/(4259:4359): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:05:114 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:05:115 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:05:115 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:05:115 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:05:115 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:05:115 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:05:115 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:05:115 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:06:121 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:06:121 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:06:121 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:06:121 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:06:121 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:06:132 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:06:132 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:24:06:132 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:06:132 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:06:132 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:06:132 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:06:132 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:07:634 KERNEL_SCHEDULER/(4259:4362): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:07:654 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:07:654 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:07:654 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:07:654 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:07:654 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:07:655 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:07:655 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:07:655 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:08:660 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:08:660 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:08:660 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:08:660 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:08:661 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:08:674 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:08:674 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:24:08:674 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:08:674 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:08:674 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:08:674 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:08:675 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:10:176 KERNEL_SCHEDULER/(4259:4365): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:10:214 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:10:214 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:10:215 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:10:215 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:10:215 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:10:215 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:10:215 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:10:216 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:11:218 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:11:219 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:11:220 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:11:221 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:11:221 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:11:233 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:11:233 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:24:11:233 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:11:233 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:11:233 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:11:233 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:11:234 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:12:735 KERNEL_SCHEDULER/(4259:4368): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:12:751 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:12:752 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:12:752 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:12:752 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:12:752 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:12:752 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:12:752 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:12:752 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:13:755 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:13:757 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:13:758 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:13:760 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:13:760 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:13:772 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:13:773 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:24:13:773 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:13:773 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:13:773 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:13:773 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:13:773 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:15:274 KERNEL_SCHEDULER/(4259:4371): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:15:290 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:15:290 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:15:290 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:15:290 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:15:290 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:15:290 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:15:290 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:15:291 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:16:295 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:16:295 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:16:295 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:16:296 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:16:296 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:16:307 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:16:307 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:24:16:307 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:16:307 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:16:307 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:16:307 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:16:307 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:17:808 KERNEL_SCHEDULER/(4259:4374): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:17:827 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:17:827 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Desalojado por fin de quantum
+[DEBUG] 20:24:17:827 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 7 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:17:827 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:17:827 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:17:827 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:17:827 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:17:827 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:18:336 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:18:337 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:18:337 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:18:337 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:18:337 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:18:337 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:18:338 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:18:338 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:19:841 KERNEL_SCHEDULER/(4259:4377): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:24:19:854 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:19:854 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:24:19:854 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:19:854 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:19:854 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:19:854 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:19:855 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:19:855 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:20:340 KERNEL_SCHEDULER/(4259:4341): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:24:20:340 KERNEL_SCHEDULER/(4259:4341): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:24:20:345 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:24:21:356 KERNEL_SCHEDULER/(4259:4378): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:24:21:376 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:21:377 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:24:21:377 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:21:377 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:21:377 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:21:377 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:21:377 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:21:377 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:22:879 KERNEL_SCHEDULER/(4259:4379): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:24:22:895 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:22:895 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:24:22:895 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:22:895 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:22:895 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:22:895 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:22:896 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:22:896 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:24:397 KERNEL_SCHEDULER/(4259:4380): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:24:24:422 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:24:422 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:24:24:422 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:24:422 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:24:422 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:24:422 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:24:422 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:24:422 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:25:923 KERNEL_SCHEDULER/(4259:4381): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:24:25:951 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:25:951 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:24:25:951 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:25:951 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:25:951 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:25:951 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:25:951 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:27:452 KERNEL_SCHEDULER/(4259:4382): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:24:27:474 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:27:474 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:24:27:474 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:27:474 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:27:474 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:27:474 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:27:474 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:24:28:341 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:28:345 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:24:28:345 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:24:28:488 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:28:488 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:24:28:488 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:28:488 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:28:488 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:28:488 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:28:489 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:29:990 KERNEL_SCHEDULER/(4259:4384): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:30:006 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:30:006 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:30:006 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:30:006 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:30:006 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:30:006 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:30:006 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:30:006 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:31:010 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:31:011 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:31:012 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:31:013 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:31:014 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:31:026 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:31:026 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:24:31:026 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:31:026 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:31:026 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:31:026 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:31:026 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:32:527 KERNEL_SCHEDULER/(4259:4387): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:32:543 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:32:543 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:32:543 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:32:543 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:32:543 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:32:543 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:32:543 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:32:544 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:33:551 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:33:551 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:33:551 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:33:551 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:33:551 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:33:558 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:33:558 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:24:33:558 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:33:559 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:33:559 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:33:559 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:33:559 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:35:059 KERNEL_SCHEDULER/(4259:4390): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:35:083 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:35:083 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:35:083 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:35:083 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:35:083 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:35:083 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:35:083 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:35:084 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:36:088 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:36:088 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:36:088 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:36:088 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:36:088 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:36:096 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:36:096 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:24:36:097 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:36:097 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:36:097 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:36:097 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:36:097 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:37:598 KERNEL_SCHEDULER/(4259:4393): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:37:615 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:37:615 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:37:615 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:37:615 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:37:616 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:37:616 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:37:616 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:37:617 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:38:622 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:38:622 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:38:622 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:38:623 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:38:623 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:38:632 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:38:633 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:24:38:633 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:38:633 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:38:633 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:38:633 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:38:634 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:40:135 KERNEL_SCHEDULER/(4259:4396): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:40:160 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:40:161 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:40:161 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:40:161 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:40:161 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:40:161 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:40:161 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:40:162 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:41:163 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:41:164 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:41:165 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:41:167 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:41:167 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:41:174 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:41:174 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:24:41:174 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:41:174 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:41:174 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:41:174 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:41:174 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:42:676 KERNEL_SCHEDULER/(4259:4399): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:42:698 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:42:699 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Desalojado por fin de quantum
+[DEBUG] 20:24:42:699 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 7 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:42:700 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:42:700 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:42:700 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:42:700 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:42:700 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:43:208 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:43:209 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:43:211 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:43:211 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:43:211 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:43:212 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[DEBUG] 20:24:43:212 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:43:212 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:44:713 KERNEL_SCHEDULER/(4259:4401): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:24:44:747 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:44:748 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:24:44:748 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:44:748 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:44:748 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:44:748 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:44:748 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:44:748 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:45:217 KERNEL_SCHEDULER/(4259:4366): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:24:45:217 KERNEL_SCHEDULER/(4259:4366): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:24:45:220 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:24:46:249 KERNEL_SCHEDULER/(4259:4403): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:24:46:265 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:46:265 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:24:46:265 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:46:265 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:46:265 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:46:265 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:46:266 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:46:266 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:47:766 KERNEL_SCHEDULER/(4259:4404): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:24:47:787 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:47:787 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:24:47:787 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:47:788 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:47:788 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:47:788 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:47:788 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:49:289 KERNEL_SCHEDULER/(4259:4405): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:24:49:308 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:49:308 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:24:49:308 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:49:308 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:49:308 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:49:308 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:49:308 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:49:308 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:50:809 KERNEL_SCHEDULER/(4259:4406): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:24:50:833 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:50:833 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:24:50:833 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:50:833 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:50:833 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:50:833 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:50:834 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:50:834 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:52:334 KERNEL_SCHEDULER/(4259:4407): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:24:52:352 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:52:353 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:24:52:353 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:24:52:353 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:52:353 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:24:52:353 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:52:353 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:52:353 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:53:217 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:53:219 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:24:53:219 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:24:53:219 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:24:53:219 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:24:53:220 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:53:223 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:24:53:223 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:24:53:394 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:53:394 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:24:53:395 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:53:395 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:53:395 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:53:395 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:53:395 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:54:897 KERNEL_SCHEDULER/(4259:4409): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:54:914 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:54:915 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:54:916 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:54:916 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:54:916 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:54:916 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:54:916 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:54:917 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:55:926 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:55:926 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:55:926 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:55:927 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:55:928 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:55:936 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:55:936 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:24:55:936 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:24:55:936 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:55:936 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:55:936 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:24:55:937 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:57:438 KERNEL_SCHEDULER/(4259:4412): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:24:57:466 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:24:57:466 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:24:57:466 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:57:466 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:24:57:466 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:57:467 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:24:57:467 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:24:57:467 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:58:470 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:24:58:471 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:24:58:471 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:24:58:471 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:24:58:471 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:24:58:482 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:24:58:482 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:24:58:482 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:24:58:482 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:24:58:482 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:24:58:482 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:24:58:482 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:24:59:983 KERNEL_SCHEDULER/(4259:4415): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:00:003 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:00:003 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:00:003 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:00:003 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:00:003 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:00:003 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:00:003 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:00:003 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:01:008 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:01:009 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:01:009 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:01:009 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:01:009 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:01:018 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:01:018 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:25:01:018 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:01:018 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:01:018 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:01:018 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:01:018 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:02:518 KERNEL_SCHEDULER/(4259:4418): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:02:539 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:02:539 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:02:539 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:02:539 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:02:539 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:02:539 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:02:539 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:02:539 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:03:548 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:03:549 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:03:551 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:03:552 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:03:552 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:03:558 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:03:558 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:25:03:558 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:03:558 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:03:558 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:03:559 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:03:559 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:05:060 KERNEL_SCHEDULER/(4259:4421): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:05:084 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:05:084 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:05:084 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:05:084 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:05:084 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:05:084 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:05:085 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:05:085 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:06:091 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:06:092 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:06:093 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:06:096 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:06:096 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:06:102 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:06:102 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:25:06:102 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:06:102 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:06:103 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:06:103 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:25:06:103 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:07:604 KERNEL_SCHEDULER/(4259:4424): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:07:644 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:07:645 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Desalojado por fin de quantum
+[DEBUG] 20:25:07:645 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 7 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:07:645 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:07:645 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:25:07:645 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:07:645 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:07:645 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:08:155 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:08:156 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:08:158 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:08:158 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:08:158 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:08:158 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:08:159 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:08:159 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:09:662 KERNEL_SCHEDULER/(4259:4427): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:25:09:678 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:09:678 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:25:09:678 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:09:679 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:09:679 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:25:09:680 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:09:681 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:09:681 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[INFO] 20:25:10:084 KERNEL_SCHEDULER/(4259:4391): ## (<7>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>
+[INFO] 20:25:10:085 KERNEL_SCHEDULER/(4259:4391): ## (<7>) Iniciando traspaso a SWAP...
+[DEBUG] 20:25:10:089 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la suspension
+[DEBUG] 20:25:11:182 KERNEL_SCHEDULER/(4259:4428): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:25:11:201 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:11:201 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:25:11:201 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:11:201 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:11:201 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:25:11:201 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:11:201 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:11:201 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:12:702 KERNEL_SCHEDULER/(4259:4429): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:2
+[DEBUG] 20:25:12:722 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:12:722 KERNEL_SCHEDULER/(4259:4276): ## (<2>) - Desalojado por fin de quantum
+[DEBUG] 20:25:12:722 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:12:722 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:12:722 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:25:12:722 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:12:722 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:12:722 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:14:222 KERNEL_SCHEDULER/(4259:4430): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:3
+[DEBUG] 20:25:14:241 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:14:241 KERNEL_SCHEDULER/(4259:4276): ## (<3>) - Desalojado por fin de quantum
+[DEBUG] 20:25:14:241 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:14:241 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:14:241 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:14:241 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:14:241 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:15:742 KERNEL_SCHEDULER/(4259:4431): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:4
+[DEBUG] 20:25:15:762 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:15:762 KERNEL_SCHEDULER/(4259:4276): ## (<4>) - Desalojado por fin de quantum
+[DEBUG] 20:25:15:762 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:15:763 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:15:763 KERNEL_SCHEDULER/(4259:4263): No hay procesos en exec
+[DEBUG] 20:25:15:763 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:15:763 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:15:764 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:17:265 KERNEL_SCHEDULER/(4259:4432): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:25:17:282 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:17:282 KERNEL_SCHEDULER/(4259:4276): ## (<1>) - Desalojado por fin de quantum
+[DEBUG] 20:25:17:282 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por fin de quantum - Pasando el proceso a Ready...
+[INFO] 20:25:17:282 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[DEBUG] 20:25:17:282 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:17:282 KERNEL_SCHEDULER/(4259:4262): ## (<2>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:17:282 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:18:161 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:18:161 KERNEL_SCHEDULER/(4259:4274): No se encontró el PCB para PID 7 en BLOCK. Verificando otras colas...
+[DEBUG] 20:25:18:161 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK_SUSP.
+[INFO] 20:25:18:161 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a SUSP. READY
+[INFO] 20:25:18:162 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>
+[DEBUG] 20:25:18:162 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:18:164 KERNEL_SCHEDULER/(4259:4261): ## KM confirmo la desuspension
+[INFO] 20:25:18:164 KERNEL_SCHEDULER/(4259:4261): ## (<7>) Pasa del estado <READY_SUSP> al estado <READY>
+[DEBUG] 20:25:18:296 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:18:296 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 2 - Por proceso con prioridad más alta
+[INFO] 20:25:18:296 KERNEL_SCHEDULER/(4259:4276): ## (<2>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:18:296 KERNEL_SCHEDULER/(4259:4263): ## (<2>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:18:296 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:18:297 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:18:297 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:19:798 KERNEL_SCHEDULER/(4259:4434): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:19:818 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:19:818 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:19:818 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:19:818 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:19:818 KERNEL_SCHEDULER/(4259:4262): ## (<3>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:19:818 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:19:819 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:19:819 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:20:824 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:20:825 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:20:825 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:20:825 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:20:825 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:20:833 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:20:834 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 3 - Por proceso con prioridad más alta
+[INFO] 20:25:20:834 KERNEL_SCHEDULER/(4259:4276): ## (<3>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:20:834 KERNEL_SCHEDULER/(4259:4263): ## (<3>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:20:834 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:20:834 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:20:834 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:22:336 KERNEL_SCHEDULER/(4259:4437): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:22:362 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:22:362 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:22:362 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:22:362 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:22:362 KERNEL_SCHEDULER/(4259:4262): ## (<4>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:22:363 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:22:363 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:22:364 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:23:366 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:23:367 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:23:368 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:23:368 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:23:371 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:23:375 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:23:375 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 4 - Por proceso con prioridad más alta
+[INFO] 20:25:23:375 KERNEL_SCHEDULER/(4259:4276): ## (<4>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:23:375 KERNEL_SCHEDULER/(4259:4263): ## (<4>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:23:375 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:23:375 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:23:375 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:24:877 KERNEL_SCHEDULER/(4259:4440): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:7
+[DEBUG] 20:25:24:894 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[INFO] 20:25:24:895 KERNEL_SCHEDULER/(4259:4276): ## (<7>) - Solicitó syscall: <SLEEP>
+[DEBUG] 20:25:24:895 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:24:895 KERNEL_SCHEDULER/(4259:4276): ## (<7>) Pasa del estado <EXEC> al estado <BLOCK>
+[INFO] 20:25:24:895 KERNEL_SCHEDULER/(4259:4262): ## (<1>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:24:895 KERNEL_SCHEDULER/(4259:4264): ## PID 7 - Enviado a Interfaz [SLEEP] desde cola de espera.
+[DEBUG] 20:25:24:895 KERNEL_SCHEDULER/(4259:4264): Se envio solicitud a io: 0
+[DEBUG] 20:25:24:895 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:25:904 KERNEL_SCHEDULER/(4259:4274): IO_OK recibido para PID: 7 TIPO: SLEEP
+[DEBUG] 20:25:25:904 KERNEL_SCHEDULER/(4259:4274): PCB para PID 7 encontrado en BLOCK.
+[INFO] 20:25:25:907 KERNEL_SCHEDULER/(4259:4274): ## (<7>) finalizó IO y pasa a READY
+[INFO] 20:25:25:908 KERNEL_SCHEDULER/(4259:4274): ## (<7>) Pasa del estado <BLOCK> al estado <READY>
+[DEBUG] 20:25:25:908 KERNEL_SCHEDULER/(4259:4274): ## Interfaz [SLEEP] liberada.
+[DEBUG] 20:25:26:396 KERNEL_SCHEDULER/(4259:4442): Notificando desalojo por fin de quantum a cpu:1 - ejecutando pid:1
+[DEBUG] 20:25:26:414 KERNEL_SCHEDULER/(4259:4276): ID CPU: 1
+[DEBUG] 20:25:26:414 KERNEL_SCHEDULER/(4259:4276): CPU: 1 - Desalojo al PID: 1 - Por proceso con prioridad más alta
+[INFO] 20:25:26:414 KERNEL_SCHEDULER/(4259:4276): ## (<1>) Pasa del estado <EXEC> al estado <READY>
+[INFO] 20:25:26:414 KERNEL_SCHEDULER/(4259:4263): ## (<1>) Prioridad: <3> - Desalojado por cola más prioritaria por el proceso <7> con prioridad <1>
+[DEBUG] 20:25:26:414 KERNEL_SCHEDULER/(4259:4276): Se libero CPU: 1
+[INFO] 20:25:26:414 KERNEL_SCHEDULER/(4259:4262): ## (<7>) Pasa del estado <READY> al estado <EXEC>
+[DEBUG] 20:25:26:415 KERNEL_SCHEDULER/(4259:4262): Iniciando el temporizador por 1500 ms...
+[DEBUG] 20:25:26:800 KERNEL_SCHEDULER/(4259:4261): ## KM informa corrupcion
+[DEBUG] 20:25:26:800 KERNEL_SCHEDULER/(4259:4261): TOTAL CPU'S 1
+[DEBUG] 20:25:26:800 KERNEL_SCHEDULER/(4259:4261): TOTAL CPU'S OCUPADAS 1
+[DEBUG] 20:25:26:800 KERNEL_SCHEDULER/(4259:4261): [DEBUG-1] queue_is_empty(cpuOcupadas)=0 (0=tiene CPUs, 1=vacia)
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): [DEBUG-2] Enviando desalojo por corrupcion a una CPU
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado BLOCK, fueron finalizados
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado BLOCK SUSPENDIDO, fueron finalizados
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado NEW, fueron finalizados
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado NEW, fueron finalizados
+[DEBUG] 20:25:26:801 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado NEW, fueron finalizados
+[DEBUG] 20:25:26:802 KERNEL_SCHEDULER/(4259:4261): Todos los procesos con estado NEW, fueron finalizados

@@ -185,14 +185,14 @@ void atender_kernel_memory(t_swap* sp) {
         void* contenido;
 
         switch ((op_code)cod_op) {
-            case ESCRITURA_EN_MS: 
+            case ESCRITURA_SWAP: 
                 nro_bloque_ptr = list_get(paquete, 1);
                 contenido = list_get(paquete, 2);
                 
                 escribir_bloque(sp, *nro_bloque_ptr, contenido);
                 break;
 
-            case LECTURA_DE_DATOS: 
+            case LECTURA_SWAP: 
                 nro_bloque_ptr = list_get(paquete, 1);
                 
                 leer_bloque(sp, *nro_bloque_ptr);

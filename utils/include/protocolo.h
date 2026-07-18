@@ -39,8 +39,10 @@ typedef enum{
     STDIN,
     INIT_PROC,
     EXIT_PROC,
+    SYSCALL_IO,
     // Operaciones de IO
-    IO_REQUEST,  // Solicitud de operación de IO de KS a IO
+    IO_REQUEST, // Solicitud de operación de IO de KS a IO
+    EJECUTAR_TAREA,
     IO_OK,       // Confirmación de finalización de IO al KS
     PROCESO_A_PROCESAR, //KS -> CPU: ejecutá este PID
     REQUEST_CONTEXTO, //CPU -> KM: dame el contexto de este PID
@@ -55,6 +57,7 @@ typedef enum{
     CONTEXT_ERROR,           //KM responde esto cuando no encuentra el CTX solicitado
     NUEVO_MEMORY_STICK,
     ESCRITURA_DE_DATOS,              //KS envía una serie de bytes y dir logica a KM para que MS lo escriba en sus segmentos
+    ESCRITURA_DE_DATOS_OK,           //KM responde esto a KS para confirmar que se escribió correctamente
     LECTURA_DE_DATOS,
     FINALIZAR_PROCESO,
     SUSPENSION_DE_PROCESO,
@@ -85,7 +88,13 @@ typedef enum{
     ESCRITURA_EN_MS,
     RTA_LECTURA,
     COMPACTACION_OK,
-    COMPACTACION_ERROR            
+    COMPACTACION_ERROR,
+    SUSPENSION_OK,
+    LECTURA_SWAP,
+    ESCRITURA_SWAP,
+    DESUSPENSION_OK,
+    ERROR_CONEXION_MS,
+    DESUSPENSION_ERROR
 }op_code;
 
 #endif /* PROTOCOLO_H_ */

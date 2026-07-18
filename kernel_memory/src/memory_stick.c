@@ -2,6 +2,7 @@
 #include "kernel_memory.h"
 #include "estructuras.h"
 
+
 int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     t_ms_info* ms_info = malloc(sizeof(t_ms_info));
 
@@ -13,10 +14,86 @@ int nuevo_memory_stick(int ms_id, int ms_tamano, int socket_cliente) {
     ms_info->id = ms_id;
     ms_info->tamano = ms_tamano;
     ms_info->socket = socket_cliente;
+    ms_info->ultimo_codigo_op = 0;
+    // INICIALIZACIÓN DE SINCRONIZACIÓN
+    pthread_mutex_init(&ms_info->mutex_socket, NULL);
+    pthread_cond_init(&ms_info->cond_respuesta, NULL);
+    ms_info->respuesta_lista = false;
+
     pthread_mutex_lock(&mutex_lista_ms);
     list_add(lista_ms, ms_info);
     pthread_mutex_unlock(&mutex_lista_ms);
     return 1;
+}
+
+int guardar_ms_conexion(int id, char* ip, char* puerto) {
+    t_ms_conexion* ms_conexion = malloc(sizeof(t_ms_conexion));
+
+    if (ms_conexion == NULL)
+        return 0;
+    memset(ms_conexion, 0, sizeof(t_ms_conexion));
+    ms_conexion->id = id;
+    ms_conexion->ip = strdup(ip);
+    ms_conexion->puerto = strdup(puerto);
+
+    if (ms_conexion->ip == NULL || ms_conexion->puerto == NULL) {
+        free(ms_conexion->ip);
+        free(ms_conexion->puerto);
+        free(ms_conexion);
+        return 0;
+    }
+
+    pthread_mutex_lock(&mutex_lista_ms_conexion);
+    list_add(lista_ms_conexion, ms_conexion);
+    pthread_mutex_unlock(&mutex_lista_ms_conexion);
+
+    return 1;
+}
+
+void enviar_ms_a_cpu(int socket_cpu, t_log* logger) {
+    pthread_mutex_lock(&mutex_lista_dir_global_ms);
+    pthread_mutex_lock(&mutex_lista_ms_conexion);
+
+    int total_ms = list_size(lista_dir_global_ms);
+    log_debug(logger, "Enviando %d Memory Sticks ya conectados a la nueva CPU (Socket: %d)", total_ms, socket_cpu);
+
+    for (int i = 0; i < total_ms; i++) {
+        t_ms_pos* ms_pos = list_get(lista_dir_global_ms, i);
+        
+        char* ms_ip = NULL;
+        char* ms_puerto = NULL;
+
+        for (int j = 0; j < list_size(lista_ms_conexion); j++) {
+            t_ms_conexion* ms_con = list_get(lista_ms_conexion, j);
+            if (ms_con->id == ms_pos->id) {
+                ms_ip = ms_con->ip;
+                ms_puerto = ms_con->puerto;
+                break;
+            }
+        }
+
+        if (ms_ip == NULL || ms_puerto == NULL) {
+            log_error(logger, "No se encontraron datos de conexión para MS ID: %d", ms_pos->id);
+            continue;
+        }
+
+        t_paquete* paquete = crear_paquete(MS_NUEVO_CPU, crear_buffer());
+        
+        agregar_a_paquete(paquete, &(ms_pos->id), sizeof(int));
+        agregar_a_paquete(paquete, ms_puerto, strlen(ms_puerto) + 1);
+        agregar_a_paquete(paquete, ms_ip, strlen(ms_ip) + 1);
+        agregar_a_paquete(paquete, &(ms_pos->base_global), sizeof(uint32_t));
+        agregar_a_paquete(paquete, &(ms_pos->limite_global), sizeof(uint32_t));
+        log_debug(logger, "Antes de enviar a CPU: ip='%s' puerto='%s'", ms_ip, ms_puerto);
+        enviar_paquete(paquete, socket_cpu, logger);
+        log_debug(logger, "Enviando Memory Stick: Puerto:%s e IP:%s a la nueva CPU (Socket: %d)",ms_puerto,ms_ip, socket_cpu);
+        eliminar_paquete(paquete);
+
+        log_debug(logger, "  [%d/%d] MS ID:%d enviado exitosamente a CPU", i + 1, total_ms, ms_pos->id);
+    }
+
+    pthread_mutex_unlock(&mutex_lista_ms_conexion);
+    pthread_mutex_unlock(&mutex_lista_dir_global_ms);
 }
 
 t_ms_info *buscar_ms_por_socket(int socket)
@@ -46,22 +123,23 @@ void manejar_desconexion_memory_stick(t_ms_info* ms, t_kernel_memory* km, t_log*
     eliminar_paquete(aviso);
 }
 
-void agregar_posicion_ms(t_resultado_hueco r,int ms_id,t_log* logger){
+void agregar_posicion_ms(uint32_t base,uint32_t tamano,int ms_id,t_log* logger){
     t_ms_pos* ms_pos = malloc(sizeof(t_ms_pos));
     memset(ms_pos, 0, sizeof(t_ms_pos));
+    uint32_t lim = base + tamano - 1 ;
     ms_pos->id = ms_id;
-    ms_pos->base_global = r.base;
-    ms_pos->limite_global = r.limite;
+    ms_pos->base_global = base;
+    ms_pos->limite_global = lim;
     pthread_mutex_lock(&mutex_lista_dir_global_ms);
     list_add(lista_dir_global_ms, ms_pos);
     //****************log temp************
-    log_info(logger, "=== Lista de Memory Sticks (%d en total) ===", list_size(lista_dir_global_ms));
+    log_debug(logger, "=== Lista de Memory Sticks (%d en total) ===", list_size(lista_dir_global_ms));
     for(int i = 0; i < list_size(lista_dir_global_ms); i++) {
         t_ms_pos *ms = list_get(lista_dir_global_ms, i);
-        log_info(logger, "  [%d] MS ID:%d | base global:%u | limite global:%u",
+        log_debug(logger, "  [%d] MS ID:%d | base global:%u | limite global:%u",
                  i, ms->id, ms->base_global, ms->limite_global);
     }
-    log_info(logger, "==========================================");
+    log_debug(logger, "==========================================");
     //****************log temp**************
     pthread_mutex_unlock(&mutex_lista_dir_global_ms);
 }
@@ -86,10 +164,24 @@ int buscar_socket_ms_por_id(int ms_id)
     pthread_mutex_unlock(&mutex_lista_ms);
     return -1;
 }
+t_ms_info* buscar_ms_por_id(int ms_id) {
+    pthread_mutex_lock(&mutex_lista_ms);
 
+    for (int i = 0; i < list_size(lista_ms); i++) {
+        t_ms_info* ms = list_get(lista_ms, i);
+
+        if (ms->id == ms_id) {
+            pthread_mutex_unlock(&mutex_lista_ms);
+            return ms; 
+        }
+    }
+
+    pthread_mutex_unlock(&mutex_lista_ms);
+    return NULL;
+}
 t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, uint32_t tamano_contenido, t_log* logger) {
 
-    log_info(logger, "== Iniciando mapeo global -> local: Dir Global: %u | Tamaño Total: %d bytes ==",dir_fisica_global, tamano_contenido);
+    log_debug(logger, "== Iniciando mapeo global -> local: Dir Global: %u | Tamaño Total: %d bytes ==",dir_fisica_global, tamano_contenido);
 
     t_list* lista_fragmentos_temp = list_create();
     int bytes_restantes = tamano_contenido;
@@ -128,6 +220,7 @@ t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, uint32_t tamano_conten
         }
 
         t_fragmento_memoria* frag = malloc(sizeof(t_fragmento_memoria));
+        memset(frag, 0, sizeof(t_fragmento_memoria)); 
         frag->ms_id = ms_encontrado->id;
         frag->dir_local = dir_local;
         frag->tamano = bytes_a_copiar;
@@ -144,94 +237,106 @@ t_list* calcular_dir_local_ms(uint32_t dir_fisica_global, uint32_t tamano_conten
 
     pthread_mutex_unlock(&mutex_lista_dir_global_ms);
 
-    log_info(logger, "Mapeo finalizado con éxito. El contenido se dividió en %d fragmento(s).",contador_fragmentos);
+    log_debug(logger, "Mapeo finalizado con éxito. El contenido se dividió en %d fragmento(s).",contador_fragmentos);
 
     return lista_fragmentos_temp;
 }
-
-void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_escribir, t_log *logger)
-{
+void enviar_fragmentos_escritura(t_list *lista_fragmentos, char *contenido_a_escribir, t_log *logger, t_kernel_memory* km) {
     int offset_contenido = 0;
 
-    for (int i = 0; i < list_size(lista_fragmentos); i++)
-    {
+    for (int i = 0; i < list_size(lista_fragmentos); i++) {
         t_fragmento_memoria *frag = list_get(lista_fragmentos, i);
+        
+        // Buscamos la estructura de control del MS (que ahora tiene el mutex y cond_var)
+        //int socket_ms = buscar_socket_ms_por_id(frag->ms_id);
+        t_ms_info* ms = buscar_ms_por_id(frag->ms_id); 
 
-        int socket_ms = buscar_socket_ms_por_id(frag->ms_id);
-
-        if (socket_ms == -1)
-        {
-            log_error(logger, "No se encontró el socket para el Memory Stick ID:%d", frag->ms_id);
+        if (ms == NULL) {
+            log_error(logger, "No se encontró el MS ID:%d", frag->ms_id);
             continue;
         }
 
-        char *datos_fragmentados = contenido_a_escribir + offset_contenido;
+        pthread_mutex_lock(&ms->mutex_socket); // Bloqueamos el acceso al socket del MS
 
-        t_paquete *paquete_ms = crear_paquete(ESCRITURA_EN_MS, crear_buffer());
+        char *datos_fragmentados = contenido_a_escribir + offset_contenido;
+        t_paquete *paquete_ms = crear_paquete(ESCRITURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_ms, &(frag->dir_local), sizeof(uint32_t));
         agregar_a_paquete(paquete_ms, &(frag->tamano), sizeof(int));
         agregar_a_paquete(paquete_ms, datos_fragmentados, frag->tamano);
-        enviar_paquete(paquete_ms, socket_ms, logger);
+        
+        enviar_paquete(paquete_ms, ms->socket, logger);
         eliminar_paquete(paquete_ms);
 
-        log_info(logger, "Enviado fragmento %d al MS ID:%d | Tam: %d bytes en Dir Local: %u",
-                 i, frag->ms_id, frag->tamano, frag->dir_local);
+        log_debug(logger, "Enviado fragmento %d al MS ID:%d. Esperando confirmación...", i, ms->id);
 
+        ms->respuesta_lista = false; 
+        while (!ms->respuesta_lista) {
+            pthread_cond_wait(&ms->cond_respuesta, &ms->mutex_socket);
+        }
+
+        if (ms->ultimo_codigo_op == IO_OK) {
+            log_debug(logger, "MS ID:%d confirmó la operación vía Dispatcher.", ms->id);
+        } else {
+            log_error(logger, "Error en la operación del MS ID:%d", ms->id);
+        }
+
+        pthread_mutex_unlock(&ms->mutex_socket); // Liberamos el socket para el siguiente fragmento
         offset_contenido += frag->tamano;
     }
 }
 
-void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger) {
-    
+void* enviar_fragmentos_lectura(t_list* lista_fragmentos, uint32_t tamano_total, t_log* logger, t_kernel_memory* km)
+{
     void* buffer_completo = malloc(tamano_total);
     if (buffer_completo == NULL) {
-        log_error(logger, "Error: No se pudo asignar memoria para el buffer de lectura completo");
+        log_error(logger, "Error: No se pudo asignar memoria para el buffer de lectura");
         return NULL;
     }
-
-    int offset_armado = 0; 
+    memset(buffer_completo, 0, tamano_total);
+    int offset_armado = 0;
 
     for (int i = 0; i < list_size(lista_fragmentos); i++) {
         t_fragmento_memoria* frag = list_get(lista_fragmentos, i);
 
-        int socket_ms = buscar_socket_ms_por_id(frag->ms_id);
-        if (socket_ms == -1) {
-            log_error(logger, "Error: No se encontró el socket para el MS ID:%d", frag->ms_id);
+        t_ms_info* ms = buscar_ms_por_id(frag->ms_id);
+        if (ms == NULL) {
+            log_error(logger, "No se encontró el MS ID:%d", frag->ms_id);
             free(buffer_completo);
             return NULL;
         }
 
-        t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());//este es el protocolo correcto?
+        pthread_mutex_lock(&ms->mutex_socket);
+
+        t_paquete* paquete_peticion = crear_paquete(LECTURA_DE_DATOS, crear_buffer());
         agregar_a_paquete(paquete_peticion, &(frag->dir_local), sizeof(uint32_t));
-        agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(uint32_t));
+        agregar_a_paquete(paquete_peticion, &(frag->tamano), sizeof(int));
 
-        log_debug(logger, "Solicitando fragmento %d al MS ID %d (%u bytes desde dir local %u)", 
-                  i, frag->ms_id, frag->tamano, frag->dir_local);
-
-        enviar_paquete(paquete_peticion, socket_ms, logger);
+        log_debug(logger, "Solicitando fragmento %d al MS %d (%d bytes)", i, ms->id, frag->tamano);
+        enviar_paquete(paquete_peticion, ms->socket, logger);
         eliminar_paquete(paquete_peticion);
 
-        uint32_t cod_op;
-        if (recv(socket_ms, &cod_op, sizeof(uint32_t), MSG_WAITALL) <= 0) {
-            log_error(logger, "Error al recibir código de operación del MS ID:%d", frag->ms_id);
+        ms->respuesta_lista = false;
+        while (!ms->respuesta_lista) {
+            pthread_cond_wait(&ms->cond_respuesta, &ms->mutex_socket);
+        }
+
+        if (ms->ultimo_codigo_op == DATOS_LEIDOS && ms->buffer_respuesta != NULL) {
+            memcpy((char*)buffer_completo + offset_armado, ms->buffer_respuesta, frag->tamano);
+            log_debug(logger, "Fragmento %d recibido vía Dispatcher y copiado", i);
+            
+            free(ms->buffer_respuesta);
+            ms->buffer_respuesta = NULL;
+        } else {
+            log_error(logger, "Error en lectura: El MS %d se desconectó o falló", ms->id);
+            pthread_mutex_unlock(&ms->mutex_socket);
             free(buffer_completo);
             return NULL;
         }
 
-        t_list* paquete_respuesta = recibir_paquete(socket_ms);
-        
-        void* datos_leidos_ms = list_get(paquete_respuesta, 1);
-
-        memcpy(buffer_completo + offset_armado, datos_leidos_ms, frag->tamano);
-
-        log_debug(logger, "Fragmento %d recibido y acoplado en el offset %d", i, offset_armado);
-
         offset_armado += frag->tamano;
-
-        list_destroy_and_destroy_elements(paquete_respuesta, free);
+        pthread_mutex_unlock(&ms->mutex_socket);
     }
 
-    log_info(logger, "Lectura fragmentada unificada con éxito (%d bytes totales)", tamano_total);
-
+    log_debug(logger, "Lectura fragmentada unificada con éxito (%u bytes)", tamano_total);
     return buffer_completo;
 }
