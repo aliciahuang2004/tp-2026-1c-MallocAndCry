@@ -116,7 +116,7 @@ t_ms_info *buscar_ms_por_socket(int socket)
 }
 
 void manejar_desconexion_memory_stick(t_ms_info* ms, t_kernel_memory* km, t_log* logger) {
-    log_error(logger, "Memory Stick ID:%d desconectado - Informando corrupción al Kernel Scheduler", ms->id);
+    log_debug(logger, "Memory Stick ID:%d desconectado - Informando corrupción al Kernel Scheduler", ms->id);
 
     t_paquete* aviso = crear_paquete(CORRUPCION_MEMORIA, crear_buffer());
     enviar_paquete(aviso, km->socket_kernel_scheduler, logger);

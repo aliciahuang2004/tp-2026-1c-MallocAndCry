@@ -54,7 +54,7 @@ int eliminar_proceso(int pid, t_kernel_memory* km, t_log* logger) {
     if (proceso == NULL) {
         pthread_mutex_unlock(&mutex_procesos);
         pthread_mutex_unlock(&mutex_paths);
-        log_error(logger, "Proceso PID:%d no encontrado", pid);
+        log_debug(logger, "Proceso PID:%d no encontrado", pid);
         return -1;
     }
 

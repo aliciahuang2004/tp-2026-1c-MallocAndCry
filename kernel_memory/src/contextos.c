@@ -89,7 +89,7 @@ void actualizar_contexto(int pid, t_registros* registros_nuevos, t_log* logger) 
         log_debug(logger, "Contexto actualizado - PID: %d", pid);
     } else {
         // Si no existe, es un paquete tardío de una CPU 
-        log_debug(logger, "Intento de actualizar PID %d, pero no existe. Paquete descartado.", pid);
+        //log_debug(logger, "Intento de actualizar PID %d, pero no existe. Paquete descartado.", pid);
     }
     pthread_mutex_unlock(&mutex_procesos);
 }

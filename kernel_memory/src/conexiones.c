@@ -94,7 +94,7 @@ void* atender_conexion(void* arg) {
             t_list* paquete = recibir_paquete(socket_cliente);
             
             if (!paquete) { // Detección instantánea de desconexión
-                log_error(logger, "Cliente desconectado en socket %d", socket_cliente);
+                log_debug(logger, "Cliente desconectado en socket %d", socket_cliente);
                 
                 t_ms_info* ms = buscar_ms_por_socket(socket_cliente);
                 if (ms != NULL) {
@@ -118,7 +118,7 @@ void* atender_conexion(void* arg) {
                 es_cpu = true;
                 int cpu_id = *(int *)list_get(paquete, 1);
                 log_debug(logger, "[Socket %d] Conexión con CPU ID:%d exitosa", socket_cliente,cpu_id);
-                log_info(logger," ## CPU <%d> Conectada ",cpu_id);
+                log_info(logger," ## CPU  %d  Conectada ",cpu_id);
                 agregar_cpu_conectada(cpu_id, socket_cliente);
                 //envia los datos de los ms ya conectados antes que esta cpu
                 enviar_ms_a_cpu(socket_cliente,logger);
@@ -137,7 +137,7 @@ void* atender_conexion(void* arg) {
                 char* ms_ip = (char*)list_get(paquete, 4);
 
                 log_debug(logger,"[Socket %d] NUEVO MEMORY STICK conectado - ID:%d Tamaño:%d bytes Puerto:%s",socket_cliente,ms_id,ms_tamano,ms_puerto);
-                log_info(logger," ## Memory Stick de <%d> bytes Conectada ",ms_tamano);
+                log_info(logger," ## Memory Stick de  %d  bytes Conectada ",ms_tamano);
 
                 uint32_t base_nuevo_ms = aumentar_memoria_total(ms_tamano);
 
@@ -171,7 +171,7 @@ void* atender_conexion(void* arg) {
 
             case KERNEL_SCHEDULER_HANDSHAKE:
             
-                log_info(logger, " ##  Kernel Scheduler Conectado  -  FD del socekt : <%d> ", socket_cliente);
+                log_info(logger, " ##  Kernel Scheduler Conectado  -  FD del socekt :  %d  ", socket_cliente);
                 km->socket_kernel_scheduler = socket_cliente;
                 // CODIGO KERNEL SCHEDULER
                  break; 
@@ -205,7 +205,7 @@ void* atender_conexion(void* arg) {
                 enviar_paquete(error, socket_cliente, logger);
                 eliminar_paquete(error);
                 }
-                log_info(logger, " ## PID: <%d> - Proceso Creado ", pid_nuevo); 
+                log_info(logger, " ## PID:  %d  - Proceso Creado ", pid_nuevo); 
                 break;
             }
 
@@ -275,7 +275,7 @@ void* atender_conexion(void* arg) {
                     list_destroy_and_destroy_elements(tabla_segmentos, free);
                     log_debug(logger, "Contexto enviado - PID:%d | Segmentos:%d", pid_solicitado, cant_segmentos);
                 } else {
-                    log_error(logger, "No se encontró contexto para PID %d", pid_solicitado);
+                    log_debug(logger, "No se encontró contexto para PID %d", pid_solicitado);
                     t_paquete* error = crear_paquete(CONTEXT_ERROR, crear_buffer());
                     enviar_paquete(error, socket_cliente, logger);
                     eliminar_paquete(error);
@@ -300,7 +300,7 @@ void* atender_conexion(void* arg) {
                 } else {
                     log_error(logger, "Error de segmentación global para PID:%d", pid_recibido);
                 }
-                log_info(logger," ## PID: - <%d> - <Escritura> - Dir. Física: <%u> - Tamaño: <%u> ",pid_recibido,direccion_fisica_global,tamano_contenido);
+                log_info(logger," ## PID: -  %d  - <Escritura> - Dir. Física:  %u  - Tamaño:  %u  ",pid_recibido,direccion_fisica_global,tamano_contenido);
                 t_paquete* confirmacion = crear_paquete(ESCRITURA_DE_DATOS_OK, crear_buffer());
                 agregar_a_paquete(confirmacion, &pid_recibido, sizeof(int));
                 enviar_paquete(confirmacion, km->socket_kernel_scheduler, logger);
@@ -320,7 +320,7 @@ void* atender_conexion(void* arg) {
                 void* contenido_leido_completo = enviar_fragmentos_lectura(lista_fragmentos_temp, tamano, logger,km);
 
                 if (contenido_leido_completo != NULL) {
-                    log_info(logger," ## PID: - <%d> - <Lectura> - Dir. Física: <%u> - Tamaño: <%u> ",pid_recibido,direccion_fisica_global,tamano);
+                    log_info(logger," ## PID: -  %d  - <Lectura> - Dir. Física:  %u  - Tamaño:  %u  ",pid_recibido,direccion_fisica_global,tamano);
                     t_paquete* respuesta_final = crear_paquete(RTA_LECTURA, crear_buffer());
                     agregar_a_paquete(respuesta_final, &pid_recibido, sizeof(int));
                     agregar_a_paquete(respuesta_final,contenido_leido_completo,tamano);
@@ -361,7 +361,7 @@ void* atender_conexion(void* arg) {
             memset(puntero_bitmap, 0, bytes_bitmap);
             bitmap_swap = bitarray_create_with_mode(puntero_bitmap, bytes_bitmap, LSB_FIRST);
             
-            log_info(logger, "SWAP configurado: %d bloques de %d bytes", total_bloques, swap_block_size);
+            log_debug(logger, "SWAP configurado: %d bloques de %d bytes", total_bloques, swap_block_size);
             free(datos);
             list_destroy_and_destroy_elements(paquete, free);
             return NULL;

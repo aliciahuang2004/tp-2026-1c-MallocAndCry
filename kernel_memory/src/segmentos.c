@@ -62,7 +62,7 @@ int crear_segmento(int pid, int id_segmento, uint32_t tamano,t_log* logger,t_ker
 
     list_add(proceso->contexto->tabla_segmentos, segmento);
     pthread_mutex_unlock(&mutex_procesos);
-    log_info(logger," ## PID: <%d> - Segmento creado <%d> - Tamaño: <%u> ",pid,id_segmento,segmento->tamanio);
+    log_info(logger," ## PID:  %d  - Segmento creado  %d  - Tamaño:  %u  ",pid,id_segmento,segmento->tamanio);
     //loguear_tabla_segmentos(proceso->contexto->tabla_segmentos,logger);
     loguear_segmentos_proceso(proceso, logger);//para probar
 
