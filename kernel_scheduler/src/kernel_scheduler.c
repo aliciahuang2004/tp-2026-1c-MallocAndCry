@@ -345,7 +345,11 @@ void finalizarColas(){
     queue_destroy_and_destroy_elements(colaREADY_SUSP,NULL);
     pthread_mutex_unlock(&mutex_READY_SUSP);
     pthread_mutex_lock(&mutex_EXEC);
-    queue_destroy_and_destroy_elements(colaEXEC,NULL);
+    for(int i = 0; i < queue_size(colaEXEC); i++){
+        free(queue_pop(colaEXEC));
+    }
+    queue_destroy(colaEXEC);
+    //queue_destroy_and_destroy_elements(colaEXEC,NULL);
     pthread_mutex_unlock(&mutex_EXEC);
     pthread_mutex_lock(&mutex_BLOCK);
     queue_destroy_and_destroy_elements(colaBLOCK,NULL);

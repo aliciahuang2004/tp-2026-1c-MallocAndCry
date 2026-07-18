@@ -1043,30 +1043,26 @@ t_pcb* retiraSegunPIDdeREADY(int pid){
     t_queue* colaAux = queue_create();
 
     switch (obtenerPlanificacion(kernel->planification_algorithm)){
-    case CMN:
-        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
-            pthread_mutex_lock(&mutex_READY[i]);
-            while (!queue_is_empty(colasREADY[i])){
-                t_pcb* pcb = queue_pop(colasREADY[i]);
-                if (pcbEncontrada == NULL && pcb->pid == pid){
-                    pcbEncontrada = pcb;
-                }else{
-                    queue_push(colaAux, pcb);
+        case CMN:
+            for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+                pthread_mutex_lock(&mutex_READY[i]);
+                while (!queue_is_empty(colasREADY[i])){
+                    t_pcb* pcb = queue_pop(colasREADY[i]);
+                    if (pcbEncontrada == NULL && pcb->pid == pid){
+                        pcbEncontrada = pcb;
+                    }else{
+                        queue_push(colaAux, pcb);
+                    }
                 }
+                while(!queue_is_empty(colaAux)){
+                    queue_push(colasREADY[i], queue_pop(colaAux));
+                }
+                
+                pthread_mutex_unlock(&mutex_READY[i]);
             }
-            while(!queue_is_empty(colaAux)){
-                queue_push(colasREADY[i], queue_pop(colaAux));
-            }
-            
-            queue_destroy(colaAux);
-            
-            pthread_mutex_unlock(&mutex_READY[i]);
-        }
-        return pcbEncontrada;
-
-    case FIFO:
-    case RR:
-        for(int i = 0; i<kernel->cantidadColasMultinivel;i++){
+            break;
+        case FIFO:
+        case RR:
             pthread_mutex_lock(&mutex_READY[0]);
             while (!queue_is_empty(colasREADY[0])){
                 t_pcb* pcb = queue_pop(colasREADY[0]);
@@ -1080,11 +1076,9 @@ t_pcb* retiraSegunPIDdeREADY(int pid){
                 queue_push(colasREADY[0], queue_pop(colaAux));
             }
             
-            queue_destroy(colaAux);
-            
             pthread_mutex_unlock(&mutex_READY[0]);
+            break;
         }
-        return pcbEncontrada;
-    }
+    queue_destroy(colaAux);
     return pcbEncontrada;
 }

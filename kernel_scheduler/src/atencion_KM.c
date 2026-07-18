@@ -328,7 +328,7 @@ void finalizarProcesosReady(){
                     pthread_mutex_lock(&mutex_READY[i]);
                     if(queue_is_empty(colasREADY[i])){
                         pthread_mutex_unlock(&mutex_READY[i]);
-                        if(i == kernel->cantidadColasMultinivel) log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
+                        if((i+ 1) == kernel->cantidadColasMultinivel) log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
                         break;
                     }
                     t_pcb* pcb = queue_peek(colasREADY[i]);
