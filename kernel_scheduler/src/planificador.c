@@ -524,18 +524,10 @@ void pasarProcesoExecABlock(int pid){
     pthread_mutex_unlock(&mutex_EXEC);
 
     pcb->estado = BLOCK;
-    // int socket_cpu = pcb->socketCPUEjecuta;
     pcb->socketCPUEjecuta = -1;
-    /*
-    LIBERO AL RECIBIR SYSCALL
-    t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
-    if(cpu != NULL){
-        //LIBERO CPU
-        liberarCPU(cpu);
-    }else{
-        log_error(kernel->logger, "ERROR al liberar CPU");
-    }
-    */
+    pcb->idBloqueoActual++;             
+    int miIdBloqueo = pcb->idBloqueoActual;  
+
     //AGREGO A BLOCK
     pthread_mutex_lock(&mutex_BLOCK);
     queue_push(colaBLOCK,pcb);
@@ -544,24 +536,31 @@ void pasarProcesoExecABlock(int pid){
     log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>",pcb->pid);
 
     //CORRO TEMPORIZADOR PARA PASAR A SUSP BLOCK
+   t_arg_timer_suspension* argTimer = malloc(sizeof(t_arg_timer_suspension));
+    argTimer->pid = pid;              
+    argTimer->idBloqueo = miIdBloqueo;
+
     pthread_t hiloBlock;
-    pthread_create(&hiloBlock, NULL, iniciarTemporizadorSuspendido, pcb);
+    pthread_create(&hiloBlock, NULL, iniciarTemporizadorSuspendido, argTimer);
     pthread_detach(hiloBlock);
 
 }
 
 void* iniciarTemporizadorSuspendido(void* arg){
-    t_pcb* pcb = (t_pcb*) arg;
-    
+    t_arg_timer_suspension* a = (t_arg_timer_suspension*) arg;
+    int pid = a->pid;
+    int idBloqueo = a->idBloqueo;
+    free(a);
+
     usleep(kernel->suspension_time * 1000);
-    
-    if (pcb->estado == BLOCK){
-        pasarProcesoBlockABlockSusp(pcb->pid);
+    t_pcb* pcb = buscarPCBPorPID(pid, colaBLOCK, &mutex_BLOCK);
+
+    if (pcb != NULL && pcb->idBloqueoActual == idBloqueo){
+        pasarProcesoBlockABlockSusp(pid);
     }
-    
+
     return NULL;
 }
-
 void pasarProcesoBlockaReady(int pid){
     t_pcb* pcb = NULL;
 
