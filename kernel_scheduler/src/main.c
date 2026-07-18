@@ -2,6 +2,7 @@
 
 // char* pathInicial;
 t_kernel_scheduler* kernel = NULL;
+bool ejecutando = true;
 
 int main(int argc, char* argv[]) {
     
@@ -9,6 +10,8 @@ int main(int argc, char* argv[]) {
         printf("Uso: ./bin/kernel_scheduler [Archivo Config] [Path Proceso Inicial]\n");
         return EXIT_FAILURE;
     }
+
+    signal(SIGINT, finalizarKS);
 
     //Se inicializa la estructura y configuracion
     t_kernel_scheduler* kernel_scheduler = iniciar_kernel_scheduler(argv[1]);

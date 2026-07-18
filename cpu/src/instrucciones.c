@@ -178,7 +178,7 @@ int ejecutar_MOV_IN(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     }
     
     log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %u", 
-             ctx->pid, dir_fisica, valor_leido);
+             ctx->pid, dir_fisica, valor_leido);// LOG OBLIGATORIO
     
     free(buffer_lectura);
     list_destroy_and_destroy_elements(fragmentos, free);
@@ -224,7 +224,7 @@ int ejecutar_MOV_OUT(t_cpu* cpu, t_contexto* ctx, char* registro_datos) {
     }
 
     log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", 
-             ctx->pid, dir_fisica, valor_a_escribir);
+             ctx->pid, dir_fisica, valor_a_escribir);//LOG OBLIGATORIO
 
     list_destroy_and_destroy_elements(fragmentos, free);
     return 1;
@@ -242,7 +242,7 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
     if (!mmu_traducir_direccion(cpu, ctx, dir_logica_origen, tamanio, &dir_fisica_origen, &ms_id_origen)) return 0;
     if (!mmu_traducir_direccion(cpu, ctx, dir_logica_destino, tamanio, &dir_fisica_destino, &ms_id_destino)) return 0;
 
-    // 1. Fragmentar y LEER del Origen
+    // Fragmentar y LEER del Origen
     t_list* frag_origen = fragmentar_acceso_memoria(cpu, dir_fisica_origen, tamanio);
     if (frag_origen == NULL) return 0;
 
@@ -265,10 +265,10 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
         }
         list_destroy_and_destroy_elements(respuesta, free);
     }
-    log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_origen);
+    log_info(cpu->logger, "PID: %d - Acción: LEER - Dirección Física: %u - Valor: %s", ctx->pid, dir_fisica_origen, (char*)buffer_copia);
     list_destroy_and_destroy_elements(frag_origen, free);
 
-    // 2. Fragmentar y ESCRIBIR en el Destino
+    // Fragmentar y ESCRIBIR en el Destino
     t_list* frag_destino = fragmentar_acceso_memoria(cpu, dir_fisica_destino, tamanio);
     if (frag_destino == NULL) { free(buffer_copia); return 0; }
 
@@ -285,7 +285,7 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
         if (!respuesta) { free(buffer_copia); list_destroy_and_destroy_elements(frag_destino, free); return 0; }
         list_destroy_and_destroy_elements(respuesta, free);
     }
-    log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: <CONTENIDO_COPIADO>", ctx->pid, dir_fisica_destino);
+    log_info(cpu->logger, "PID: %d - Acción: ESCRIBIR - Dirección Física: %u - Valor: %s", ctx->pid, dir_fisica_destino, (char*)buffer_copia);
     
     list_destroy_and_destroy_elements(frag_destino, free);
     free(buffer_copia);
@@ -293,7 +293,7 @@ int ejecutar_COPY_MEM(t_cpu* cpu, t_contexto* ctx, char* registro_tamano) {
 }
 
 int ejecutar_SYSCALL(t_cpu* cpu, t_contexto* ctx, t_instruccion_decodificada instruccion){
-    log_info(cpu->logger, "Delegando SYSCALL %s al Kernel Scheduler", instruccion.nombre_operacion);
+    log_debug(cpu->logger, "Delegando SYSCALL %s al Kernel Scheduler", instruccion.nombre_operacion);
 
     // se guarda el contexto en memoria
     //enviar_contexto_a_memoria(cpu, ctx);

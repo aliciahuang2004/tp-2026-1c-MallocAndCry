@@ -345,7 +345,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
 }
 
 void* monitorPrioridades(void* arg){
-    while(1) {
+    while(ejecutando) {
         while(kernel->noHayCompactacion && kernel->noHayCorrupcion){
             t_pcb* pcbExecMenorPrioridad = NULL;
             int nuevaPrioridad = -1;
@@ -792,7 +792,7 @@ t_cpu_conectada* buscar_cpu_por_socket(int socket_cpu) {
 void* loop_corto_plazo(void* args) {
     log_debug(kernel->logger, "Planificador de Corto Plazo iniciado correctamente");
     
-    while(1) {
+    while(ejecutando) {
             sem_wait(&sem_hayCPUdisponible);
             sem_wait(&sem_hayProcesosEnReady);
 
@@ -885,12 +885,12 @@ void inicializarHilos(){
     //CPU E IO AL CONECTARSE
 
     //MONITOREAR EL CIERRE
-    pthread_t finalizarKS;
+    /*pthread_t finalizarKS;
     if (pthread_create(&finalizarKS, NULL, finalizarKernelScheduler, NULL) != 0) {
         log_error(kernel->logger, "No se pudo crear el hilo para finalizar KERNEL SCHEDULER");
         return ;
     }
-    pthread_detach(finalizarKS);
+    pthread_detach(finalizarKS);*/
 
 
     //KM
@@ -945,7 +945,7 @@ void inicializarHilos(){
 
 void* atencionIOsleep(void* args) {
     
-    while(1) {
+    while(ejecutando) {
         sem_wait(&sem_hayIO[IO_SLEEP]);
         sem_wait(&sem_haySolicitudIO[IO_SLEEP]);
         revisarProcesosBloqueadosParaTipoIO(IO_SLEEP);
@@ -955,7 +955,7 @@ void* atencionIOsleep(void* args) {
 
 void* atencionIOstdIN(void* args) {
     
-    while(1) {
+    while(ejecutando) {
         sem_wait(&sem_hayIO[IO_STDIN]);
         sem_wait(&sem_haySolicitudIO[IO_STDIN]);
         revisarProcesosBloqueadosParaTipoIO(IO_STDIN);
@@ -965,7 +965,7 @@ void* atencionIOstdIN(void* args) {
 
 void* atencionIOstdOUT(void* args) {
     
-    while(1) {
+    while(ejecutando) {
         sem_wait(&sem_hayIO[IO_STDOUT]);
         sem_wait(&sem_haySolicitudIO[IO_STDOUT]);
         revisarProcesosBloqueadosParaTipoIO(IO_STDOUT);
@@ -1000,20 +1000,16 @@ void ordenarSuspReadySegunPrioridad(){
 }
 
 void* finalizarKernelScheduler(void* args){
-    while(1){
+    while(ejecutando){
         sem_wait(&sem_procesoFinalizado);
         if (pidParaAsignar == (kernel->pcbFinalizados)){
             log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER - NO HAY MAS PROCESOS");
-            liberarConexiones();
-            finalizarColas();
-            finalizarSemaforos();
-            finalizarInterfaces();
-            destruir_kernel_scheduler(kernel);
-            exit(EXIT_SUCCESS);
+            finalizarKS();
         }
-        
     }
+    return NULL;
 }
+
 t_pcb* retiraSegunPID(int pid, t_queue* cola, pthread_mutex_t mutex){
     t_pcb* pcbEncontrada = NULL;
 

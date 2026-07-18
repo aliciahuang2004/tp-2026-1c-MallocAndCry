@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         log_warning(cpu->logger, "Error en la conexion con memory stick.");
     }*/ //comento esto porque el kernel ahora me va a avisar cuando haya un memory stick disponible y me va a dar la ip y puerto para conectarme
 
-    log_info(cpu->logger, "## CPU %s inicializada y conectada exitosamente", cpu->id);
+    log_info(cpu->logger, "CPU %s inicializada y conectada exitosamente", cpu->id);
 
     esperar_proceso(cpu);
 

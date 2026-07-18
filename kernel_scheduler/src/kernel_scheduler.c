@@ -417,3 +417,18 @@ void finalizarInterfaces(){
         }
     }
 }
+
+void finalizarKS(){
+    ejecutando = false;
+    log_info(kernel->logger,"FINALIZANDO KERNEL SCHEDULER: CTRL + C");
+    liberarRecursos();
+    exit(EXIT_SUCCESS);
+}
+
+void liberarRecursos(){
+    liberarConexiones();
+    finalizarColas();
+    finalizarSemaforos();
+    finalizarInterfaces();
+    destruir_kernel_scheduler(kernel);
+}

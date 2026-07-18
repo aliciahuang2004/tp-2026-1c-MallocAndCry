@@ -410,7 +410,9 @@ void finalizarProceso(int pid, op_code motivo){
             if (pcb == NULL){
                 pcb = retiraSegunPIDdeREADY(pid);
             }
+            break;
         }
+
         default:{
             log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso no se pudo retirar del estado actual");
             break;
