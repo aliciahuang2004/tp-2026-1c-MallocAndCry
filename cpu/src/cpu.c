@@ -64,7 +64,7 @@ int conectar_kernel_memory(t_cpu *cpu)
         }
 
         eliminar_paquete(paquete);
-        log_info(cpu->logger, "## CPU conectada a Kernel Memory en %s:%s", cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
+        log_info(cpu->logger, "CPU conectada a Kernel Memory en %s:%s", cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
         return 1;
     }
     return -1;
@@ -92,7 +92,7 @@ int conectar_kernel_scheduler(t_cpu *cpu)
         }
 
         eliminar_paquete(paquete);
-        log_info(cpu->logger, "## CPU conectada a Kernel Scheduler en %s:%s", cpu->ip_kernel_scheduler, cpu->puerto_kernel_scheduler);
+        log_info(cpu->logger, "CPU conectada a Kernel Scheduler en %s:%s", cpu->ip_kernel_scheduler, cpu->puerto_kernel_scheduler);
         return 1;
     }
     return -1;
@@ -145,8 +145,7 @@ int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_
         list_add(cpu->sockets_memory_sticks, ms_conectado);
         pthread_mutex_unlock(&cpu->mutex_lista_ms);
 
-        log_info(cpu->logger, "## CPU conectada a Memory Stick (ID: %d) en %s:%s | Base: %u| Límite: %u", ms_id, ip, puerto, base, limite);
-
+        log_info(cpu->logger, "CPU conectada a Memory Stick (ID: %d) en %s:%s | Base: %u| Límite: %u", ms_id, ip, puerto, base, limite);
 
         return socket_ms;
     }
@@ -158,7 +157,7 @@ int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_
 void *escuchar_kernel_memory(void *arg)
 {
     t_cpu *cpu = (t_cpu *)arg;
-    log_info(cpu->logger, "Hilo de escucha de Kernel Memory iniciado.");
+    log_debug(cpu->logger, "Hilo de escucha de Kernel Memory iniciado.");
 
     while (1)
     {
@@ -181,7 +180,7 @@ void *escuchar_kernel_memory(void *arg)
             uint32_t base = *(uint32_t *)list_get(paquete, 4);
             uint32_t limite = *(uint32_t *)list_get(paquete, 5);
 
-            log_info(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
+            log_debug(cpu->logger, "Aviso de KM: Nuevo Memory Stick %d disponible en %s:%s", ms_id, ms_ip, ms_puerto);
             conectar_memory_stick(cpu, ms_ip, ms_puerto, ms_id, base, limite);
             break;
         }
@@ -236,7 +235,7 @@ void *escuchar_kernel_memory(void *arg)
         case SEG_MAX_SIZE:
         {
             cpu->segment_max_size = *(int *)list_get(paquete, 1);
-            log_info(cpu->logger, "Tamaño de segmento recibido: %d", cpu->segment_max_size);
+            log_debug(cpu->logger, "Tamaño de segmento recibido: %d", cpu->segment_max_size);
             break;
         }
         case ERROR_INSTRUCCION:
@@ -277,7 +276,7 @@ void liberar_cpu(t_cpu *cpu)
 // espera a que el kernel scheduler le mande un proceso a ejecutar, y cuando lo recibe, solicita el contexto a kernel memory y ejecuta el ciclo de instruccion
 void esperar_proceso(t_cpu *cpu)
 {
-    log_info(cpu->logger, "CPU esperando procesos del Kernel Scheduler");
+    log_debug(cpu->logger, "CPU esperando procesos del Kernel Scheduler");
 
     while (1)
     {
@@ -300,7 +299,7 @@ void esperar_proceso(t_cpu *cpu)
 
             if (contexto_actual != NULL)
             {
-                log_info(cpu->logger, "Contexto recibido para PID %d", contexto_actual->pid);
+                log_debug(cpu->logger, "Contexto recibido para PID %d", contexto_actual->pid);
 
                 // inicia el ciclo de instruccion
                 ciclo_de_instruccion(cpu, contexto_actual);
@@ -320,7 +319,7 @@ void esperar_proceso(t_cpu *cpu)
         }else if (cod_op == PROCESO_DESALOJADO_COMPACTACION)
         {
             int pid_desalojado = *(int *)list_get(paquete, 1);
-            log_info(cpu->logger, "## CPU desalojada por compactacion. PID: %d", pid_desalojado);
+            log_debug(cpu->logger, "CPU desalojada por compactacion. PID: %d", pid_desalojado);
             devolver_proceso_interrumpido(cpu, pid_desalojado, PROCESO_DESALOJADO_COMPACTACION);
             list_destroy_and_destroy_elements(paquete, free);
         }
@@ -409,7 +408,7 @@ void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
     {
 
         // FETCH
-        log_info(cpu->logger, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+        log_info(cpu->logger, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC); //LOG OBLIGATORIO
 
         char *cadena_leida = fetch_instruccion(cpu, contexto);
 
@@ -422,7 +421,7 @@ void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
         // DECODE
         t_instruccion_decodificada instruccion_actual = decodificar_instruccion(cpu, cadena_leida);
 
-        log_info(cpu->logger, "## PID: %d - Ejecutando: %s", contexto->pid, cadena_leida);
+        log_info(cpu->logger, "## PID: %d - Ejecutando: %s", contexto->pid, cadena_leida); ////LOG OBLIGATORIO
 
         // EXECUTE
 
@@ -464,7 +463,7 @@ void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
 
                     if (pid_interrumpido == contexto->pid)
                     { // chequeo que sea el PID correcto
-                        log_info(cpu->logger, "## Interrupción recibida");
+                        log_info(cpu->logger, "## Interrupción recibida");//LOG OBLIGATORIO
 
                         enviar_contexto_a_memoria(cpu, contexto);
 
@@ -663,7 +662,7 @@ void devolver_proceso_interrumpido(t_cpu *cpu, int pid, op_code motivo_desalojo)
     }
     else
     {
-        log_info(cpu->logger, "Proceso %d devuelto al Kernel Scheduler (Motivo: %d)", pid, motivo_desalojo);
+        log_debug(cpu->logger, "Proceso %d devuelto al Kernel Scheduler (Motivo: %d)", pid, motivo_desalojo);
     }
 
     eliminar_paquete(paquete);
