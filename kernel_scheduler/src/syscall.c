@@ -45,7 +45,7 @@ void crearProceso(char* path, int prioridad){
     pthread_mutex_lock(&mutex_NEW);
     queue_push(colaNEW, pcbNuevo);
     pthread_mutex_unlock(&mutex_NEW);
-    log_info(kernel->logger,"## (<%d>) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
+    log_info(kernel->logger,"## (%d) Se crea el proceso - Estado: NEW",pcbNuevo->pid);
     enviarPathYPidKM(pcbNuevo->pid,path);
 }
 
@@ -102,7 +102,7 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
         mutex->pidAsignado = pidSolicitaSyscall;
         pthread_mutex_unlock(&mutex_diccionario);
         
-        log_info(kernel->logger, "## (<%d>) Toma el Mutex <%s>", pidSolicitaSyscall, nombreMutex); 
+        log_info(kernel->logger, "## (%d) Toma el Mutex %s", pidSolicitaSyscall, nombreMutex); 
         enviarPIDAcpu(pidSolicitaSyscall,cpu);
         
     } else {
@@ -116,8 +116,8 @@ void tomarMutex(int pidSolicitaSyscall, char* nombreMutex, t_cpu_conectada* cpu)
         t_pcb* pcbSolicitante = buscarPCBPorPID(pidSolicitaSyscall, colaEXEC, &mutex_EXEC);
         t_pcb* pcbDuenio = buscarPCBEnCualquierEstado(pidDuenio);
         if(pcbSolicitante != NULL && pcbDuenio != NULL && pcbSolicitante->prioridad < pcbDuenio->prioridad){
-            log_debug(kernel->logger, "## (<%d>) Hereda prioridad <%d> del proceso <%d>", pidDuenio, pcbSolicitante->prioridad, pidSolicitaSyscall);
-            log_info(kernel->logger, "## <%d> Cambio de prioridad: <%d> - <%d>", pidDuenio, pcbDuenio->prioridad, pcbSolicitante->prioridad);
+            log_debug(kernel->logger, "## (%d) Hereda prioridad %d del proceso %d", pidDuenio, pcbSolicitante->prioridad, pidSolicitaSyscall);
+            log_info(kernel->logger, "## %d Cambio de prioridad: %d - %d", pidDuenio, pcbDuenio->prioridad, pcbSolicitante->prioridad);
             pcbDuenio->prioridad = pcbSolicitante->prioridad;
         }        
         pasarProcesoExecABlock(pidSolicitaSyscall);
@@ -139,7 +139,7 @@ void liberarMutex(int pidLiberaMutex, char* nombreMutex, t_cpu_conectada* cpu){
     bool huboCambioDeDuenio = false;
 
     if(mutex->bloqueado && mutex->pidAsignado == pidLiberaMutex){
-        log_info(kernel->logger, "## (<%d>) Libera el Mutex <%s>", pidLiberaMutex, nombreMutex); 
+        log_info(kernel->logger, "## (%d) Libera el Mutex %s", pidLiberaMutex, nombreMutex); 
         
         pcbDuenioAnterior = buscarPCBEnCualquierEstado(pidLiberaMutex);
         if(pcbDuenioAnterior != NULL){
@@ -240,8 +240,8 @@ void recalcularPrioridad(t_pcb* pcb){
     pthread_mutex_unlock(&mutex_diccionario);
 
     if(pcb->prioridad != prioridadCalculada){
-        log_debug(kernel->logger, "## (<%d>) Prioridad efectiva pasa de <%d> a <%d> tras recalcular herencia", pcb->pid, pcb->prioridad, prioridadCalculada);
-        log_info(kernel->logger, "## <%d> Cambio de prioridad: <%d> - <%d>", pcb->pid, pcb->prioridad, prioridadCalculada);
+        log_debug(kernel->logger, "## (%d) Prioridad efectiva pasa de %d a %d tras recalcular herencia", pcb->pid, pcb->prioridad, prioridadCalculada);
+        log_info(kernel->logger, "## %d Cambio de prioridad: %d - %d", pcb->pid, pcb->prioridad, prioridadCalculada);
         pcb->prioridad = prioridadCalculada;
     }
 }
@@ -432,7 +432,7 @@ void finalizarProceso(int pid, op_code motivo){
     queue_push(colaEXIT, pcb);
     pthread_mutex_unlock(&mutex_EXIT);
 
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <EXIT>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado EXEC al estado EXIT",pcb->pid);
 
     //AVISAMOS A KM PARA QUE LIBERE SEGMENTOS SI LOS TIENE
     t_buffer* buffer = crear_buffer();
@@ -486,24 +486,24 @@ void eliminarProceso(int pid, op_code motivo){
 
     switch (motivo){
     case EXIT_PROC:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <SYSCALL EXIT>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de SYSCALL EXIT",pid);
         break;
 
     case CREACION_DE_PROCESO_ERROR:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <ERROR AL CREAR EL PROCESO>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de ERROR AL CREAR EL PROCESO",pid);
         break;
 
     case DESCONEXION_CPU:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION DE CPU>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de DESCONEXION DE CPU",pid);
         break;
     case DESCONEXION_IO:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <DESCONEXION DE IO>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de DESCONEXION DE IO",pid);
         break;
         case CORRUPCION_MEMORIA:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <CORRUPCION_MEMORIA>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de CORRUPCION_MEMORIA",pid);
         break;
     case SEG_FAULT:
-        log_info(kernel->logger,"## (<%d>) Finalizó su ejecución con motivo de <SEGMENTATION FAULT>",pid);
+        log_info(kernel->logger,"## (%d) Finalizó su ejecución con motivo de SEGMENTATION FAULT",pid);
         break;
     default:
         log_error(kernel->logger, "Se desconoce el motivo de finalizacion de proceso");
@@ -585,18 +585,18 @@ void hacerSTDIN(t_solicitud_io* solicitud,int socket_io){
             if (pcbBlockSusp->suspensionEnCurso) {
                 pcbBlockSusp->ioCompletadaEnTransito = true;
                 pthread_mutex_unlock(&mutex_BLOCK_SUSP);
-                log_debug(kernel->logger, "## (<%d>) IO (STDIN) finalizó pero la suspensión en KM sigue en curso, se difiere", solicitud->pidSolicitaSyscall);
+                log_debug(kernel->logger, "## (%d) IO (STDIN) finalizó pero la suspensión en KM sigue en curso, se difiere", solicitud->pidSolicitaSyscall);
             } else {
                 pthread_mutex_unlock(&mutex_BLOCK_SUSP);
-                log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+                log_info(kernel->logger, "## (%d) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
                 pasarProcesoBlockSuspAReadySusp(solicitud->pidSolicitaSyscall);
                 solicitarDesuspenderProceso(-1);
             }
-        }    // VER PORQUE REPITE ESTA LINEA: log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
+        }    // VER PORQUE REPITE ESTA LINEA: log_info(kernel->logger, "## (%d) finalizó IO y pasa a SUSP. READY", solicitud->pidSolicitaSyscall);
             
     } else {
         log_debug(kernel->logger, "PCB para PID %d encontrado en BLOCK.", solicitud->pidSolicitaSyscall);
-        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a READY", solicitud->pidSolicitaSyscall);
+        log_info(kernel->logger, "## (%d) finalizó IO y pasa a READY", solicitud->pidSolicitaSyscall);
         pasarProcesoBlockaReady(solicitud->pidSolicitaSyscall);
     }
     free(ioSolicitud);

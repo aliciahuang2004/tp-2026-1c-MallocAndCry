@@ -133,7 +133,7 @@ void pasarProcesoNewAReady(){
             break;
         }
        
-        log_info(kernel->logger,"## (<%d>) Pasa del estado <NEW> al estado <READY>",pcb->pid);
+        log_info(kernel->logger,"## (%d) Pasa del estado NEW al estado READY",pcb->pid);
         sem_post(&sem_hayProcesosEnReady);
     }else{
         pthread_mutex_unlock(&mutex_NEW);
@@ -185,7 +185,7 @@ void pasarProcesoReadyAExec(){
     queue_push(colaEXEC,pcbAEjecutar);
     pthread_mutex_unlock(&mutex_EXEC);
 
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <READY> al estado <EXEC>",pcbAEjecutar->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado READY al estado EXEC",pcbAEjecutar->pid);
 
     // ENVIAR A CPU
     enviarPIDAcpu(pcbAEjecutar->pid,cpuElegida);
@@ -337,7 +337,7 @@ void notificarDesalojo(t_cpu_conectada* cpu, t_pcb* pcbOtroProceso, op_code moti
             break;
         }
         sem_wait(&sem_procesoDesalojadoPrioridad);
-        log_info(kernel->logger,"## (<%d>) Prioridad: <%d> - Desalojado por cola más prioritaria por el proceso <%d> con prioridad <%d>",pcbEnExec->pid, pcbEnExec->prioridad, pcbOtroProceso->pid,pcbOtroProceso->prioridad);
+        log_info(kernel->logger,"## (%d) Prioridad: %d - Desalojado por cola más prioritaria por el proceso %d con prioridad %d",pcbEnExec->pid, pcbEnExec->prioridad, pcbOtroProceso->pid,pcbOtroProceso->prioridad);
         break;
     default:
         break;
@@ -492,7 +492,7 @@ void pasarProcesoExecAReady(int pid){
         break;
     }
     
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado EXEC al estado READY",pcb->pid);
     sem_post(&sem_hayProcesosEnReady);
 }
 
@@ -533,7 +533,7 @@ void pasarProcesoExecABlock(int pid){
     queue_push(colaBLOCK,pcb);
     pthread_mutex_unlock(&mutex_BLOCK);
     
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <BLOCK>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado EXEC al estado BLOCK",pcb->pid);
 
     //CORRO TEMPORIZADOR PARA PASAR A SUSP BLOCK
    t_arg_timer_suspension* argTimer = malloc(sizeof(t_arg_timer_suspension));
@@ -602,7 +602,7 @@ void pasarProcesoBlockaReady(int pid){
             break;
     }
        
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <READY>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado BLOCK al estado READY",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
 }
 
@@ -634,8 +634,8 @@ void pasarProcesoBlockABlockSusp(int pid){
     queue_push(colaBLOCK_SUSP,pcb);
     pthread_mutex_unlock(&mutex_BLOCK_SUSP);
 
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK> al estado <BLOCK_SUSP>",pcb->pid);
-    log_info(kernel->logger, "## (<%d>) Iniciando traspaso a SWAP...", pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado BLOCK al estado BLOCK_SUSP",pcb->pid);
+    log_debug(kernel->logger, "## (%d) Iniciando traspaso a SWAP...", pcb->pid);
 
     t_paquete* paquete = crear_paquete(SUSPENSION_DE_PROCESO, crear_buffer());
     agregar_a_paquete(paquete, &pid, sizeof(int));
@@ -651,8 +651,8 @@ void pasarProcesoBlockABlockSusp(int pid){
     pthread_mutex_unlock(&mutex_BLOCK_SUSP);
 
     if (ioQuedoPendiente) {
-        log_debug(kernel->logger, "## (<%d>) IO había finalizado durante la suspensión, disparando desuspensión diferida", pid);
-        log_info(kernel->logger, "## (<%d>) finalizó IO y pasa a SUSP. READY", pid);
+        log_debug(kernel->logger, "## (%d) IO había finalizado durante la suspensión, disparando desuspensión diferida", pid);
+        log_info(kernel->logger, "## (%d) finalizó IO y pasa a SUSP. READY", pid);
         pasarProcesoBlockSuspAReadySusp(pid);
         solicitarDesuspenderProceso(pid);
     }
@@ -681,7 +681,7 @@ void pasarProcesoBlockSuspAReadySusp(int pid){
     queue_push(colaREADY_SUSP,pcb);
     pthread_mutex_unlock(&mutex_READY_SUSP);
 
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <BLOCK_SUSP> al estado <READY_SUSP>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado BLOCK_SUSP al estado READY_SUSP",pcb->pid);
 
 }
 
@@ -725,7 +725,7 @@ void pasarProcesoReadySuspAReady(int pid){
             break;
     }
        
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <READY_SUSP> al estado <READY>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado READY_SUSP al estado READY",pcb->pid);
     sem_post(&sem_hayProcesosEnReady); 
 
 
@@ -877,7 +877,7 @@ void reencolarAlInicio(int pid){
         break;
     }
     queue_destroy(colaAux);
-    log_info(kernel->logger,"## (<%d>) Pasa del estado <EXEC> al estado <READY>",pcb->pid);
+    log_info(kernel->logger,"## (%d) Pasa del estado EXEC al estado READY",pcb->pid);
     sem_post(&sem_hayProcesosEnReady);
 }
 

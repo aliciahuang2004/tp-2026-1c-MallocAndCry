@@ -294,24 +294,20 @@ void finalizarProcesosNew(){
 }
 void finalizarProcesosReady(){
     switch (obtenerPlanificacion(kernel->planification_algorithm)){
-        case CMN:
-            for(int i = 0; i < kernel->cantidadColasMultinivel; i++){
-                while(1){
-                    pthread_mutex_lock(&mutex_READY[i]);
-                    if(queue_is_empty(colasREADY[i])){
-                        pthread_mutex_unlock(&mutex_READY[i]);
-                        log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
-                        break;
-                    }
-                    t_pcb* pcb = queue_peek(colasREADY[i]);
-                    int pid = pcb->pid; 
-                    pthread_mutex_unlock(&mutex_READY[i]);
-                    finalizarProceso(pid,CORRUPCION_MEMORIA);
-
-                }
-            }
-            break;
         case FIFO:
+            while(1){
+                pthread_mutex_lock(&mutex_READY[0]);
+                if(queue_is_empty(colasREADY[0])){
+                    pthread_mutex_unlock(&mutex_READY[0]);
+                    log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
+                    break;
+                }
+                t_pcb* pcb = queue_peek(colasREADY[0]);
+                int pid = pcb->pid; 
+                pthread_mutex_unlock(&mutex_READY[0]);
+                finalizarProceso(pid,CORRUPCION_MEMORIA);
+                }
+            break;
         case RR:
             while(1){
                 pthread_mutex_lock(&mutex_READY[0]);
@@ -325,6 +321,23 @@ void finalizarProcesosReady(){
                 pthread_mutex_unlock(&mutex_READY[0]);
                 finalizarProceso(pid,CORRUPCION_MEMORIA);
                 }
+            break;
+        case CMN:
+            for(int i = 0; i < kernel->cantidadColasMultinivel; i++){
+                while(1){
+                    pthread_mutex_lock(&mutex_READY[i]);
+                    if(queue_is_empty(colasREADY[i])){
+                        pthread_mutex_unlock(&mutex_READY[i]);
+                        if(i == kernel->cantidadColasMultinivel) log_debug(kernel->logger,"Todos los procesos con estado READY, fueron finalizados");
+                        break;
+                    }
+                    t_pcb* pcb = queue_peek(colasREADY[i]);
+                    int pid = pcb->pid; 
+                    pthread_mutex_unlock(&mutex_READY[i]);
+                    finalizarProceso(pid,CORRUPCION_MEMORIA);
+
+                }
+            }
             break;
     }
 }
