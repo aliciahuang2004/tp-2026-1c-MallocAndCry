@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
+//si el registro es de 8 bits
 bool es_registro_8bits(char* nombre_registro) {
-    return (strcmp(nombre_registro, "AX") == 0 || 
+    return (strcmp(nombre_registro, "AX") == 0 || // si las cadenas son iguales
             strcmp(nombre_registro, "BX") == 0 || 
             strcmp(nombre_registro, "CX") == 0 || 
             strcmp(nombre_registro, "DX") == 0);
@@ -29,6 +29,7 @@ void* obtener_registro(t_registros* registros, char* nombre_registro) {
     return NULL;
 }
 
+//
 uint32_t leer_valor_registro(t_registros* registros, char* nombre_registro) {
     void* reg_ptr = obtener_registro(registros, nombre_registro);
     if (reg_ptr == NULL) return 0;

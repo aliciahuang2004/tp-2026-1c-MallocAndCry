@@ -7,6 +7,8 @@ sem_t sem_instruccion_recibida;
 t_contexto *buffer_contexto = NULL;
 char *buffer_instruccion = NULL;
 
+
+// lee el archivo config, crea el logger, inicializa las variables de la cpu y devuelve un puntero a la estructura t_cpu
 t_cpu *iniciar_cpu(char *path_config, char *id_cpu)
 {
     t_cpu *cpu = malloc(sizeof(t_cpu));
@@ -40,6 +42,7 @@ t_cpu *iniciar_cpu(char *path_config, char *id_cpu)
     return cpu;
 }
 
+// establece la conexion con kernel memory, creando el socket y hace el handshake
 int conectar_kernel_memory(t_cpu *cpu)
 {
     cpu->socket_kernel_memory = crear_conexion(cpu->logger, cpu->ip_kernel_memory, cpu->puerto_kernel_memory);
@@ -67,6 +70,7 @@ int conectar_kernel_memory(t_cpu *cpu)
     return -1;
 }
 
+// establece la conexion con kernel scheduler, creando el socket y hace el handshake
 int conectar_kernel_scheduler(t_cpu *cpu)
 {
     cpu->socket_kernel_scheduler = crear_conexion(cpu->logger, cpu->ip_kernel_scheduler, cpu->puerto_kernel_scheduler);
@@ -94,6 +98,7 @@ int conectar_kernel_scheduler(t_cpu *cpu)
     return -1;
 }
 
+// se conecta a un memory stick, hace el handshake y lo agrega a la lista de memory sticks conectados. Devuelve el socket del memory stick conectado o -1 si hubo error.
 int conectar_memory_stick(t_cpu *cpu, char *ip, char *puerto, int ms_id, uint32_t base, uint32_t limite)
 {
     if (ip == NULL || puerto == NULL)
@@ -248,6 +253,8 @@ void *escuchar_kernel_memory(void *arg)
     }
     return NULL;
 }
+
+//limpia la memoria, elimina semaforos y loggers
 void liberar_cpu(t_cpu *cpu)
 {
     if (!cpu)
@@ -266,6 +273,8 @@ void liberar_cpu(t_cpu *cpu)
     free(cpu);
 }
 
+//CPU 
+// espera a que el kernel scheduler le mande un proceso a ejecutar, y cuando lo recibe, solicita el contexto a kernel memory y ejecuta el ciclo de instruccion
 void esperar_proceso(t_cpu *cpu)
 {
     log_info(cpu->logger, "CPU esperando procesos del Kernel Scheduler");
@@ -319,6 +328,7 @@ void esperar_proceso(t_cpu *cpu)
     
 }
 
+//solicita el contexto de un proceso a kernel memory
 t_contexto *solicitar_contexto(t_cpu *cpu, int pid)
 {
     log_debug(cpu->logger, "Solicitando contexto para PID %d a Kernel Memory", pid);
@@ -390,6 +400,7 @@ t_contexto *solicitar_contexto(t_cpu *cpu, int pid)
     return contexto_recibido;
 }
 
+//ciclo de instruccion: fetch, decode, execute, check interrupt
 void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
 {
     int ejecutando = 1; // para mantener el ciclo corriendo
@@ -496,6 +507,7 @@ void ciclo_de_instruccion(t_cpu *cpu, t_contexto *contexto)
     }
 }
 
+// solicita la instruccion a kernel memory con el PC y espera a que llegue, luego devuelve la instruccion leida
 char *fetch_instruccion(t_cpu *cpu, t_contexto *contexto)
 {
 
@@ -513,6 +525,7 @@ char *fetch_instruccion(t_cpu *cpu, t_contexto *contexto)
     return instruccion_leida;
 }
 
+//decodifica la instruccion recibida en fetch y devuelve una estructura con la instruccion decodificada
 t_instruccion_decodificada decodificar_instruccion(t_cpu *cpu, char *cadena_instruccion_texto)
 {
     t_instruccion_decodificada instruccion_formateada;
@@ -591,6 +604,7 @@ t_instruccion_decodificada decodificar_instruccion(t_cpu *cpu, char *cadena_inst
     return instruccion_formateada;
 }
 
+// revisa si hay una interrupción pendiente en un socket, devuelve true si hay interrupción pendiente, false si no
 bool hay_interrupcion_pendiente(int socket_fd)
 {
     fd_set read_fds;
@@ -635,6 +649,7 @@ void enviar_contexto_a_memoria(t_cpu *cpu, t_contexto *contexto)
     eliminar_paquete(paquete);
 }
 
+// envia el proceso interrumpido al kernel scheduler con el motivo del desalojo
 void devolver_proceso_interrumpido(t_cpu *cpu, int pid, op_code motivo_desalojo)
 {
 
@@ -654,6 +669,7 @@ void devolver_proceso_interrumpido(t_cpu *cpu, int pid, op_code motivo_desalojo)
     eliminar_paquete(paquete);
 }
 
+// ejecuta la instruccion decodificada, devuelve 1 si se ejecuto correctamente, 0 si hubo error de segmentacion
 int execute(t_cpu *cpu, t_contexto *contexto, t_instruccion_decodificada instruccion)
 {
     int estado_ejecucion = 1;

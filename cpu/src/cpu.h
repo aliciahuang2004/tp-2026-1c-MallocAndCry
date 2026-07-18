@@ -44,8 +44,8 @@ typedef struct
     uint32_t EBX;
     uint32_t ECX;
     uint32_t EDX;
-    uint32_t SI;
-    uint32_t DI;
+    uint32_t SI; //indice origen
+    uint32_t DI; //indice destino
 
 } t_registros;
 
@@ -59,10 +59,10 @@ typedef struct
 
 // estructura de contexto
 typedef struct
-{ // consultar
+{ 
     int pid;
     t_registros registros;
-    t_list *tabla_segmentos; // lista de t_segmento
+    t_list *tabla_segmentos; 
 } t_contexto;
 
 typedef enum
