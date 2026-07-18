@@ -7,7 +7,7 @@ void* atender_cpu(void* arg){
     log_debug(kernel->logger, "CPU Listener: hilo iniciado en socket %d", socket_cpu);
     sem_post(&sem_hayCPUdisponible);
     
-    while(1) {
+    while(ejecutando) {
         t_list* paquete = recibir_paquete(socket_cpu);
         if (!paquete) {
             t_cpu_conectada* cpu = buscar_cpu_por_socket(socket_cpu);
@@ -17,7 +17,7 @@ void* atender_cpu(void* arg){
                 quitarCPU(cpu);
                 free(cpu);
                 liberar_conexion(socket_cpu);
-                pthread_exit(NULL);
+                return NULL;
             }
         }
 
@@ -143,6 +143,7 @@ void* atender_cpu(void* arg){
 
         list_destroy_and_destroy_elements(paquete,free);
     }
+    return NULL;
 }
 
 void quitarCPU(t_cpu_conectada* cpuDesconectada){

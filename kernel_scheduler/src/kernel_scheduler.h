@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <commons/collections/dictionary.h>
 #include <unistd.h>
+#include <signal.h>
 #define COLOR_VERDE "\033[32m"
 
 typedef enum{
@@ -112,6 +113,7 @@ typedef struct {
 extern int pidParaAsignar;
 extern int idCPUParaAsignar;
 extern t_kernel_scheduler* kernel;
+extern bool ejecutando;
 
 extern t_interfaz_conectada interfaces[3];
 extern pthread_mutex_t mutex_interfaces[3];
@@ -173,6 +175,8 @@ void liberarConexiones();
 void finalizarColas();
 void finalizarSemaforos();
 void finalizarInterfaces();
+void finalizarKS();
+void liberarRecursos();
 
 // atencionKM
 void* atender_kernel_memory(void* arg);

@@ -7,7 +7,7 @@ void* atender_io(void* arg) {
     log_debug(kernel->logger, "IO Listener: hilo iniciado en socket %d", socket_io);
     sem_post(&sem_hayIO[buscarTipoIOPorSocket(socket_io)]);
 
-    while(1) {
+    while(ejecutando) {
         t_tipo_io tipoIO = buscarTipoIOPorSocket(socket_io);
         t_list* paquete = recibir_paquete(socket_io);
         if (!paquete) {
@@ -123,10 +123,11 @@ void* atender_io(void* arg) {
                 log_warning(kernel->logger, "Operación desconocida de cliente en socket %d", socket_io);
                 break;
             }
-            list_destroy_and_destroy_elements(paquete,free);
     // Aca el hilo puede continuar en un bucle según la necesidad del protocolo
         }
+        list_destroy_and_destroy_elements(paquete,free);
     }
+    return NULL;
 }
 
 int finalizoConexionIO(t_tipo_io tipo){
