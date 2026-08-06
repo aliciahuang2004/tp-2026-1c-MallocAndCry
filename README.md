@@ -1,3 +1,7 @@
+# Enunciado (Plug & Pray)
+
+https://docs.google.com/document/d/1-ZFplvZd7zdflZ113d6rdoI5yLhfn1BC1-Np_TsH1pk/edit?usp=sharing
+
 # tp-scaffold
 
 Esta es una plantilla de proyecto diseñada para generar un TP de Sistemas
